@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">Wallpaper Changer</string>
+	<string name="prefs">WallChanger Preferences</string>
+	<string name="btn_select">Select</string>
+	<string name="btn_test">Test</string>
+	<string name="btn_cancel">Cancel</string>
+	<string name="create_shortcut">Create Wallpaper Changer Shortcut</string>
+	<string name="create">Create</string>
+	<string name="app_description">Wall Changer is a simple Wallpaper update tool. You can input any URL which returns an image, and it will set your Wallpaper to the returning image.</string>
+</resources>
