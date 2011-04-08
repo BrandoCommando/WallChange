@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+    <string name="create_shortcut">壁紙チェンジャーのショートカットを作成します。</string>
+    <string name="btn_cancel">キャンセル</string>
+    <string name="s_invalid">無効なイメージ！</string>
+    <string name="btn_select">選択</string>
+    <string name="s_create">作成</string>
+    <string name="s_wallpaper">壁紙</string>
+    <string name="s_shortcut">ショートカット</string>
+    <string name="s_downloading">ダウンロード</string>
+    <string name="app_name">壁紙チェンジャー</string>
+    <string name="btn_test">テスト</string>
+    <string name="s_updated">壁紙を更新！</string>
+    <string name="s_zipcode">ロケーション</string>
+    <string name="btn_gps">GPSを使用する</string>
+</resources>

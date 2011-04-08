@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+    <string name="create_shortcut">Создать ярлык Wallpaper Changer</string>
+    <string name="btn_cancel">Отменить</string>
+    <string name="s_invalid">Неверное изображение!</string>
+    <string name="btn_select">Выберите</string>
+    <string name="s_create">Создать</string>
+    <string name="s_wallpaper">Обои</string>
+    <string name="s_shortcut">Сокращенный</string>
+    <string name="s_downloading">Загрузка</string>
+    <string name="app_name">Wallpaper Changer</string>
+    <string name="btn_test">Испытаний</string>
+    <string name="s_updated">Обои Обновлено!</string>
+    <string name="s_zipcode">Местоположение</string>
+    <string name="btn_gps">Использование GPS</string>
+</resources>

@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	android:id="@+id/mainLayout" android:gravity="center|top"
 	android:orientation="vertical">
 	<LinearLayout android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:id="@+id/linearLayout2">
 		<ImageView android:src="@drawable/icon"
 			android:layout_width="wrap_content" android:layout_height="wrap_content"
 			android:id="@+id/imageIcon"></ImageView>
-		<TextView android:layout_width="fill_parent" android:text="@string/app_name" android:layout_height="fill_parent" android:id="@+id/txtTitle"></TextView>
+		<TextView android:layout_width="fill_parent" android:text="@string/app_name"
+			android:layout_height="fill_parent" android:id="@+id/lblTitle"></TextView>
 	</LinearLayout>
-	<EditText android:layout_width="fill_parent" android:id="@+id/editText1"
-		android:layout_height="wrap_content" android:text="@string/app_name"></EditText>
+	<AutoCompleteTextView android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:text="AutoCompleteTextView"
+		android:id="@+id/txtURL"></AutoCompleteTextView>
 	<LinearLayout android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:id="@+id/linearLayout1"
 		android:orientation="horizontal">
@@ -20,13 +23,18 @@
 		<Button android:layout_width="wrap_content"
 			android:layout_height="wrap_content" android:text="@string/btn_cancel"
 			android:id="@+id/btnCancel"></Button>
-	<LinearLayout android:layout_height="fill_parent"
-		android:id="@+id/linearLayout3" android:orientation="horizontal"
-		android:gravity="right" android:layout_width="fill_parent">
-		<ProgressBar android:id="@+id/progressBar1" android:layout_height="wrap_content" android:layout_width="wrap_content" android:visibility="invisible" android:layout_gravity="right"></ProgressBar>
-		<Button android:layout_width="wrap_content" android:id="@+id/btnTest"
-			android:layout_height="wrap_content" android:text="@string/btn_test"></Button>
+		<LinearLayout android:layout_height="fill_parent"
+			android:id="@+id/linearLayout3" android:orientation="horizontal"
+			android:gravity="right" android:layout_width="fill_parent">
+			<ProgressBar android:id="@+id/progressBar1"
+				android:layout_height="wrap_content" android:layout_width="wrap_content"
+				android:visibility="invisible" android:layout_gravity="right"></ProgressBar>
+			<Button android:layout_width="wrap_content" android:id="@+id/btnTest"
+				android:layout_height="wrap_content" android:text="@string/btn_test"></Button>
+		</LinearLayout>
 	</LinearLayout>
-	</LinearLayout>
-	<ImageView android:src="@drawable/picture" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/imageSample"></ImageView>
+	<LinearLayout android:layout_height="wrap_content" android:gravity="center" android:layout_width="fill_parent" android:id="@+id/adLayout"></LinearLayout>
+	<ImageView android:src="@drawable/picture"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:id="@+id/imageSample"></ImageView>
 </LinearLayout>

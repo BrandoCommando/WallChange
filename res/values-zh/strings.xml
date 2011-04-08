@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+    <string name="create_shortcut">创建快捷方式换壁纸</string>
+    <string name="btn_cancel">取消</string>
+    <string name="s_invalid">无效的形象！</string>
+    <string name="btn_select">选择</string>
+    <string name="s_create">创建</string>
+    <string name="s_wallpaper">壁纸</string>
+    <string name="s_shortcut">捷径</string>
+    <string name="s_downloading">下载</string>
+    <string name="app_name">换壁纸</string>
+    <string name="btn_test">测试</string>
+    <string name="s_updated">壁纸更新！</string>
+    <string name="s_zipcode">地点</string>
+    <string name="btn_gps">使用GPS</string>
+</resources>

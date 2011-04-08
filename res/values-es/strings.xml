@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+    <string name="create_shortcut">Crear acceso directo Wallpaper Changer</string>
+    <string name="btn_cancel">Cancelar</string>
+    <string name="s_invalid">Imagen no válida!</string>
+    <string name="btn_select">Seleccione</string>
+    <string name="s_create">Crear</string>
+    <string name="s_wallpaper">Fondos</string>
+    <string name="s_shortcut">Acceso directo</string>
+    <string name="s_downloading">Descargar</string>
+    <string name="app_name">Wallpaper Changer</string>
+    <string name="btn_test">Prueba</string>
+    <string name="s_updated">¡Fondos de Actualización!</string>
+    <string name="s_zipcode">Localización</string>
+    <string name="btn_gps">El uso del GPS</string>
+</resources>
