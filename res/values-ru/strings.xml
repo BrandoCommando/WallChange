@@ -3,7 +3,7 @@
     <string name="create_shortcut">Создать ярлык Wallpaper Changer</string>
     <string name="btn_cancel">Отменить</string>
     <string name="s_invalid">Неверное изображение!</string>
-    <string name="btn_select">Выберите</string>
+    <string name="btn_select">Применить</string>
     <string name="s_create">Создать</string>
     <string name="s_wallpaper">Обои</string>
     <string name="s_shortcut">Сокращенный</string>
@@ -13,4 +13,7 @@
     <string name="s_updated">Обои Обновлено!</string>
     <string name="s_zipcode">Местоположение</string>
     <string name="btn_gps">Использование GPS</string>
+    <string name="s_creating_base">Создание базы изображений с использованием текущих обоев ...</string>
+    <string name="btn_current">Использовать текущие</string>
+    <string name="btn_undo">Возвращаться</string>
 </resources>

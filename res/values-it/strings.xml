@@ -3,7 +3,7 @@
     <string name="create_shortcut">Creare Wallpaper Changer di scelta rapida</string>
     <string name="btn_cancel">Annulla</string>
     <string name="s_invalid">Immagine non valida!</string>
-    <string name="btn_select">Seleziona</string>
+    <string name="btn_select">Applica</string>
     <string name="s_create">Crea</string>
     <string name="s_wallpaper">Wallpaper</string>
     <string name="s_shortcut">Di scelta rapida</string>
@@ -13,4 +13,7 @@
     <string name="s_updated">Wallpaper Aggiornato!</string>
     <string name="s_zipcode">Posizione</string>
     <string name="btn_gps">Usa GPS</string>
+    <string name="s_creating_base">Creazione Immagine di base con il desktop attuale ...</string>
+    <string name="btn_current">L\'uso corrente</string>
+    <string name="btn_undo">Ritornare</string>
 </resources>

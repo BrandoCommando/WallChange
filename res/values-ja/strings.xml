@@ -3,7 +3,7 @@
     <string name="create_shortcut">壁紙チェンジャーのショートカットを作成します。</string>
     <string name="btn_cancel">キャンセル</string>
     <string name="s_invalid">無効なイメージ！</string>
-    <string name="btn_select">選択</string>
+    <string name="btn_select">適用</string>
     <string name="s_create">作成</string>
     <string name="s_wallpaper">壁紙</string>
     <string name="s_shortcut">ショートカット</string>
@@ -13,4 +13,7 @@
     <string name="s_updated">壁紙を更新！</string>
     <string name="s_zipcode">ロケーション</string>
     <string name="btn_gps">GPSを使用する</string>
+    <string name="s_creating_base">現在の壁紙を使用してベースイメージを作成しています...</string>
+    <string name="btn_current">使用電流</string>
+    <string name="btn_undo">元に戻す</string>
 </resources>

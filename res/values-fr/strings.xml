@@ -3,7 +3,7 @@
     <string name="create_shortcut">Créer un raccourci Wallpaper Changer</string>
     <string name="btn_cancel">Annuler</string>
     <string name="s_invalid">Image Blancs!</string>
-    <string name="btn_select">Sélectionnez</string>
+    <string name="btn_select">Appliquer</string>
     <string name="s_create">Créer</string>
     <string name="s_wallpaper">Fond d\'écran</string>
     <string name="s_shortcut">Raccourci</string>
@@ -13,4 +13,7 @@
     <string name="s_updated">Fond d\'écran Mise à jour!</string>
     <string name="s_zipcode">Lieu</string>
     <string name="btn_gps">Utiliser le GPS</string>
+    <string name="s_creating_base">Création d\'Image de base à l\'aide d\'écran actuel ...</string>
+    <string name="btn_current">Utilisation actuelle</string>
+    <string name="btn_undo">Revenir</string>
 </resources>

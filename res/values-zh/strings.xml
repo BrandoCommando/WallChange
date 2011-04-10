@@ -3,7 +3,7 @@
     <string name="create_shortcut">创建快捷方式换壁纸</string>
     <string name="btn_cancel">取消</string>
     <string name="s_invalid">无效的形象！</string>
-    <string name="btn_select">选择</string>
+    <string name="btn_select">应用</string>
     <string name="s_create">创建</string>
     <string name="s_wallpaper">壁纸</string>
     <string name="s_shortcut">捷径</string>
@@ -13,4 +13,7 @@
     <string name="s_updated">壁纸更新！</string>
     <string name="s_zipcode">地点</string>
     <string name="btn_gps">使用GPS</string>
+    <string name="s_creating_base">建立相应的图像使用电流壁纸...</string>
+    <string name="btn_current">使用当前</string>
+    <string name="btn_undo">还原</string>
 </resources>

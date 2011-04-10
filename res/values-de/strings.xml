@@ -3,7 +3,7 @@
     <string name="create_shortcut">Erstellen Wallpaper Changer Shortcut</string>
     <string name="btn_cancel">Abbrechen</string>
     <string name="s_invalid">Ungültige Bild!</string>
-    <string name="btn_select">Wählen Sie</string>
+    <string name="btn_select">Bewerben</string>
     <string name="s_create">Erstellen</string>
     <string name="s_wallpaper">Wallpaper</string>
     <string name="s_shortcut">Verknüpfung</string>
@@ -13,4 +13,7 @@
     <string name="s_updated">Wallpaper Aktualisiert!</string>
     <string name="s_zipcode">Ort</string>
     <string name="btn_gps">Verwenden Sie GPS</string>
+    <string name="s_creating_base">Erstellen Base Image mit Hilfe Aktuelle Bilder ...</string>
+    <string name="btn_current">Use Current</string>
+    <string name="btn_undo">Zurückkehren</string>
 </resources>
