@@ -9,11 +9,12 @@
     <string name="s_shortcut">ショートカット</string>
     <string name="s_downloading">ダウンロード</string>
     <string name="app_name">壁紙チェンジャー</string>
-    <string name="btn_test">テスト</string>
+    <string name="btn_test">プレビュー</string>
     <string name="s_updated">壁紙を更新！</string>
     <string name="s_zipcode">ロケーション</string>
-    <string name="btn_gps">GPSを使用する</string>
     <string name="s_creating_base">現在の壁紙を使用してベースイメージを作成しています...</string>
     <string name="btn_current">使用電流</string>
     <string name="btn_undo">元に戻す</string>
+    <string name="menu_help">ヘルプ</string>
+    <string name="menu_about">について</string>
 </resources>

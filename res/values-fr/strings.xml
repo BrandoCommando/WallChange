@@ -9,11 +9,12 @@
     <string name="s_shortcut">Raccourci</string>
     <string name="s_downloading">Téléchargement</string>
     <string name="app_name">Wallpaper Changer</string>
-    <string name="btn_test">Test</string>
+    <string name="btn_test">Extrait</string>
     <string name="s_updated">Fond d\'écran Mise à jour!</string>
     <string name="s_zipcode">Lieu</string>
-    <string name="btn_gps">Utiliser le GPS</string>
     <string name="s_creating_base">Création d\'Image de base à l\'aide d\'écran actuel ...</string>
     <string name="btn_current">Utilisation actuelle</string>
     <string name="btn_undo">Revenir</string>
+    <string name="menu_help">Aide</string>
+    <string name="menu_about">A propos</string>
 </resources>

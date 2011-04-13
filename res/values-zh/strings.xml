@@ -9,11 +9,12 @@
     <string name="s_shortcut">捷径</string>
     <string name="s_downloading">下载</string>
     <string name="app_name">换壁纸</string>
-    <string name="btn_test">测试</string>
+    <string name="btn_test">预览</string>
     <string name="s_updated">壁纸更新！</string>
     <string name="s_zipcode">地点</string>
-    <string name="btn_gps">使用GPS</string>
     <string name="s_creating_base">建立相应的图像使用电流壁纸...</string>
     <string name="btn_current">使用当前</string>
     <string name="btn_undo">还原</string>
+    <string name="menu_help">帮助</string>
+    <string name="menu_about">关于</string>
 </resources>

@@ -303,6 +303,40 @@ public class WallChanger extends Activity implements OnClickListener {
     	return mResources.getString(stringResourceID);
     }
     
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+    	getMenuInflater().inflate(R.menu.main_menu, menu);
+    	return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+    	switch(item.getItemId())
+    	{
+    	case R.id.menu_select:
+    		onClick(mBtnSelect);
+    		break;
+    	case R.id.menu_test:
+    		onClick(mBtnTest);
+    		break;
+    	case R.id.menu_current:
+    		onClick(mBtnCurrent);
+    		break;
+    	case R.id.menu_undo:
+    		onClick(mBtnUndo);
+    		break;
+    	case R.id.menu_about:
+    		startActivity(new Intent(MY_ROOT_URL));
+    		break;
+    	case R.id.menu_help:
+    		
+    		break;
+    	}
+    	return true;
+    }
+    
 	private class UploadTask extends AsyncTask<Bitmap, Void, String>
 	{
 

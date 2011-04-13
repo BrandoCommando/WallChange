@@ -3,7 +3,7 @@
     <string name="app_name">Wallpaper Changer</string>
     <string name="create_shortcut">Create Wallpaper Changer Shortcut</string>
     <string name="btn_select">Apply</string>
-    <string name="btn_test">Test</string>
+    <string name="btn_test">Preview</string>
     <string name="btn_cancel">Cancel</string>
     <string name="s_create">Create</string>
     <string name="s_shortcut">Shortcut</string>
@@ -12,8 +12,9 @@
     <string name="s_updated">Wallpaper Updated!</string>
     <string name="s_invalid">Invalid Image!</string>
     <string name="s_zipcode">Location</string>
-    <string name="btn_gps">Use GPS</string>
     <string name="s_creating_base">Creating Base Image using Current Wallpaper...</string>
     <string name="btn_current">Use Current</string>
     <string name="btn_undo">Revert</string>
+    <string name="menu_help">Help</string>
+    <string name="menu_about">About</string>
 </resources>

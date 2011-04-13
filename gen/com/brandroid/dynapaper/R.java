@@ -11,8 +11,17 @@ public final class R {
     public static final class attr {
     }
     public static final class drawable {
-        public static final int icon=0x7f020000;
-        public static final int picture=0x7f020001;
+        public static final int ic_menu_dice=0x7f020000;
+        public static final int ic_menu_largetiles=0x7f020001;
+        public static final int ic_menu_more=0x7f020002;
+        public static final int ic_menu_phone=0x7f020003;
+        public static final int ic_menu_puzzle=0x7f020004;
+        public static final int ic_menu_stop=0x7f020005;
+        public static final int icon=0x7f020006;
+        public static final int menu_help=0x7f020007;
+        public static final int menu_info=0x7f020008;
+        public static final int menu_search=0x7f020009;
+        public static final int picture=0x7f02000a;
     }
     public static final class id {
         public static final int adLayout=0x7f06000c;
@@ -20,7 +29,6 @@ public final class R {
         public static final int btnSelect=0x7f060006;
         public static final int btnTest=0x7f060007;
         public static final int btnUndo=0x7f06000b;
-        public static final int happy=0x7f06000f;
         public static final int imageIcon=0x7f060002;
         public static final int imageSample=0x7f06000d;
         public static final int lblTitle=0x7f060003;
@@ -28,10 +36,13 @@ public final class R {
         public static final int linearLayout2=0x7f060001;
         public static final int linearLayout3=0x7f060008;
         public static final int mainLayout=0x7f060000;
-        public static final int neutral=0x7f060010;
+        public static final int menu_about=0x7f060011;
+        public static final int menu_current=0x7f060010;
+        public static final int menu_help=0x7f060013;
+        public static final int menu_select=0x7f06000e;
+        public static final int menu_test=0x7f06000f;
+        public static final int menu_undo=0x7f060012;
         public static final int progressBar1=0x7f060009;
-        public static final int sad=0x7f060011;
-        public static final int submenu=0x7f06000e;
         public static final int txtURL=0x7f060004;
     }
     public static final class layout {
@@ -45,14 +56,15 @@ public final class R {
     public static final class string {
         public static final int app_name=0x7f040000;
         public static final int btn_cancel=0x7f040004;
-        public static final int btn_current=0x7f04000e;
-        public static final int btn_gps=0x7f04000c;
+        public static final int btn_current=0x7f04000d;
         public static final int btn_select=0x7f040002;
         public static final int btn_test=0x7f040003;
-        public static final int btn_undo=0x7f04000f;
+        public static final int btn_undo=0x7f04000e;
         public static final int create_shortcut=0x7f040001;
+        public static final int menu_about=0x7f040010;
+        public static final int menu_help=0x7f04000f;
         public static final int s_create=0x7f040005;
-        public static final int s_creating_base=0x7f04000d;
+        public static final int s_creating_base=0x7f04000c;
         public static final int s_downloading=0x7f040007;
         public static final int s_invalid=0x7f04000a;
         public static final int s_shortcut=0x7f040006;
