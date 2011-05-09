@@ -13,8 +13,18 @@
     <string name="s_updated">壁纸更新！</string>
     <string name="s_zipcode">地点</string>
     <string name="s_creating_base">建立相应的图像使用电流壁纸...</string>
-    <string name="btn_current">使用当前</string>
+    <string name="btn_current">当前</string>
     <string name="btn_undo">还原</string>
     <string name="menu_help">帮助</string>
     <string name="menu_about">关于</string>
+    <string name="s_select_base">选择相应的图片</string>
+    <string name="btn_gallery">图片</string>
+    <string name="btn_online">在线</string>
+    <string name="btn_url">网址</string>
+    <string name="lbl_overlay">选择贴</string>
+    <string name="btn_weather">天气</string>
+    <string name="lbl_command">选择命令</string>
+    <string name="btn_stocks">股票</string>
+    <string name="btn_recent">近期</string>
+    <string name="s_updating_options">更新选项。请稍候。</string>
 </resources>

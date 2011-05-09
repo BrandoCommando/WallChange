@@ -13,8 +13,18 @@
     <string name="s_invalid">Invalid Image!</string>
     <string name="s_zipcode">Location</string>
     <string name="s_creating_base">Creating Base Image using Current Wallpaper...</string>
-    <string name="btn_current">Use Current</string>
+    <string name="btn_current">Current</string>
     <string name="btn_undo">Revert</string>
     <string name="menu_help">Help</string>
     <string name="menu_about">About</string>
+    <string name="s_select_base">Select Base Image</string>
+    <string name="btn_gallery">Pictures</string>
+    <string name="btn_online">Online</string>
+    <string name="btn_url">URL</string>
+    <string name="lbl_overlay">Select Overlay</string>
+    <string name="btn_weather">Weather</string>
+    <string name="lbl_command">Select Command</string>
+    <string name="btn_stocks">Stocks</string>
+    <string name="btn_recent">Recent</string>
+    <string name="s_updating_options">Updating Options. Please wait.</string>
 </resources>

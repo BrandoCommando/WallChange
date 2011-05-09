@@ -13,8 +13,18 @@
     <string name="s_updated">Обои Обновлено!</string>
     <string name="s_zipcode">Местоположение</string>
     <string name="s_creating_base">Создание базы изображений с использованием текущих обоев ...</string>
-    <string name="btn_current">Использовать текущие</string>
+    <string name="btn_current">Текущие</string>
     <string name="btn_undo">Возвращаться</string>
     <string name="menu_help">Справка</string>
     <string name="menu_about">О</string>
+    <string name="s_select_base">Выберите базовый образ</string>
+    <string name="btn_gallery">Фотографии</string>
+    <string name="btn_online">Интернет</string>
+    <string name="btn_url">URL</string>
+    <string name="lbl_overlay">Выберите Overlay</string>
+    <string name="btn_weather">Погода</string>
+    <string name="lbl_command">Выберите команду</string>
+    <string name="btn_stocks">Акции</string>
+    <string name="btn_recent">Последние</string>
+    <string name="s_updating_options">Обновление обозревателя. Пожалуйста, подождите.</string>
 </resources>

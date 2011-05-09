@@ -13,8 +13,18 @@
     <string name="s_updated">¡Fondos de Actualización!</string>
     <string name="s_zipcode">Localización</string>
     <string name="s_creating_base">Creación de Base de la imagen actual con Fondos de ...</string>
-    <string name="btn_current">El uso actual</string>
+    <string name="btn_current">Actual</string>
     <string name="btn_undo">Revertir</string>
     <string name="menu_help">Ayuda</string>
     <string name="menu_about">Acerca de</string>
+    <string name="s_select_base">Seleccione el Banco de Imágenes</string>
+    <string name="btn_gallery">Imágenes</string>
+    <string name="btn_online">En línea</string>
+    <string name="btn_url">URL</string>
+    <string name="lbl_overlay">Seleccione Superposición</string>
+    <string name="btn_weather">El tiempo</string>
+    <string name="lbl_command">Seleccione el comando</string>
+    <string name="btn_stocks">Existencias</string>
+    <string name="btn_recent">Recientes</string>
+    <string name="s_updating_options">Opciones de actualización. Por favor, espere.</string>
 </resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/GridItem" android:layout_width="wrap_content"
+	android:gravity="center_horizontal" android:padding="6dip"
+	android:orientation="vertical" android:minHeight="160dip" android:layout_height="180dip">
+
+	<ProgressBar android:id="@+id/grid_item_progress"
+		android:layout_width="wrap_content" android:layout_height="wrap_content" />
+	<ImageView android:id="@+id/grid_item_image"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:src="@drawable/picture" android:visibility="visible"></ImageView>
+	<RatingBar android:layout_width="wrap_content"
+		style="?android:attr/ratingBarStyleSmall" android:visibility="visible"
+		android:layout_height="wrap_content" android:id="@+id/grid_item_rating"
+		android:max="5" android:layout_alignParentBottom="true"></RatingBar>
+	<TextView android:visibility="visible" android:id="@+id/grid_item_text" android:gravity="center_horizontal" android:layout_width="wrap_content" android:text="TextView" android:layout_height="wrap_content" android:layout_above="@+id/grid_item_rating" android:layout_alignLeft="@+id/grid_item_rating"></TextView>
+
+</RelativeLayout>

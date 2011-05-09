@@ -4,7 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class Preferences {
+	public static final String LOG_KEY = "WallChanger";
 	public static final String PREFS_NAME = "WallChangerPrefs";
+	public static final String EXTRA_SHORTCUT = "WallChangerShortcut";
+	public static final String MY_AD_UNIT_ID = "a14d9c70f03d5b2";
+	public static final String MY_ROOT_URL = "http://android.brandonbowles.com";
+	
 	private static Preferences preferences;
 	private SharedPreferences mStorage; 
 	
@@ -37,7 +42,9 @@ public class Preferences {
 	}
 	public Long getSetting(String key, Long defValue)
 	{
-		return mStorage.getLong(key, defValue);
+		try {
+			return mStorage.getLong(key, defValue);
+		} catch(Throwable t) { return defValue; }
 	}
 	public String getString(String key, String defValue) 	{ return getSetting(key, defValue); }
 	public int getInt(String key, int defValue) 			{ return getSetting(key, defValue); }
@@ -50,6 +57,10 @@ public class Preferences {
 		SharedPreferences.Editor editor = getPreferences().edit();
 		editor.putString(key, value);
 		editor.commit();
+	}
+	public Boolean hasSetting(String key)
+	{
+		return mStorage.contains(key);
 	}
 	
 	public SharedPreferences getPreferences() {

@@ -22,8 +22,8 @@
 		<Button android:text="@string/btn_test" android:id="@+id/btnTest"
 			android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
 	<LinearLayout android:gravity="right"
-		android:layout_width="fill_parent" android:orientation="horizontal"
-		android:layout_height="wrap_content" android:id="@+id/linearLayout3">
+		android:orientation="horizontal"
+		android:layout_height="wrap_content" android:id="@+id/linearLayout3" android:layout_width="wrap_content">
 		<ProgressBar android:id="@+id/progressBar1" android:layout_width="wrap_content" android:visibility="invisible" android:layout_height="wrap_content" android:layout_gravity="right"></ProgressBar>
 		<Button android:text="@string/btn_current" android:id="@+id/btnCurrent"
 			android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>

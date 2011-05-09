@@ -13,8 +13,18 @@
     <string name="s_updated">Wallpaper Aktualisiert!</string>
     <string name="s_zipcode">Ort</string>
     <string name="s_creating_base">Erstellen Base Image mit Hilfe Aktuelle Bilder ...</string>
-    <string name="btn_current">Use Current</string>
+    <string name="btn_current">Aktuelle</string>
     <string name="btn_undo">Zurückkehren</string>
     <string name="menu_help">Hilfe</string>
     <string name="menu_about">Über</string>
+    <string name="s_select_base">Wählen Base Image</string>
+    <string name="btn_gallery">Bilder</string>
+    <string name="btn_online">Online</string>
+    <string name="btn_url">URL</string>
+    <string name="lbl_overlay">Wählen Sie Overlay</string>
+    <string name="btn_weather">Wetter</string>
+    <string name="lbl_command">Wählen Command</string>
+    <string name="btn_stocks">Aktien</string>
+    <string name="btn_recent">Aktuelle</string>
+    <string name="s_updating_options">Aktualisieren Sie Optionen. Bitte warten Sie.</string>
 </resources>

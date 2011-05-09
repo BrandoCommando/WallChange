@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	android:orientation="vertical" android:gravity="center|top" android:id="@+id/btnWeather">
+	<TextView android:text="@string/s_select_base" android:id="@+id/textView1"
+		android:layout_height="wrap_content" android:layout_width="fill_parent"></TextView>
+	<LinearLayout android:layout_height="wrap_content"
+		android:id="@+id/linearLayout1" android:layout_width="fill_parent"
+		android:paddingLeft="1pt" android:scrollbarAlwaysDrawHorizontalTrack="true">
+		<Button android:text="@string/btn_current"
+			android:layout_height="wrap_content" android:layout_width="wrap_content"
+			android:id="@+id/btnCurrent"></Button>
+		<Button android:text="@string/btn_gallery"
+			android:layout_height="wrap_content" android:layout_width="wrap_content"
+			android:id="@+id/btnGallery"></Button>
+		<Button android:text="@string/btn_online"
+			android:layout_height="wrap_content" android:layout_width="wrap_content"
+			android:id="@+id/btnOnline"></Button>
+		<Button android:text="@string/btn_url" android:layout_height="wrap_content"
+			android:layout_width="wrap_content" android:id="@+id/btnURL" android:soundEffectsEnabled="true"></Button>
+	</LinearLayout>
+	<EditText android:singleLine="true" android:layout_width="fill_parent" android:id="@+id/txtURL" android:layout_height="wrap_content"></EditText>
+	<TextView android:text="@string/lbl_overlay" android:id="@+id/textView2"
+		android:layout_height="wrap_content" android:layout_width="fill_parent"></TextView>
+	<LinearLayout android:layout_height="wrap_content"
+		android:id="@+id/linearLayout2" android:layout_width="fill_parent"
+		android:paddingLeft="1pt" android:gravity="bottom|top">
+		<Button android:text="@string/btn_weather"
+			android:layout_height="wrap_content" android:layout_width="wrap_content"
+			android:id="@+id/btnWeather" android:soundEffectsEnabled="true"></Button>
+		<Button android:text="@string/btn_stocks" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:id="@+id/btnStocks"></Button>
+	</LinearLayout>
+	<TextView android:text="@string/lbl_command" android:id="@+id/textView3"
+		android:layout_height="wrap_content" android:layout_width="fill_parent"></TextView>
+	<LinearLayout android:layout_height="wrap_content"
+		android:id="@+id/linearLayout3" android:layout_width="fill_parent"
+		android:paddingLeft="1pt">
+		<Button android:layout_height="wrap_content"
+			android:layout_width="wrap_content" android:text="@string/btn_select"
+			android:id="@+id/btnSelect"></Button>
+		<Button android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:text="@string/btn_test"
+			android:id="@+id/btnTest"></Button>
+		<Button android:layout_width="wrap_content" android:text="@string/btn_undo"
+			android:layout_height="wrap_content" android:id="@+id/btnUndo"></Button>
+		<ProgressBar android:id="@+id/progressBar1"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"></ProgressBar>
+	</LinearLayout>
+	<LinearLayout android:layout_height="wrap_content"
+		android:id="@+id/adLayout" android:layout_width="fill_parent"></LinearLayout>
+	<FrameLayout android:layout_width="fill_parent" android:id="@+id/frameLayout1"
+		android:layout_height="wrap_content" android:foregroundGravity="center">
+		<ImageView android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:id="@+id/imageSample"
+			android:src="@drawable/picture"></ImageView>
+	</FrameLayout>
+</LinearLayout>

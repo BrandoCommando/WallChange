@@ -13,8 +13,18 @@
     <string name="s_updated">Fond d\'écran Mise à jour!</string>
     <string name="s_zipcode">Lieu</string>
     <string name="s_creating_base">Création d\'Image de base à l\'aide d\'écran actuel ...</string>
-    <string name="btn_current">Utilisation actuelle</string>
+    <string name="btn_current">Actuel</string>
     <string name="btn_undo">Revenir</string>
     <string name="menu_help">Aide</string>
     <string name="menu_about">A propos</string>
+    <string name="s_select_base">Image Base Sélectionnez</string>
+    <string name="btn_gallery">Photos</string>
+    <string name="btn_online">En ligne</string>
+    <string name="btn_url">URL</string>
+    <string name="lbl_overlay">Sélectionnez Overlay</string>
+    <string name="btn_weather">Météo</string>
+    <string name="lbl_command">Sélectionnez la commande</string>
+    <string name="btn_stocks">Stocks</string>
+    <string name="btn_recent">Dernières</string>
+    <string name="s_updating_options">Mise à jour Options. S\'il vous plaît attendre.</string>
 </resources>
