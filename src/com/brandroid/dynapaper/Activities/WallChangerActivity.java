@@ -4,6 +4,7 @@ import com.brandroid.dynapaper.Preferences;
 
 import android.app.Activity;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ProgressBar;
@@ -20,6 +21,7 @@ public class WallChangerActivity extends Activity
 	public static final int SELECT_ONLINE_PICTURE = 2;
 	protected Resources mResources;
 	protected Preferences prefs;
+	protected Cursor mGalleryCursor;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

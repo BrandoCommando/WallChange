@@ -37,6 +37,7 @@ import android.widget.ProgressBar;
 
 public class WallChangerNew extends WallChangerActivity implements OnClickListener
 { 
+	private final static int REQUEST_CODE_GALLERY_UPDATE = 101;
 	private EditText mTxtURL;
 	private ProgressBar mProgressBar;
 	private ImageView mImgPreview;
@@ -53,7 +54,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
         if(mIntent == null)
         	mIntent = new Intent();
         
-		setContentView(R.layout.layout_new);
+        setContentView(R.layout.layout_new);
 		
 		findViewById(R.id.btnCurrent).setOnClickListener(this);
 		findViewById(R.id.btnGallery).setOnClickListener(this);
@@ -71,6 +72,10 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		findViewById(R.id.btnUndo).setEnabled(false);
 		findViewById(R.id.txtURL).setVisibility(View.GONE);
 		findViewById(R.id.progressBar1).setVisibility(View.GONE);
+		
+		findViewById(R.id.btnOnline).setEnabled(false);
+		startActivityForResult(new Intent(this, GalleryUpdater.class), REQUEST_CODE_GALLERY_UPDATE);
+		
 		addAds();
 	}
 
@@ -132,6 +137,9 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		{
 			Uri selUri = data.getData();
 			new DownloadImageTask().execute(selUri.toString());
+		} else if (requestCode == REQUEST_CODE_GALLERY_UPDATE)
+		{
+			findViewById(R.id.btnOnline).setEnabled(true);
 		}
 	}
 	
@@ -223,9 +231,9 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	        layout.addView(adView);
 	        // Initiate a generic request to load it with an ad
 	        AdRequest ad = new AdRequest();
-	        //ad.setTesting(true);
-	        adView.loadAd(new AdRequest());
-    	} catch(Exception ex) { }    
+	        ad.setTesting(true);
+	        adView.loadAd(ad);
+    	} catch(Exception ex) { Log.e(LOG_KEY, "Error adding ads: " + ex.toString()); }    
     }
 	
 	@Override

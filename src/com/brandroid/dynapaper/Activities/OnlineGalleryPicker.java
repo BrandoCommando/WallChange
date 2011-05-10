@@ -17,6 +17,7 @@ import org.json.JSONObject;
 
 import com.brandroid.JSON;
 import com.brandroid.OnlineGalleryItem;
+import com.brandroid.dynapaper.GalleryDbAdapter;
 import com.brandroid.dynapaper.Preferences;
 import com.brandroid.dynapaper.R;
 
@@ -35,8 +36,10 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 public class OnlineGalleryPicker extends WallChangerActivity implements OnClickListener
@@ -59,7 +62,19 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnClickL
 		mGridView = (GridView)findViewById(R.id.gridView1);
 		
 		setTitle(getResourceString(R.string.btn_online));
-		new DownloadStringTask().execute(ONLINE_GALLERY_URL);
+		
+		if(mGalleryCursor == null)
+			mGalleryCursor = new GalleryDbAdapter(this).open().fetchAllItems();
+		startManagingCursor(mGalleryCursor);
+		
+		String[] from = new String[]{GalleryDbAdapter.KEY_TITLE};
+		int[] to = new int[]{R.id.grid_item_text};
+		
+		SimpleCursorAdapter items = new SimpleCursorAdapter(this, R.layout.grid_item, mGalleryCursor, from, to);
+		
+		mGridView.setAdapter(items);
+		
+		//new DownloadStringTask().execute(ONLINE_GALLERY_URL);
 	}
 	@Override
 	public void onClick(View v) {

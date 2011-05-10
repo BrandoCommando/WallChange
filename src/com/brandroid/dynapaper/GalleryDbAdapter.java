@@ -17,7 +17,7 @@ import android.util.Log;
 
 public class GalleryDbAdapter
 {
-	public static final String KEY_ID = "id";
+	public static final String KEY_ID = "_id";
     public static final String KEY_TITLE = "title";
     public static final String KEY_URL = "url";
     public static final String KEY_DATA = "data";
@@ -34,10 +34,10 @@ public class GalleryDbAdapter
     
     private static final String DATABASE_NAME = "wallchange";
     private static final String DATABASE_TABLE = "gallery";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
 
     private static final String DATABASE_CREATE =
-        "create table gallery (id integer primary key, "
+        "create table gallery (" + KEY_ID + " integer primary key, "
         + "title text not null, url text not null, data blob null, "
         + "w int not null, h int not null, tags text not null, "
         + "rating real null, downloads int null, visible integer not null default 1);";
@@ -51,16 +51,17 @@ public class GalleryDbAdapter
         }
 
         @Override
-        public void onCreate(SQLiteDatabase db) {
-
+        public void onCreate(SQLiteDatabase db)
+        {
+        	Log.i(Preferences.LOG_KEY, "Creating database");
             db.execSQL(DATABASE_CREATE);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
+            Log.w(Preferences.LOG_KEY, "Upgrading database from version " + oldVersion + " to "
                     + newVersion + ", which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS notes");
+            db.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE);
             onCreate(db);
         }
     }
@@ -84,19 +85,27 @@ public class GalleryDbAdapter
     public long createItem(int id, String title, String url, byte[] data,
     		Integer width, Integer height, String tags,
     		Float rating, Integer downloads, Boolean visible) {
-        ContentValues initialValues = new ContentValues();
+    	ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_ID, id);
         initialValues.put(KEY_TITLE, title);
         initialValues.put(KEY_URL, url);
-        initialValues.put(KEY_RATING, rating);
+        if(rating != null)
+        	initialValues.put(KEY_RATING, rating);
         initialValues.put(KEY_DOWNLOADS, downloads);
-		initialValues.put(KEY_DATA, data);
+        if(data != null && data.length > 0)
+        	initialValues.put(KEY_DATA, data);
 		initialValues.put(KEY_WIDTH, width);
 		initialValues.put(KEY_HEIGHT, height);
 		initialValues.put(KEY_TAGS, tags);
 		initialValues.put(KEY_VISIBLE, visible);
 
-        return mDb.insert(DATABASE_TABLE, null, initialValues);
+        long ret = -1;
+        try {
+        	mDb.replace(DATABASE_TABLE, null, initialValues);
+        } catch(Exception ex) { }
+        if(ret == -1)
+        	ret = mDb.update(DATABASE_TABLE, initialValues, KEY_ID + "=" + id, null);
+        return ret;
     }
     
     public boolean deleteItem(long rowId) {
@@ -126,6 +135,12 @@ public class GalleryDbAdapter
     	args.put(KEY_VISIBLE, false);
     	args.put(KEY_DATA, (byte[])null);
     	return mDb.update(DATABASE_TABLE, args, KEY_ID + "=" + Id, null) > 0;
+    }
+    public boolean exists(long Id)
+    {
+    	boolean ret = false;
+    	//mDb.
+    	return ret;
     }
     public boolean updateItem(long Id, String title, String url, byte[] data,
     		Integer width, Integer height, String tags,
