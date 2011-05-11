@@ -2,6 +2,7 @@ package com.brandroid.dynapaper.Activities;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,8 +24,11 @@ import com.brandroid.dynapaper.R;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,6 +37,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -42,11 +48,12 @@ import android.widget.RatingBar;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-public class OnlineGalleryPicker extends WallChangerActivity implements OnClickListener
+public class OnlineGalleryPicker extends WallChangerActivity implements OnItemClickListener
 {
 	private ProgressBar mProgressBar = null;
 	private GridView mGridView = null;
-	private OnlineGalleryItem[] mGalleryItems;
+	private GalleryDbAdapter mDb = null;
+	private int iDownloads = 0;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -64,101 +71,42 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnClickL
 		setTitle(getResourceString(R.string.btn_online));
 		
 		if(mGalleryCursor == null)
-			mGalleryCursor = new GalleryDbAdapter(this).open().fetchAllItems();
+		{
+			if(mDb == null)
+				mDb = new GalleryDbAdapter(this).open();
+			mGalleryCursor = mDb.fetchAllItems();
+		}
 		startManagingCursor(mGalleryCursor);
+		mGridView.setAdapter(new OnlineGalleryAdapter(this, mGalleryCursor));
+		mGridView.setOnItemClickListener(this);
 		
-		String[] from = new String[]{GalleryDbAdapter.KEY_TITLE};
-		int[] to = new int[]{R.id.grid_item_text};
+		//SimpleCursorAdapter items = new SimpleCursorAdapter(this, R.layout.grid_item, mGalleryCursor, from, to);
 		
-		SimpleCursorAdapter items = new SimpleCursorAdapter(this, R.layout.grid_item, mGalleryCursor, from, to);
-		
-		mGridView.setAdapter(items);
+		//mGridView.setAdapter(items);
 		
 		//new DownloadStringTask().execute(ONLINE_GALLERY_URL);
 	}
+	
 	@Override
-	public void onClick(View v) {
-		// TODO Auto-generated method stub
-		
-	}
-	private class DownloadStringTask extends AsyncTask<String, Void, String>
+	public void onItemClick(AdapterView<?> adapter, View view, int position, long id)
 	{
-	    /** The system calls this to perform work in a worker thread and
-	      * delivers it the parameters given to AsyncTask.execute() */
-	    protected String doInBackground(String... urls)
-	    {
-	    	String ret = null;
-	    	String line = null;
-	    	InputStream in = null;
-	    	BufferedReader br = null;
-	    	StringBuilder sb = null;
-	    	HttpURLConnection uc = null;
-	    	Long modified = null;
-	    	String url = urls[0];
-	    	try {
-	    		uc = (HttpURLConnection)new URL(url).openConnection();
-	    		if(prefs.hasSetting("data_" + url) && prefs.hasSetting("modified_" + url))
-	    		{
-		    		modified = prefs.getLong("modified_" + url, Long.MIN_VALUE);
-		    		if(modified > Long.MIN_VALUE)
-		    			uc.setIfModifiedSince(modified);
-	    		}
-	    		uc.connect();
-	    		if(uc.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED)
-	    			ret = prefs.getString("data_" + url, "");
-	    		else
-	    		{
-	    			in = new BufferedInputStream(uc.getInputStream());
-		    		br = new BufferedReader(new InputStreamReader(in));
-		    		sb = new StringBuilder();
-		    		while((line = br.readLine()) != null)
-		    			sb.append(line + '\n');
-		    		ret = sb.toString();
-		    		modified = uc.getLastModified();
-	    			prefs.setSetting("modified_" + url, modified.toString());
-		    		prefs.setSetting("data_" + url, ret);
-	    		}
-			}
-			catch(MalformedURLException mex) { Log.e(LOG_KEY, mex.toString()); }
-			catch(ProtocolException pex) { Log.e(LOG_KEY, pex.toString()); }
-			catch(IOException ex) { Log.e(LOG_KEY, ex.toString()); }
-	    	finally {
-				if(uc != null) uc.disconnect();
-				in = null;
-				br = null;
-				sb = null;
-				uc = null;
-	    	}
-	    	return ret;
-	    }
-	    
-	    @Override
-	    protected void onPreExecute() {
-	    	// TODO Auto-generated method stub
-	    	super.onPreExecute();
-	    	if(mProgressBar != null)
-	    		mProgressBar.setVisibility(View.VISIBLE);
-	    }
-	    
-	    /** The system calls this to perform work in the UI thread and delivers
-	      * the result from doInBackground() */
-	    protected void onPostExecute(String result) {
-	    	if(mProgressBar != null)
-	    		mProgressBar.setVisibility(View.GONE);
-	    	JSONObject json = JSON.Parse(result);
-	    	if(json != null && json.has("images"))
-	    	{
-	    		try {
-	    			JSONArray imgs = json.getJSONArray("images");
-	    			mGalleryItems = new OnlineGalleryItem[imgs.length()];
-	    			for(int i=0; i<imgs.length(); i++)
-	    				mGalleryItems[i] = new OnlineGalleryItem(imgs.getJSONObject(i));
-	    			mGridView.setAdapter(new ImageAdapter(OnlineGalleryPicker.this));
-	    		} catch(JSONException jex) { LogError(jex.toString()); }
-	    	}
-	    }
+		if(view.getTag() == null)
+			setResult(RESULT_CANCELED);
+		else {
+			OnlineGalleryItem item = (OnlineGalleryItem)view.getTag();
+			Intent intentResult = new Intent();
+			intentResult.putExtra("url", item.getURL());
+			intentResult.putExtra("id", item.getID());
+			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+			item.getBitmap().compress(CompressFormat.PNG, 100, stream);
+			intentResult.putExtra("bmp", stream.toByteArray());
+			//intentResult.putExtra("item", item);
+			intentResult.putExtra("pos", position);
+			intentResult.setData(Uri.parse(item.getURL()));
+			setResult(RESULT_OK, intentResult);
+		}
+		finish();
 	}
-
 	
 	@Override
 	protected void onStart() {
@@ -166,15 +114,26 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnClickL
 		super.onStart();
 	}
 	
-	public class ImageAdapter extends BaseAdapter {
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		mDb.close();
+	}
+	
+	public class OnlineGalleryAdapter extends BaseAdapter {
 	    private Context mContext;
-
-	    public ImageAdapter(Context c) {
+	    private Cursor mCursor;
+	    
+	    public OnlineGalleryAdapter(Context c, Cursor cursor) {
 	        mContext = c;
+	        mCursor = cursor;
+	        iDownloads = getCount();
 	    }
 
 	    public int getCount() {
-	        return mGalleryItems.length;
+	    	return mCursor.getCount();
+	        //return mGalleryItems.length;
 	    }
 
 	    public Object getItem(int position) {
@@ -188,32 +147,48 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnClickL
 	    // create a new ImageView for each item referencedimage by the Adapter
 		@Override
 	    public View getView(int position, View convertView, ViewGroup parent) {
+			if(!mCursor.moveToPosition(position)) return null;
 	        View view = convertView;
-	        OnlineGalleryItem item = mGalleryItems[position]; 
+	        OnlineGalleryItem item;
+	        //OnlineGalleryItem item = mGalleryItems[position]; 
 	        if (convertView == null) {  // if it's not recycled, initialize some attributes
+	        	item = new OnlineGalleryItem(mCursor);
 	            LayoutInflater li = getLayoutInflater();
 	            view = li.inflate(R.layout.grid_item, null);
 	            view.findViewById(R.id.grid_item_image).setVisibility(View.GONE);
 	            view.findViewById(R.id.grid_item_rating).setVisibility(View.GONE);
 	            view.findViewById(R.id.grid_item_text).setVisibility(View.GONE);
 	            //imageView.setTag();
-		        item.setView(view);
-	        }
+	            view.setTag(item);
+	        } else
+	        	item = (OnlineGalleryItem)view.getTag();
 	        
 	        try {
-		        if(item.isDownloaded())
-		        	((ImageView)view.findViewById(R.id.grid_item_image)).setImageBitmap(item.getBitmap());
+		        if(item.getBitmap() != null)
+		        	new DownloadImageTask(view).onPostExecute(item);
+		        	//((ImageView)view.findViewById(R.id.grid_item_image)).setImageBitmap(item.getBitmap());
 		        else if(!item.isStarted())
-		        	new DownloadImageTask().execute(item);
-		        } catch(NullPointerException npe) {
-		        	LogError(npe.toString());
-		        	//new DownloadImageTask().execute(item);
-		        }
+		        {
+		        	item.setIsDownloading(true);
+		        	new DownloadImageTask(view).execute(item);
+		        } else
+		        	Log.w(LOG_KEY, "Unknown sitch");
+	        } catch(NullPointerException npe) {
+	        	LogError(npe.toString());
+	        	//new DownloadImageTask().execute(item);
+	        }
 	        
 	        return view;
 	    }
 		
 		private class DownloadImageTask extends AsyncTask<OnlineGalleryItem, Void, OnlineGalleryItem> {
+			private View mView;
+			
+			public DownloadImageTask(View v)
+			{
+				mView = v;
+			}
+			
 	        /** The system calls this to perform work in a worker thread and
 		      * delivers it the parameters given to AsyncTask.execute() */
 		    protected OnlineGalleryItem doInBackground(OnlineGalleryItem... galleryItems)
@@ -222,12 +197,25 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnClickL
 		    	InputStream s = null;
 		    	try {
 		    		String url = item.getURL();
+		    		if(url.startsWith("images/"))
+		    			url = url.substring(7);
 		    		url = MY_ROOT_URL + "/images/thumb.php?url=" + url;
+		    		Log.i(Preferences.LOG_KEY, url);
 		    		URLConnection uc = new URL(url).openConnection();
 		    		uc.connect();
 		    		s = uc.getInputStream();
-		    		item.setBitmap(BitmapFactory.decodeStream(s));
-		    		item.setIsDownloaded();
+		    		Bitmap b = BitmapFactory.decodeStream(s);
+		    		item.setIsDownloading(false);
+		    		if(b != null)
+		    		{
+		    			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		    			b.compress(CompressFormat.JPEG, 90, stream);
+		    			byte[] data = stream.toByteArray();
+		    			mDb.updateData(item.getID(), data);
+		    			//mDb.updateItem(Id, title, url, data, width, height, tags, rating, downloads, visible)
+			    		item.setBitmap(b);
+			    		item.setIsDownloaded();
+		    		} //else mDb.hideItem(item.getID());
 		    	} catch(IOException ex) { Log.e(LOG_KEY, ex.toString()); }
 		    	finally {
 		    		try {
@@ -241,11 +229,14 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnClickL
 		    /** The system calls this to perform work in the UI thread and delivers
 		      * the result from doInBackground() */
 		    protected void onPostExecute(OnlineGalleryItem result) {
-		    	View view = result.getView();
-		    	ImageView imageView = (ImageView)view.findViewById(R.id.grid_item_image);
-		    	ProgressBar progressBar = (ProgressBar)view.findViewById(R.id.grid_item_progress);
-		    	RatingBar ratingBar = (RatingBar)view.findViewById(R.id.grid_item_rating);
-		    	TextView textView = (TextView)view.findViewById(R.id.grid_item_text);
+		    	//if(--iDownloads==0);
+		    	//	mDb.close();
+		    	if(mView == null) return;
+		    	if(result.getBitmap() == null) { mView.setVisibility(View.GONE); return; }
+		    	ImageView imageView = (ImageView)mView.findViewById(R.id.grid_item_image);
+		    	ProgressBar progressBar = (ProgressBar)mView.findViewById(R.id.grid_item_progress);
+		    	RatingBar ratingBar = (RatingBar)mView.findViewById(R.id.grid_item_rating);
+		    	TextView textView = (TextView)mView.findViewById(R.id.grid_item_text);
 		    	textView.setText("DL: " + result.getDownloadCount());
 		    	ratingBar.setRating((float)result.getRating());
 		    	imageView.setImageBitmap(result.getBitmap());

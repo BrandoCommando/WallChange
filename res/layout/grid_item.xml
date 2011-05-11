@@ -8,11 +8,14 @@
 		android:layout_width="wrap_content" android:layout_height="wrap_content" />
 	<ImageView android:id="@+id/grid_item_image"
 		android:layout_width="wrap_content" android:layout_height="wrap_content"
-		android:src="@drawable/picture" android:visibility="visible"></ImageView>
+		android:src="@drawable/picture" />
+	<TextView android:id="@+id/grid_item_text"
+		android:gravity="center_horizontal" android:layout_width="wrap_content"
+		android:text="TextView" android:layout_height="wrap_content"
+		android:layout_above="@+id/grid_item_rating" />
 	<RatingBar android:layout_width="wrap_content"
-		style="?android:attr/ratingBarStyleSmall" android:visibility="visible"
+		style="?android:attr/ratingBarStyleSmall" 
 		android:layout_height="wrap_content" android:id="@+id/grid_item_rating"
-		android:max="5" android:layout_alignParentBottom="true"></RatingBar>
-	<TextView android:visibility="visible" android:id="@+id/grid_item_text" android:gravity="center_horizontal" android:layout_width="wrap_content" android:text="TextView" android:layout_height="wrap_content" android:layout_above="@+id/grid_item_rating" android:layout_alignLeft="@+id/grid_item_rating"></TextView>
+		android:max="5" android:layout_alignParentBottom="true" />
 
 </RelativeLayout>

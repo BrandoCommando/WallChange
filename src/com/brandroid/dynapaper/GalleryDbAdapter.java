@@ -73,8 +73,11 @@ public class GalleryDbAdapter
     
     public GalleryDbAdapter open() throws SQLException
     {
-    	mDbHelper = new DatabaseHelper(mCtx);
-    	mDb = mDbHelper.getWritableDatabase();
+    	if(mDb != null && mDb.isOpen()) return this;
+    	if(mDbHelper == null)
+    		mDbHelper = new DatabaseHelper(mCtx);
+    	if(mDb == null)
+    		mDb = mDbHelper.getWritableDatabase();
     	return this;
     }
     
@@ -85,6 +88,7 @@ public class GalleryDbAdapter
     public long createItem(int id, String title, String url, byte[] data,
     		Integer width, Integer height, String tags,
     		Float rating, Integer downloads, Boolean visible) {
+    	if(!mDb.isOpen()) open();
     	ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_ID, id);
         initialValues.put(KEY_TITLE, title);
@@ -99,26 +103,39 @@ public class GalleryDbAdapter
 		initialValues.put(KEY_TAGS, tags);
 		initialValues.put(KEY_VISIBLE, visible);
 
-        long ret = -1;
+        long ret = 0;
         try {
-        	mDb.replace(DATABASE_TABLE, null, initialValues);
+        	if(mDb.replace(DATABASE_TABLE, null, initialValues) > -1)
+        		ret = 1;
         } catch(Exception ex) { }
         if(ret == -1)
-        	ret = mDb.update(DATABASE_TABLE, initialValues, KEY_ID + "=" + id, null);
+        	ret = mDb.update(DATABASE_TABLE, initialValues, KEY_ID + "=" + id, null) > 0 ? 1 : 0;
         return ret;
     }
     
+    public boolean updateData(long Id, byte[] data)
+    {
+    	if(!mDb.isOpen()) open();
+    	ContentValues args = new ContentValues();
+    	//args.put(KEY_ID, Id);
+    	args.put(KEY_DATA, data);
+    	return mDb.update(DATABASE_TABLE, args, KEY_ID + "=" + Id, null) > 0;
+    }
+    
     public boolean deleteItem(long rowId) {
+    	if(!mDb.isOpen()) open();
     	return mDb.delete(DATABASE_TABLE, KEY_ID + "=" + rowId, null) > 0;
     }
     
     public Cursor fetchAllItems() {
+    	if(!mDb.isOpen()) open();
     	return mDb.query(DATABASE_TABLE,
     			new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_DATA, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS},
-    			KEY_VISIBLE + " = 1", null, null, null, null);
+    			KEY_VISIBLE + " = 1", null, null, null, "downloads DESC, rating DESC");
     }
     
     public Cursor fetchItem(long Id) throws SQLException {
+    	if(!mDb.isOpen()) open();
     	Cursor mCursor =
             mDb.query(true, DATABASE_TABLE,
             		new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_DATA, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS},
@@ -131,6 +148,7 @@ public class GalleryDbAdapter
     }
     public boolean hideItem(long Id)
     {
+    	if(!mDb.isOpen()) open();
     	ContentValues args = new ContentValues();
     	args.put(KEY_VISIBLE, false);
     	args.put(KEY_DATA, (byte[])null);
@@ -145,6 +163,7 @@ public class GalleryDbAdapter
     public boolean updateItem(long Id, String title, String url, byte[] data,
     		Integer width, Integer height, String tags,
     		Float rating, Integer downloads, Boolean visible) {
+    	if(!mDb.isOpen()) open();
     	ContentValues args = new ContentValues();
         args.put(KEY_TITLE, title);
         args.put(KEY_URL, url);

@@ -11,6 +11,7 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import com.brandroid.OnlineGalleryItem;
 import com.brandroid.dynapaper.Preferences;
 import com.brandroid.dynapaper.R;
 import com.google.ads.AdRequest;
@@ -129,14 +130,27 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		if(requestCode == SELECT_PICTURE)
 		{
 			Uri selUri = data.getData();
-			String selPath = getPath(selUri);
+			String selPath = getMediaPath(selUri);
 			mTxtURL.setText(selPath);
 			mCacheBitmap = BitmapFactory.decodeFile(selPath);
 			mImgPreview.setImageBitmap(mCacheBitmap);
 		} else if (requestCode == SELECT_ONLINE_PICTURE)
 		{
-			Uri selUri = data.getData();
-			new DownloadImageTask().execute(selUri.toString());
+			String url = data.getStringExtra("url");
+			int id = data.getIntExtra("id", -1);
+			if(id > -1)
+				url = Preferences.MY_ROOT_URL + "/dynapaper/get_image.php?id=" + id;
+			Log.i(LOG_KEY, "Selected URL: " + url);
+			byte[] bmp = data.getByteArrayExtra("data");
+			//OnlineGalleryItem item = (OnlineGalleryItem)data.getSerializableExtra("item");
+			mTxtURL.setText(url);
+			if(!url.startsWith("http"))
+				url = Preferences.MY_ROOT_URL + "/images/full/" + url;
+			if(bmp != null && bmp.length > 0)
+				mImgPreview.setImageBitmap(BitmapFactory.decodeByteArray(bmp, 0, bmp.length));
+			else
+				new DownloadToWallpaperTask(true).execute(url);
+	    	//new DownloadToWallpaperTask().execute(selURL);
 		} else if (requestCode == REQUEST_CODE_GALLERY_UPDATE)
 		{
 			findViewById(R.id.btnOnline).setEnabled(true);
@@ -164,7 +178,10 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
     }
     
 
-	private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+	private class DownloadToWallpaperTask extends AsyncTask<String, Void, Bitmap> {
+		public Boolean Testing = false;
+		public DownloadToWallpaperTask() { }
+		public DownloadToWallpaperTask(Boolean doTest) { Testing = doTest; }
 	        /** The system calls this to perform work in a worker thread and
 	      * delivers it the parameters given to AsyncTask.execute() */
 	    protected Bitmap doInBackground(String... urls)
@@ -190,14 +207,19 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    /** The system calls this to perform work in the UI thread and delivers
 	      * the result from doInBackground() */
 	    protected void onPostExecute(Bitmap result) {
-	    	setHomeWallpaper(result);
+	    	if(Testing)
+	    		mImgPreview.setImageBitmap(result);
+	    	else
+	    		setHomeWallpaper(result);
 	    	mCacheBitmap = result;
+	    	findViewById(R.id.btnSelect).setEnabled(true);
+	    	findViewById(R.id.btnTest).setEnabled(true);
 	    	if(mProgressBar != null)
 	    		mProgressBar.setVisibility(View.GONE);
 	    }
 	}
 	
-	public String getPath(Uri uri) {
+	public String getMediaPath(Uri uri) {
 	    String[] projection = { MediaStore.Images.Media.DATA };
 	    Cursor cursor = managedQuery(uri, projection, null, null, null);
 	    int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);

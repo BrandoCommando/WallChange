@@ -59,7 +59,7 @@ public class GalleryUpdater extends WallChangerActivity {
 	    			uc.setIfModifiedSince(modified);
     		}
     		uc.connect();
-    		if(uc.getResponseCode() != HttpURLConnection.HTTP_NOT_MODIFIED)
+    		if(uc.getResponseCode() == HttpURLConnection.HTTP_OK)
     		{
     			in = new BufferedInputStream(uc.getInputStream());
 	    		br = new BufferedReader(new InputStreamReader(in));
