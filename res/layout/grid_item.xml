@@ -12,10 +12,11 @@
 	<TextView android:id="@+id/grid_item_text"
 		android:gravity="center_horizontal" android:layout_width="wrap_content"
 		android:text="TextView" android:layout_height="wrap_content"
-		android:layout_above="@+id/grid_item_rating" />
+		android:layout_below="@+id/grid_item_image"
+		android:layout_alignWithParentIfMissing="true" />
 	<RatingBar android:layout_width="wrap_content"
 		style="?android:attr/ratingBarStyleSmall" 
 		android:layout_height="wrap_content" android:id="@+id/grid_item_rating"
-		android:max="5" android:layout_alignParentBottom="true" />
+		android:max="5" android:layout_below="@+id/grid_item_text" />
 
 </RelativeLayout>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	android:orientation="vertical" android:gravity="center|top" android:id="@+id/btnWeather">
+	android:orientation="vertical" android:gravity="center|top" android:id="@+id/layoutMain">
 	<TextView android:text="@string/s_select_base" android:id="@+id/textView1"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"></TextView>
 	<LinearLayout android:layout_height="wrap_content"
@@ -50,9 +50,8 @@
 	<LinearLayout android:layout_height="wrap_content"
 		android:id="@+id/adLayout" android:layout_width="fill_parent"></LinearLayout>
 	<FrameLayout android:layout_width="fill_parent" android:id="@+id/frameLayout1"
-		android:layout_height="wrap_content" android:foregroundGravity="center">
-		<ImageView android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:id="@+id/imageSample"
-			android:src="@drawable/picture"></ImageView>
+		android:foregroundGravity="center" android:layout_height="wrap_content">
+		<ImageView android:layout_height="wrap_content" android:id="@+id/imageSample"
+			android:src="@drawable/picture" android:layout_width="fill_parent"></ImageView>
 	</FrameLayout>
 </LinearLayout>

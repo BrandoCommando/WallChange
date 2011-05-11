@@ -75,8 +75,8 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnItemCl
 			if(mDb == null)
 				mDb = new GalleryDbAdapter(this).open();
 			mGalleryCursor = mDb.fetchAllItems();
+			startManagingCursor(mGalleryCursor);
 		}
-		startManagingCursor(mGalleryCursor);
 		mGridView.setAdapter(new OnlineGalleryAdapter(this, mGalleryCursor));
 		mGridView.setOnItemClickListener(this);
 		
@@ -204,6 +204,8 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnItemCl
 		    		URLConnection uc = new URL(url).openConnection();
 		    		uc.connect();
 		    		s = uc.getInputStream();
+		    		if(uc.getURL().toString() != url)
+		    			Log.i(LOG_KEY, "...redirected to " + uc.getURL());
 		    		Bitmap b = BitmapFactory.decodeStream(s);
 		    		item.setIsDownloading(false);
 		    		if(b != null)
@@ -224,6 +226,13 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnItemCl
 		    		} catch(IOException ex) { Log.e(LOG_KEY, ex.toString()); }
 		    	}
 		    	return item;
+		    }
+		    
+		    @Override
+		    protected void onPreExecute() {
+		    	// TODO Auto-generated method stub
+		    	super.onPreExecute();
+		    	if(mView == null) return;
 		    }
 		    
 		    /** The system calls this to perform work in the UI thread and delivers
