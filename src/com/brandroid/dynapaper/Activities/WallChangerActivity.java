@@ -23,6 +23,7 @@ public class WallChangerActivity extends Activity
 	protected Resources mResources;
 	protected Preferences prefs;
 	protected Cursor mGalleryCursor;
+	protected String mUser = "";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

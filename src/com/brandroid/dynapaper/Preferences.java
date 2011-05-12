@@ -58,6 +58,18 @@ public class Preferences {
 		editor.putString(key, value);
 		editor.commit();
 	}
+	public void setSetting(String key, Boolean value)
+	{
+		SharedPreferences.Editor editor = getPreferences().edit();
+		editor.putBoolean(key, value);
+		editor.commit();
+	}
+	public void setSetting(String key, int value)
+	{
+		SharedPreferences.Editor editor = getPreferences().edit();
+		editor.putInt(key, value);
+		editor.commit();
+	}
 	public Boolean hasSetting(String key)
 	{
 		return mStorage.contains(key);

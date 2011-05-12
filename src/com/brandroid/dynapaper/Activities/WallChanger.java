@@ -254,8 +254,8 @@ public class WallChanger extends Activity implements OnClickListener {
 			mBtnSelect.setEnabled(false);
 			mBtnUndo.setEnabled(false);
 			mBtnTest.setEnabled(false);
-			prefs.setSetting("baseUrl", null);
-			prefs.setSetting("dynaUrl", null);
+			prefs.setSetting("baseUrl", (String)null);
+			prefs.setSetting("dynaUrl", (String)null);
 			mSilent = true;
 			new DownloadImageTask().execute(url);
 		} else if (v.getId() == R.id.btnCurrent)

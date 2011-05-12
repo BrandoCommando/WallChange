@@ -1,12 +1,16 @@
 package com.brandroid.dynapaper.Activities;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import com.brandroid.dynapaper.Preferences;
 import com.brandroid.dynapaper.R;
@@ -44,8 +48,11 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	private ProgressBar mProgressBar;
 	private ImageView mImgPreview;
 	private Button mBtnSelect, mBtnTest;
+	private CheckBox mBtnWeather, mBtnGPS;
 	private Intent mIntent;
 	private Bitmap mCacheBitmap;
+	private final int mUploadQuality = 100;
+	//private String mGPSLocation = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,11 +76,15 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		findViewById(R.id.btnOnline).setOnClickListener(this);
 		findViewById(R.id.btnSelect).setOnClickListener(this);
 		//findViewById(R.id.btnStocks).setOnClickListener(this);
-		findViewById(R.id.chkGPS).setOnClickListener(this);
+		findViewById(R.id.btnGPS).setOnClickListener(this);
 		findViewById(R.id.btnTest).setOnClickListener(this);
 		findViewById(R.id.btnUndo).setOnClickListener(this);
 		findViewById(R.id.btnURL).setOnClickListener(this);
-		findViewById(R.id.btnWeather).setOnClickListener(this);
+		
+		mBtnWeather = (CheckBox)findViewById(R.id.btnWeather);
+		mBtnWeather.setOnClickListener(this);
+		mBtnGPS = (CheckBox)findViewById(R.id.btnGPS);
+		mBtnGPS.setOnClickListener(this);
 		
 		mTxtURL = (EditText)findViewById(R.id.txtURL);
 		mProgressBar = (ProgressBar)findViewById(R.id.progressBar1);
@@ -88,12 +99,14 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				mBtnSelect.setEnabled(true);
 				mBtnTest.setEnabled(true);
 			} });
-		mTxtZip = (EditText)findViewById(R.id.txtZip);
 		findViewById(R.id.btnUndo).setEnabled(false);
 		mBtnSelect.setEnabled(false);
 		mBtnTest.setEnabled(false);
+		mTxtZip = (EditText)findViewById(R.id.txtZip);
 		findViewById(R.id.txtURL).setVisibility(View.GONE);
 		findViewById(R.id.progressBar1).setVisibility(View.GONE);
+		
+		mTxtZip.setText(prefs.getString("zip", mTxtZip.getText().toString()));
 		
 		mImgPreview.setVisibility(View.GONE);
 		
@@ -103,7 +116,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		addAds();
 	}
 	
-	public String getFinalURL()
+	public String getDynaURL()
 	{
 		String url = "";
 		if(mTxtURL != null)
@@ -112,12 +125,13 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 			url = prefs.getSetting("baseUrl", url);
 		if(url == "")
 			url = "schema.jpg";
-		url = url.replace(MY_ROOT_URL, "");
-		url = MY_ROOT_URL + "/images/weather.php?i1=" + URLEncoder.encode(url);
-		url += "&source=google&format=image";
 		Display display = getWindow().getWindowManager().getDefaultDisplay();
-		url += "&x=26&w=" + (display.getWidth() * 2) + "&h=" + display.getHeight();
-		Log.i(LOG_KEY, "Final URL: " + url);
+		if(mBtnWeather.isChecked())
+			url = MY_ROOT_URL + "/images/weather.php?source=google&format=image&" +
+				"&x=26&w=" + (display.getWidth() * 2) + "&h=" + display.getHeight() +
+				(mTxtZip.getText().length() > 0 ? "&zip=" + mTxtZip.getText() : "") +
+				"&i1=" + URLEncoder.encode(url.replace(MY_ROOT_URL, ""));
+		Log.i(LOG_KEY, "Final DynaURL: " + url);
 		return url;
 	}
 
@@ -143,17 +157,20 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				intentOnline.setType("image/*");
 				startActivityForResult(intentOnline, SELECT_ONLINE_PICTURE);
 				break;
-			case R.id.chkGPS:
-				mTxtZip.setEnabled(((CheckBox)findViewById(R.id.chkGPS)).isChecked());
+			case R.id.btnGPS:
+				//mGPSLocation = null;
+				mTxtZip.setEnabled(mBtnGPS.isChecked());
 				break;
 			case R.id.btnTest:
-				new DownloadToWallpaperTask(true).execute(getFinalURL());
+				new DownloadToWallpaperTask(true).execute(getDynaURL());
 			case R.id.btnSelect:
-				new DownloadToWallpaperTask().execute(getFinalURL());
+				new DownloadToWallpaperTask().execute(getDynaURL());
 				break;
 			case R.id.btnWeather:
-				break;
-			case R.id.btnStocks:
+				Boolean bWeather = mBtnWeather.isChecked();
+				//Boolean bGPS = mBtnGPS.isChecked();
+				mTxtZip.setEnabled(bWeather);
+				//mBtnGPS.setEnabled(bWeather);
 				break;
 			case R.id.btnURL:
 				Boolean bURLMode = mTxtURL.getVisibility() == View.GONE;
@@ -236,35 +253,64 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
     	return mResources.getString(stringResourceID);
     }
     
+    public String getMD5(byte[] data)
+    {
+    	try {
+	    	MessageDigest digest = MessageDigest.getInstance("MD5");
+	    	byte[] msgDigest = digest.digest(data);
+	    	StringBuffer sb = new StringBuffer();
+	    	for(int i = 0; i < msgDigest.length; i++)
+	    		sb.append(Integer.toHexString(0xFF & msgDigest[i]));
+	    	return sb.toString();
+    	} catch(NoSuchAlgorithmException nsme) { Log.e(LOG_KEY, "WTF! No MD5!"); return null; }
+    }
+    
 	private class UploadTask extends AsyncTask<Bitmap, Void, String>
 	{
 
 		@Override
-		protected String doInBackground(Bitmap... arg0)
+		protected String doInBackground(Bitmap... pics)
 		{
 			URL url = null;
-			URLConnection con = null;
+			HttpURLConnection con = null;
 			OutputStream out = null;
 			InputStream in = null;
 			StringBuilder ret = new StringBuilder();
 			InputStreamReader sr = null;
 			try {
-				url = new URL(MY_ROOT_URL + "/images/upload.php");
-				con = url.openConnection();
-				con.setConnectTimeout(20000);
-				con.setDoOutput(true);
-				out = con.getOutputStream();
-				// TODO: Make Quality Configurable
-				arg0[0].compress(CompressFormat.JPEG, 100, out);
-				out.flush();
-				in = con.getInputStream();
-				sr = new InputStreamReader(in);
-				char[] buf = new char[64];
-				while(sr.read(buf) > 0)
+				ByteArrayOutputStream stream = new ByteArrayOutputStream();
+				pics[0].compress(CompressFormat.JPEG, mUploadQuality, stream);
+				byte[] data = stream.toByteArray(); 
+				String md5 = getMD5(data);
+				Log.i(LOG_KEY, "MD5: " + md5);
+				url = new URL(MY_ROOT_URL + "/images/upload2.php" + (mUser != null && mUser != "" ? "?user=" + mUser : ""));
+				con = (HttpURLConnection)url.openConnection();
+				con.setRequestProperty("If-None-Match", md5);
+				con.setRequestMethod("HEAD");
+				con.setConnectTimeout(5000);
+				con.connect();
+				if(con.getResponseCode() == 304)
+					ret.append("user/" + (mUser != null && mUser != "" ? mUser + "_" : "") + md5 + ".jpg");
+				else
 				{
-					ret.append(buf);
-					if(buf.length < 64)
-						break;
+					Log.i(LOG_KEY, "New upload!");
+					//con.disconnect();
+					con = (HttpURLConnection)url.openConnection();
+					con.setRequestMethod("POST");
+					con.setConnectTimeout(15000);
+					con.setDoOutput(true);
+					out = con.getOutputStream();
+					out.write(data);
+					out.flush();
+					in = con.getInputStream();
+					sr = new InputStreamReader(in);
+					char[] buf = new char[64];
+					while(sr.read(buf) > 0)
+					{
+						ret.append(buf);
+						if(buf.length < 64)
+							break;
+					}
 				}
 			} catch(Exception ex) {
 				DoLog("Exception Uploading. " + ex.toString());
@@ -426,13 +472,15 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	@Override
 	protected void onStart() {
 		super.onStart();
-		// TODO Put your code here
+		mTxtZip.setText(prefs.getSetting("zip", mTxtZip.getText().toString()));
+		mBtnWeather.setChecked(prefs.getBoolean("weather", mBtnWeather.isChecked()));
 	}
 	
 	@Override
 	protected void onStop() {
-		// TODO Auto-generated method stub
 		super.onStop();
+		prefs.setSetting("zip", mTxtZip.getText().toString());
+		prefs.setSetting("weather", mBtnWeather.isChecked());
 	}
 	
 	@Override

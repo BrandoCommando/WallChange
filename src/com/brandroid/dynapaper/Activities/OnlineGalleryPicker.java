@@ -1,22 +1,12 @@
 package com.brandroid.dynapaper.Activities;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.brandroid.JSON;
 import com.brandroid.OnlineGalleryItem;
 import com.brandroid.dynapaper.GalleryDbAdapter;
 import com.brandroid.dynapaper.Preferences;
@@ -34,26 +24,21 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 public class OnlineGalleryPicker extends WallChangerActivity implements OnItemClickListener
 {
-	private ProgressBar mProgressBar = null;
 	private GridView mGridView = null;
 	private GalleryDbAdapter mDb = null;
-	private int iDownloads = 0;
+	private ArrayList<OnlineGalleryAdapter.DownloadImageTask> mArrayDownloads;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +46,7 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnItemCl
 		Intent intent = getIntent();
 		if(intent == null)
 			intent = new Intent();
-		String action = intent.getAction();
+		//String action = intent.getAction();
 		setContentView(R.layout.online_picker);
 		
 		prefs = Preferences.getPreferences(OnlineGalleryPicker.this);
@@ -70,21 +55,27 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnItemCl
 		
 		setTitle(getResourceString(R.string.btn_online));
 		
-		if(mGalleryCursor == null)
-		{
-			if(mDb == null)
-				mDb = new GalleryDbAdapter(this).open();
-			mGalleryCursor = mDb.fetchAllItems();
-			startManagingCursor(mGalleryCursor);
-		}
-		mGridView.setAdapter(new OnlineGalleryAdapter(this, mGalleryCursor));
-		mGridView.setOnItemClickListener(this);
+		setupCursor();
 		
 		//SimpleCursorAdapter items = new SimpleCursorAdapter(this, R.layout.grid_item, mGalleryCursor, from, to);
 		
 		//mGridView.setAdapter(items);
 		
 		//new DownloadStringTask().execute(ONLINE_GALLERY_URL);
+	}
+	
+	private void setupCursor()
+	{
+		if(mGalleryCursor == null)
+		{
+			if(mDb == null)
+				mDb = new GalleryDbAdapter(this).open();
+			mGalleryCursor = mDb.fetchAllItems();
+			mArrayDownloads = new ArrayList<OnlineGalleryAdapter.DownloadImageTask>(mGalleryCursor.getCount());
+			startManagingCursor(mGalleryCursor);
+		}
+		mGridView.setAdapter(new OnlineGalleryAdapter(this, mGalleryCursor));
+		mGridView.setOnItemClickListener(this);
 	}
 	
 	@Override
@@ -110,25 +101,38 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnItemCl
 	
 	@Override
 	protected void onStart() {
-		// TODO Auto-generated method stub
 		super.onStart();
+		setupCursor();
 	}
 	
 	@Override
 	protected void onStop() {
-		// TODO Auto-generated method stub
 		super.onStop();
 		mDb.close();
+		clearDownloads();
+	}
+	
+	private void clearDownloads()
+	{
+		if(mArrayDownloads == null) return;
+		for(int i = 0; i < mArrayDownloads.size(); i++)
+		{
+			try {
+				OnlineGalleryAdapter.DownloadImageTask task = mArrayDownloads.get(i);
+				task.cancel(true);
+			} catch(Exception e) { Log.e(LOG_KEY, "Error clearing downloads. " + e.toString()); }
+		}
+		mArrayDownloads.clear();
 	}
 	
 	public class OnlineGalleryAdapter extends BaseAdapter {
-	    private Context mContext;
+	    @SuppressWarnings("unused")
+		private Context mContext;
 	    private Cursor mCursor;
 	    
 	    public OnlineGalleryAdapter(Context c, Cursor cursor) {
 	        mContext = c;
 	        mCursor = cursor;
-	        iDownloads = getCount();
 	    }
 
 	    public int getCount() {
@@ -170,7 +174,9 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnItemCl
 		        else if(!item.isStarted())
 		        {
 		        	item.setIsDownloading(true);
-		        	new DownloadImageTask(view).execute(item);
+		        	DownloadImageTask task = new DownloadImageTask(view);
+		        	mArrayDownloads.add(task);
+		        	task.execute(item);
 		        } else
 		        	Log.w(LOG_KEY, "Unknown sitch");
 	        } catch(NullPointerException npe) {
@@ -240,6 +246,7 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnItemCl
 		    protected void onPostExecute(OnlineGalleryItem result) {
 		    	//if(--iDownloads==0);
 		    	//	mDb.close();
+		    	mArrayDownloads.remove(this);
 		    	if(mView == null) return;
 		    	if(result.getBitmap() == null) { mView.setVisibility(View.GONE); return; }
 		    	ImageView imageView = (ImageView)mView.findViewById(R.id.grid_item_image);

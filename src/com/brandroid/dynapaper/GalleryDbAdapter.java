@@ -1,18 +1,11 @@
 package com.brandroid.dynapaper;
 
-import java.io.IOException;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.util.EntityUtils;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.graphics.Bitmap;
 import android.util.Log;
 
 public class GalleryDbAdapter
@@ -28,13 +21,13 @@ public class GalleryDbAdapter
     public static final String KEY_TAGS = "tags";
     public static final String KEY_VISIBLE = "visible";
 
-    private static final String TAG = "WallChangeGalleryDbAdapter";
+    //private static final String TAG = "WallChangeGalleryDbAdapter";
     private DatabaseHelper mDbHelper;
     private SQLiteDatabase mDb;
     
-    private static final String DATABASE_NAME = "wallchange";
+    private static final String DATABASE_NAME = "wallchange.db";
     private static final String DATABASE_TABLE = "gallery";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     private static final String DATABASE_CREATE =
         "create table gallery (" + KEY_ID + " integer primary key, "
