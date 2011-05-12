@@ -31,6 +31,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -39,7 +40,7 @@ import android.widget.ProgressBar;
 public class WallChangerNew extends WallChangerActivity implements OnClickListener
 { 
 	private final static int REQUEST_CODE_GALLERY_UPDATE = 101;
-	private EditText mTxtURL;
+	private EditText mTxtURL, mTxtZip;
 	private ProgressBar mProgressBar;
 	private ImageView mImgPreview;
 	private Intent mIntent;
@@ -61,7 +62,8 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		findViewById(R.id.btnGallery).setOnClickListener(this);
 		findViewById(R.id.btnOnline).setOnClickListener(this);
 		findViewById(R.id.btnSelect).setOnClickListener(this);
-		findViewById(R.id.btnStocks).setOnClickListener(this);
+		//findViewById(R.id.btnStocks).setOnClickListener(this);
+		findViewById(R.id.chkGPS).setOnClickListener(this);
 		findViewById(R.id.btnTest).setOnClickListener(this);
 		findViewById(R.id.btnUndo).setOnClickListener(this);
 		findViewById(R.id.btnURL).setOnClickListener(this);
@@ -70,6 +72,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		mTxtURL = (EditText)findViewById(R.id.txtURL);
 		mProgressBar = (ProgressBar)findViewById(R.id.progressBar1);
 		mImgPreview = (ImageView)findViewById(R.id.imageSample);
+		mTxtZip = (EditText)findViewById(R.id.txtZip);
 		findViewById(R.id.btnUndo).setEnabled(false);
 		findViewById(R.id.txtURL).setVisibility(View.GONE);
 		findViewById(R.id.progressBar1).setVisibility(View.GONE);
@@ -101,6 +104,9 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				intentOnline.setAction(Intent.ACTION_GET_CONTENT);
 				intentOnline.setType("image/*");
 				startActivityForResult(intentOnline, SELECT_ONLINE_PICTURE);
+				break;
+			case R.id.chkGPS:
+				mTxtZip.setEnabled(((CheckBox)findViewById(R.id.chkGPS)).isChecked());
 				break;
 			case R.id.btnSelect:
 				break;
