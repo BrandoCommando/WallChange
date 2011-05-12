@@ -27,9 +27,14 @@
 		android:paddingLeft="1pt" android:gravity="bottom|top">
 		<Button android:text="@string/btn_weather"
 			android:layout_height="wrap_content" android:layout_width="wrap_content"
-			android:id="@+id/btnWeather" android:soundEffectsEnabled="true"></Button>
+			android:id="@+id/btnWeather" android:soundEffectsEnabled="true"
+			android:enabled="true"></Button>
 		<Button android:text="@string/btn_stocks" android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:id="@+id/btnStocks"></Button>
+			android:layout_height="wrap_content" android:id="@+id/btnStocks"
+			android:visibility="gone"></Button>
+		<EditText android:layout_height="wrap_content" android:id="@+id/txtZip"
+			android:text="@string/btn_zip" android:layout_width="100dip" android:enabled="false"></EditText>
+		<CheckBox android:layout_height="wrap_content" android:text="@string/btn_gps" android:layout_width="wrap_content" android:checked="true" android:id="@+id/chkGPS"></CheckBox>
 	</LinearLayout>
 	<TextView android:text="@string/lbl_command" android:id="@+id/textView3"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"></TextView>

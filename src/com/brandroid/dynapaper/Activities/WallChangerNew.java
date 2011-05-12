@@ -1,23 +1,13 @@
 package com.brandroid.dynapaper.Activities;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.params.HttpClientParams;
-
-import com.brandroid.OnlineGalleryItem;
 import com.brandroid.dynapaper.Preferences;
 import com.brandroid.dynapaper.R;
 import com.google.ads.AdRequest;
@@ -25,7 +15,6 @@ import com.google.ads.AdSize;
 import com.google.ads.AdView;
 
 import android.content.Intent;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -42,6 +31,7 @@ import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -50,7 +40,7 @@ import android.widget.ProgressBar;
 public class WallChangerNew extends WallChangerActivity implements OnClickListener
 { 
 	private final static int REQUEST_CODE_GALLERY_UPDATE = 101;
-	private EditText mTxtURL;
+	private EditText mTxtURL, mTxtZip;
 	private ProgressBar mProgressBar;
 	private ImageView mImgPreview;
 	private Button mBtnSelect, mBtnTest;
@@ -61,8 +51,8 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         
-        final Intent intent = mIntent = getIntent();
-        final String action = intent.getAction();
+        mIntent = getIntent();
+        //final String action = intent.getAction();
 
         if(mIntent == null)
         	mIntent = new Intent();
@@ -77,7 +67,10 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		findViewById(R.id.btnCurrent).setOnClickListener(this);
 		findViewById(R.id.btnGallery).setOnClickListener(this);
 		findViewById(R.id.btnOnline).setOnClickListener(this);
-		findViewById(R.id.btnStocks).setOnClickListener(this);
+		findViewById(R.id.btnSelect).setOnClickListener(this);
+		//findViewById(R.id.btnStocks).setOnClickListener(this);
+		findViewById(R.id.chkGPS).setOnClickListener(this);
+		findViewById(R.id.btnTest).setOnClickListener(this);
 		findViewById(R.id.btnUndo).setOnClickListener(this);
 		findViewById(R.id.btnURL).setOnClickListener(this);
 		findViewById(R.id.btnWeather).setOnClickListener(this);
@@ -95,6 +88,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				mBtnSelect.setEnabled(true);
 				mBtnTest.setEnabled(true);
 			} });
+		mTxtZip = (EditText)findViewById(R.id.txtZip);
 		findViewById(R.id.btnUndo).setEnabled(false);
 		mBtnSelect.setEnabled(false);
 		mBtnTest.setEnabled(false);
@@ -149,9 +143,11 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				intentOnline.setType("image/*");
 				startActivityForResult(intentOnline, SELECT_ONLINE_PICTURE);
 				break;
+			case R.id.chkGPS:
+				mTxtZip.setEnabled(((CheckBox)findViewById(R.id.chkGPS)).isChecked());
+				break;
 			case R.id.btnTest:
 				new DownloadToWallpaperTask(true).execute(getFinalURL());
-				break;
 			case R.id.btnSelect:
 				new DownloadToWallpaperTask().execute(getFinalURL());
 				break;
@@ -193,7 +189,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		} else if (requestCode == SELECT_ONLINE_PICTURE)
 		{
 			String url = data.getStringExtra("url");
-			int id = data.getIntExtra("id", -1);
+			//int id = data.getIntExtra("id", -1);
 			//if(id > -1)
 			//	url = Preferences.MY_ROOT_URL + "/dynapaper/get_image.php?id=" + id;
 			Log.i(LOG_KEY, "Selected URL: " + url);

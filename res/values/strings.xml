@@ -27,4 +27,6 @@
     <string name="btn_stocks">Stocks</string>
     <string name="btn_recent">Recent</string>
     <string name="s_updating_options">Updating Options. Please wait.</string>
+    <string name="btn_zip">Zip Code</string>
+    <string name="btn_gps">GPS</string>
 </resources>
