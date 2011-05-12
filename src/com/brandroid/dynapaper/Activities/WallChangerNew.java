@@ -131,6 +131,8 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				"&x=26&w=" + (display.getWidth() * 2) + "&h=" + display.getHeight() +
 				(mTxtZip.getText().length() > 0 ? "&zip=" + mTxtZip.getText() : "") +
 				"&i1=" + URLEncoder.encode(url.replace(MY_ROOT_URL, ""));
+		else
+			url = getImageFullUrl(url);
 		Log.i(LOG_KEY, "Final DynaURL: " + url);
 		return url;
 	}
@@ -414,7 +416,10 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    		mImgPreview.setVisibility(View.VISIBLE);
 	    		mImgPreview.setImageBitmap(result);
 	    		if(!Testing)
+	    		{
 		    		setHomeWallpaper(result);
+		    		finish();
+	    		}
 		    	//mCacheBitmap = result;
 		    	mBtnSelect.setEnabled(true);
 		    	mBtnTest.setEnabled(true);

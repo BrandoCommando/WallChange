@@ -51,6 +51,8 @@ public class WallChangerActivity extends Activity
     
     protected String getImageFullUrl(String sBase)
     {
+    	if(sBase.contains("//") && !sBase.startsWith(MY_ROOT_URL))
+    		return sBase;
     	return MY_IMAGE_ROOT_URL + "full/" + sBase.substring(sBase.lastIndexOf("/") + 1);
     }
 

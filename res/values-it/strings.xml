@@ -27,4 +27,6 @@
     <string name="btn_stocks">Azioni</string>
     <string name="btn_recent">Recenti</string>
     <string name="s_updating_options">Aggiornamento delle Opzioni. Si prega di attendere.</string>
+    <string name="btn_zip">Zip Code</string>
+    <string name="btn_gps">GPS</string>
 </resources>

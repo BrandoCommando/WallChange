@@ -27,4 +27,6 @@
     <string name="btn_stocks">Акции</string>
     <string name="btn_recent">Последние</string>
     <string name="s_updating_options">Обновление обозревателя. Пожалуйста, подождите.</string>
+    <string name="btn_zip">Почтовый индекс</string>
+    <string name="btn_gps">GPS</string>
 </resources>

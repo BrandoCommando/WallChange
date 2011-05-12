@@ -27,4 +27,6 @@
     <string name="btn_stocks">Stocks</string>
     <string name="btn_recent">Dernières</string>
     <string name="s_updating_options">Mise à jour Options. S\'il vous plaît attendre.</string>
+    <string name="btn_zip">Code postal</string>
+    <string name="btn_gps">GPS</string>
 </resources>
