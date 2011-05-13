@@ -18,6 +18,7 @@ import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -43,7 +44,6 @@ import android.widget.ProgressBar;
 
 public class WallChangerNew extends WallChangerActivity implements OnClickListener
 { 
-	private final static int REQUEST_CODE_GALLERY_UPDATE = 101;
 	private EditText mTxtURL, mTxtZip;
 	private ProgressBar mProgressBar;
 	private ImageView mImgPreview;
@@ -51,7 +51,6 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	private CheckBox mBtnWeather, mBtnGPS;
 	private Intent mIntent;
 	private Bitmap mCacheBitmap;
-	private final int mUploadQuality = 100;
 	//private String mGPSLocation = null;
 	
 	@Override
@@ -111,9 +110,10 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		mImgPreview.setVisibility(View.GONE);
 		
 		findViewById(R.id.btnOnline).setEnabled(false);
-		startActivityForResult(new Intent(this, GalleryUpdater.class), REQUEST_CODE_GALLERY_UPDATE);
+		startActivityForResult(new Intent(this, GalleryUpdater.class), REQ_UPDATE_GALLERY);
 		
-		addAds();
+		if(!isPaidMode())
+			addAds();
 	}
 	
 	public String getDynaURL()
@@ -125,12 +125,11 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 			url = prefs.getSetting("baseUrl", url);
 		if(url == "")
 			url = "schema.jpg";
-		Display display = getWindow().getWindowManager().getDefaultDisplay();
 		if(mBtnWeather.isChecked())
 			url = MY_ROOT_URL + "/images/weather.php?source=google&format=image&" +
-				"&x=26&w=" + (display.getWidth() * 2) + "&h=" + display.getHeight() +
+				"&x=26&w=" + getHomeWidth() + "&h=" + getHomeHeight() +
 				(mTxtZip.getText().length() > 0 ? "&zip=" + mTxtZip.getText() : "") +
-				"&i1=" + URLEncoder.encode(url.replace(MY_ROOT_URL, ""));
+				"&i1=" + URLEncoder.encode(url.replace(MY_ROOT_URL + "/images/", "").replace(MY_ROOT_URL, ""));
 		else
 			url = getImageFullUrl(url);
 		Log.i(LOG_KEY, "Final DynaURL: " + url);
@@ -143,7 +142,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		switch(v.getId())
 		{
 			case R.id.btnCurrent:
-				mCacheBitmap = ((BitmapDrawable)getWallpaper()).getBitmap();
+				mCacheBitmap = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
 				mImgPreview.setImageBitmap(mCacheBitmap);
 				new UploadTask().execute(mCacheBitmap);
 				break;
@@ -151,13 +150,13 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				Intent intentGallery = new Intent();
 				intentGallery.setType("image/*");
 				intentGallery.setAction(Intent.ACTION_GET_CONTENT);
-				startActivityForResult(Intent.createChooser(intentGallery, "Select Picture"), SELECT_PICTURE);
+				startActivityForResult(Intent.createChooser(intentGallery, "Select Picture"), REQ_SELECT_GALLERY);
 				break;
 			case R.id.btnOnline:
 				Intent intentOnline = new Intent(this, OnlineGalleryPicker.class);
 				intentOnline.setAction(Intent.ACTION_GET_CONTENT);
 				intentOnline.setType("image/*");
-				startActivityForResult(intentOnline, SELECT_ONLINE_PICTURE);
+				startActivityForResult(intentOnline, REQ_SELECT_ONLINE);
 				break;
 			case R.id.btnGPS:
 				//mGPSLocation = null;
@@ -165,6 +164,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				break;
 			case R.id.btnTest:
 				new DownloadToWallpaperTask(true).execute(getDynaURL());
+				break;
 			case R.id.btnSelect:
 				new DownloadToWallpaperTask().execute(getDynaURL());
 				break;
@@ -195,17 +195,19 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if(resultCode == RESULT_CANCELED) return;
-		if(requestCode == SELECT_PICTURE)
+		if(requestCode == REQ_SELECT_GALLERY)
 		{
 			Uri selUri = data.getData();
 			String selPath = getMediaPath(selUri);
-			mCacheBitmap = BitmapFactory.decodeFile(selPath);
-			if(mCacheBitmap != null)
+			Bitmap bmp = getSizedBitmap(BitmapFactory.decodeFile(selPath), getHomeWidth(), getHomeHeight());
+			if(bmp != null)
 			{
-				new UploadTask().execute(mCacheBitmap);
-				mImgPreview.setImageBitmap(mCacheBitmap);
+				mCacheBitmap = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
+				new UploadTask().execute(bmp);
+				mImgPreview.setVisibility(View.GONE);
+				mImgPreview.setImageBitmap(bmp);
 			}
-		} else if (requestCode == SELECT_ONLINE_PICTURE)
+		} else if (requestCode == REQ_SELECT_ONLINE)
 		{
 			String url = data.getStringExtra("url");
 			//int id = data.getIntExtra("id", -1);
@@ -226,10 +228,13 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 					new UploadTask().execute(mGalleryBitmap);
 					mImgPreview.setImageBitmap(mGalleryBitmap);
 				}
-			} else
-				new DownloadToWallpaperTask(true).execute(url);
+			} else {
+				String sThumbUrl = getImageThumbUrl(mTxtURL.getText().toString() + "?w=" + (getHomeWidth() / 2));
+				Log.w(LOG_KEY, "Couldn't find image in Intent. Re-downloading " + sThumbUrl);
+				new DownloadToWallpaperTask(true).execute(sThumbUrl);
+			}
 	    	//new DownloadToWallpaperTask().execute(selURL);
-		} else if (requestCode == REQUEST_CODE_GALLERY_UPDATE)
+		} else if (requestCode == REQ_UPDATE_GALLERY)
 		{
 			findViewById(R.id.btnOnline).setEnabled(true);
 		}
@@ -286,17 +291,19 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				String md5 = getMD5(data);
 				Log.i(LOG_KEY, "MD5: " + md5);
 				url = new URL(MY_ROOT_URL + "/images/upload2.php" + (mUser != null && mUser != "" ? "?user=" + mUser : ""));
+				Log.i(LOG_KEY, "Checking " + url.toString() + " for " + md5);
 				con = (HttpURLConnection)url.openConnection();
 				con.setRequestProperty("If-None-Match", md5);
 				con.setRequestMethod("HEAD");
 				con.setConnectTimeout(5000);
 				con.connect();
-				if(con.getResponseCode() == 304)
+				if(con.getResponseCode() == 304) {
+					Log.i(LOG_KEY, "Image already uploaded. No need to re-upload.");
 					ret.append("user/" + (mUser != null && mUser != "" ? mUser + "_" : "") + md5 + ".jpg");
-				else
+				} else
 				{
 					Log.i(LOG_KEY, "New upload!");
-					//con.disconnect();
+					con.disconnect();
 					con = (HttpURLConnection)url.openConnection();
 					con.setRequestMethod("POST");
 					con.setConnectTimeout(15000);
@@ -362,7 +369,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				findViewById(R.id.btnCurrent).setEnabled(true);
 			}
 			mProgressBar.setVisibility(View.GONE);
-			//mImgPreview.setVisibility(View.VISIBLE);
+			mImgPreview.setVisibility(View.VISIBLE);
 			//mImgSample.setImageDrawable(getWallpaper());
 			//mImgSample.setVisibility(View.VISIBLE);
 		}
@@ -381,6 +388,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    	try {
 	    		String url = urls[0];
 	    		URLConnection uc = new URL(url).openConnection();
+	    		uc.setConnectTimeout(15000);
 	    		uc.connect();
 	    		s = uc.getInputStream();
 	    		ret = BitmapFactory.decodeStream(s);
@@ -397,7 +405,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    @Override
 	    protected void onPreExecute() {
 	    	super.onPreExecute();
-	    	showToast("Downloading image.");
+	    	//showToast("Downloading image.");
 	    	if(mImgPreview != null)
 	    		mImgPreview.setVisibility(View.GONE);
 	    	if(mProgressBar != null)

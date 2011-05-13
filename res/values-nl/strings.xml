@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+    <string name="create_shortcut">Maak Wallpaper Changer Snelkoppeling</string>
+    <string name="s_create">Creëren</string>
+    <string name="s_wallpaper">Wallpaper</string>
+    <string name="s_creating_base">Het creëren van Base Image met de huidige achtergronden ...</string>
+    <string name="btn_zip">Postcode</string>
+    <string name="btn_recent">Recente</string>
+    <string name="btn_undo">Terugkeren</string>
+    <string name="lbl_command">SELECT commando</string>
+    <string name="app_name">Wallpaper Changer</string>
+    <string name="s_select_base">Selecteer Base Image</string>
+    <string name="btn_cancel">Annuleren</string>
+    <string name="btn_stocks">Voorraden</string>
+    <string name="btn_gps">GPS</string>
+    <string name="s_downloading">Downloaden</string>
+    <string name="btn_test">Preview</string>
+    <string name="s_updating_options">Actualisering Opties. Even geduld aub.</string>
+    <string name="s_updated">Wallpaper Bijgewerkt!</string>
+    <string name="s_invalid">Ongeldige afbeelding!</string>
+    <string name="btn_select">Van toepassing</string>
+    <string name="btn_url">URL</string>
+    <string name="menu_help">Help</string>
+    <string name="s_shortcut">Snelkoppeling</string>
+    <string name="btn_gallery">Foto\'s</string>
+    <string name="s_zipcode">Locatie</string>
+    <string name="btn_weather">Weer</string>
+    <string name="lbl_overlay">Selecteer Overlay</string>
+    <string name="btn_current">Huidige</string>
+    <string name="btn_online">Online</string>
+    <string name="menu_about">Over</string>
+</resources>

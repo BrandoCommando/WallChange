@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+    <string name="create_shortcut">יצירת קיצור דרך מחלף י.א.נ.</string>
+    <string name="s_create">צור</string>
+    <string name="s_wallpaper">טפט</string>
+    <string name="s_creating_base">יצירת בסיס תמונה באמצעות עבודה נוכחי ...</string>
+    <string name="btn_zip">מיקוד</string>
+    <string name="btn_recent">האחרונות</string>
+    <string name="btn_undo">לחזור</string>
+    <string name="lbl_command">בחר פיקוד</string>
+    <string name="app_name">טפט מחלף</string>
+    <string name="s_select_base">בחר תמונה Base</string>
+    <string name="btn_cancel">לבטל</string>
+    <string name="btn_stocks">מניות</string>
+    <string name="btn_gps">GPS</string>
+    <string name="s_downloading">הורדת</string>
+    <string name="btn_test">תצוגה</string>
+    <string name="s_updating_options">עדכון אפשרויות. אנא המתן.</string>
+    <string name="s_updated">טפט עודכן!</string>
+    <string name="s_invalid">תמונה לא חוקית!</string>
+    <string name="btn_select">להגיש</string>
+    <string name="btn_url">כתובת האתר</string>
+    <string name="menu_help">עזרה</string>
+    <string name="s_shortcut">קיצור דרך</string>
+    <string name="btn_gallery">תמונות</string>
+    <string name="s_zipcode">מיקום</string>
+    <string name="btn_weather">מזג אויר</string>
+    <string name="lbl_overlay">בחר כיסוי</string>
+    <string name="btn_current">הנוכחי</string>
+    <string name="btn_online">Online</string>
+    <string name="menu_about">כ</string>
+</resources>

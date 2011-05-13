@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+    <string name="create_shortcut">إنشاء اختصار للجدران مبدل</string>
+    <string name="s_create">خلق</string>
+    <string name="s_wallpaper">ورق الجدران</string>
+    <string name="s_creating_base">خلق قاعدة خلفية صورة باستخدام الحالي...</string>
+    <string name="btn_zip">الرمز البريدي</string>
+    <string name="btn_recent">الأخيرة</string>
+    <string name="btn_undo">العودة</string>
+    <string name="lbl_command">اختيار القيادة</string>
+    <string name="app_name">جدران مبدل</string>
+    <string name="s_select_base">حدد قاعدة صورة</string>
+    <string name="btn_cancel">إلغاء</string>
+    <string name="btn_stocks">أسهم</string>
+    <string name="btn_gps">نظام تحديد المواقع</string>
+    <string name="s_downloading">تحميله</string>
+    <string name="btn_test">معاينة</string>
+    <string name="s_updating_options">تحديث خيارات. يرجى الانتظار.</string>
+    <string name="s_updated">حدثت في جدران!</string>
+    <string name="s_invalid">صورة غير صالح!</string>
+    <string name="btn_select">تطبيق</string>
+    <string name="btn_url">عنوان الموقع</string>
+    <string name="menu_help">مساعدة</string>
+    <string name="s_shortcut">الاختصار</string>
+    <string name="btn_gallery">صور</string>
+    <string name="s_zipcode">المكان</string>
+    <string name="btn_weather">الطقس</string>
+    <string name="lbl_overlay">حدد تراكب</string>
+    <string name="btn_current">الحالية</string>
+    <string name="btn_online">على الانترنت</string>
+    <string name="menu_about">حول</string>
+</resources>

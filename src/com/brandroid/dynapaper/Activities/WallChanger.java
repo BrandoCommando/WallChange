@@ -306,13 +306,15 @@ public class WallChanger extends Activity implements OnClickListener {
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-    	getMenuInflater().inflate(R.menu.main_menu, menu);
+    	//getMenuInflater().inflate(R.menu.main_menu, menu);
     	return true;
     }
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
+    	return true;
+    	/*
     	switch(item.getItemId())
     	{
     	case R.id.menu_select:
@@ -335,6 +337,7 @@ public class WallChanger extends Activity implements OnClickListener {
     		break;
     	}
     	return true;
+    	*/
     }
     
 	private class UploadTask extends AsyncTask<Bitmap, Void, String>
