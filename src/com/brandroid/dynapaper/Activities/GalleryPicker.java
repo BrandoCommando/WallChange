@@ -7,7 +7,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 
-import com.brandroid.OnlineGalleryItem;
+import com.brandroid.GalleryItem;
 import com.brandroid.dynapaper.GalleryDbAdapter;
 import com.brandroid.dynapaper.Preferences;
 import com.brandroid.dynapaper.R;
@@ -34,7 +34,7 @@ import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-public class OnlineGalleryPicker extends WallChangerActivity implements OnItemClickListener
+public class GalleryPicker extends WallChangerActivity implements OnItemClickListener
 {
 	private GridView mGridView = null;
 	private GalleryDbAdapter mDb = null;
@@ -49,13 +49,15 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnItemCl
 		//String action = intent.getAction();
 		setContentView(R.layout.online_picker);
 		
-		prefs = Preferences.getPreferences(OnlineGalleryPicker.this);
+		prefs = Preferences.getPreferences(GalleryPicker.this);
 		
 		mGridView = (GridView)findViewById(R.id.gridView1);
 		
 		setTitle(getResourceString(R.string.btn_online));
 		
 		setupCursor();
+		
+		addAds();
 		
 		//SimpleCursorAdapter items = new SimpleCursorAdapter(this, R.layout.grid_item, mGalleryCursor, from, to);
 		
@@ -84,7 +86,12 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnItemCl
 		if(view.getTag() == null)
 			setResult(RESULT_CANCELED);
 		else {
-			OnlineGalleryItem item = (OnlineGalleryItem)view.getTag();
+			GalleryItem item = (GalleryItem)view.getTag();
+			if(item == null)
+			{
+				setResult(RESULT_CANCELED);
+				finish();
+			}
 			Intent intentResult = new Intent();
 			intentResult.putExtra("url", item.getURL());
 			intentResult.putExtra("id", item.getID());
@@ -153,10 +160,10 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnItemCl
 	    public View getView(int position, View convertView, ViewGroup parent) {
 			if(!mCursor.moveToPosition(position)) return null;
 	        View view = convertView;
-	        OnlineGalleryItem item;
+	        GalleryItem item;
 	        //OnlineGalleryItem item = mGalleryItems[position]; 
 	        if (convertView == null) {  // if it's not recycled, initialize some attributes
-	        	item = new OnlineGalleryItem(mCursor);
+	        	item = new GalleryItem(mCursor);
 	            LayoutInflater li = getLayoutInflater();
 	            view = li.inflate(R.layout.grid_item, null);
 	            view.findViewById(R.id.grid_item_image).setVisibility(View.GONE);
@@ -165,7 +172,7 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnItemCl
 	            //imageView.setTag();
 	            view.setTag(item);
 	        } else
-	        	item = (OnlineGalleryItem)view.getTag();
+	        	item = (GalleryItem)view.getTag();
 	        
 	        try {
 		        if(item.getBitmap() != null)
@@ -187,7 +194,7 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnItemCl
 	        return view;
 	    }
 		
-		private class DownloadImageTask extends AsyncTask<OnlineGalleryItem, Void, OnlineGalleryItem> {
+		private class DownloadImageTask extends AsyncTask<GalleryItem, Void, GalleryItem> {
 			private View mView;
 			
 			public DownloadImageTask(View v)
@@ -197,9 +204,9 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnItemCl
 			
 	        /** The system calls this to perform work in a worker thread and
 		      * delivers it the parameters given to AsyncTask.execute() */
-		    protected OnlineGalleryItem doInBackground(OnlineGalleryItem... galleryItems)
+		    protected GalleryItem doInBackground(GalleryItem... galleryItems)
 		    {
-		    	OnlineGalleryItem item = galleryItems[0];
+		    	GalleryItem item = galleryItems[0];
 		    	InputStream s = null;
 		    	try {
 		    		String url = item.getURL();
@@ -243,7 +250,7 @@ public class OnlineGalleryPicker extends WallChangerActivity implements OnItemCl
 		    
 		    /** The system calls this to perform work in the UI thread and delivers
 		      * the result from doInBackground() */
-		    protected void onPostExecute(OnlineGalleryItem result) {
+		    protected void onPostExecute(GalleryItem result) {
 		    	//if(--iDownloads==0);
 		    	//	mDb.close();
 		    	mArrayDownloads.remove(this);

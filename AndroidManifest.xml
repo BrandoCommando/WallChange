@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<manifest package="com.brandroid.dynapaper" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="0.011" android:versionCode="11">
+<manifest package="com.brandroid.dynapaper" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="0.012" android:versionCode="12">
     <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="4"/>
     <uses-feature name="android.hardware.touchscreen" required="false"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -31,7 +31,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="com.brandroid.dynapaper.Activities.OnlineGalleryPicker">
+        <activity android:name="com.brandroid.dynapaper.Activities.GalleryPicker">
             <intent-filter>
                 <action android:name="android.intent.action.GET_CONTENT"/>
             </intent-filter>

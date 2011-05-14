@@ -20,6 +20,8 @@ public class GalleryDbAdapter
     public static final String KEY_HEIGHT = "h";
     public static final String KEY_TAGS = "tags";
     public static final String KEY_VISIBLE = "visible";
+    
+    private static String mCurrentIDs = null;
 
     //private static final String TAG = "WallChangeGalleryDbAdapter";
     private DatabaseHelper mDbHelper;
@@ -125,6 +127,19 @@ public class GalleryDbAdapter
     	return mDb.query(DATABASE_TABLE,
     			new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_DATA, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS},
     			KEY_VISIBLE + " = 1", null, null, null, "downloads DESC, rating DESC");
+    }
+    
+    public String fetchAllIDs()
+    {
+    	Cursor c = mDb.query(DATABASE_TABLE, new String[] {KEY_ID}, KEY_VISIBLE + " = 1", null, null, null, null);
+    	StringBuilder sb = new StringBuilder(",");
+    	c.moveToFirst();
+    	for(int i = 0; i < c.getCount(); i++)
+    	{
+    		sb.append(c.getInt(0) + ",");
+    		if(!c.moveToNext()) break;
+    	}
+    	return sb.toString();
     }
     
     public Cursor fetchItem(long Id) throws SQLException {

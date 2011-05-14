@@ -1,6 +1,10 @@
 package com.brandroid.dynapaper.Activities;
 
 import com.brandroid.dynapaper.Preferences;
+import com.brandroid.dynapaper.R;
+import com.google.ads.AdRequest;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
 
 import android.app.Activity;
 import android.content.res.Resources;
@@ -9,6 +13,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -17,7 +22,9 @@ public class WallChangerActivity extends Activity
 	public static final String LOG_KEY = "WallChanger";
 	public static final String MY_AD_UNIT_ID = "a14d9c70f03d5b2";
 	public static final String MY_ROOT_URL = "http://android.brandonbowles.com";
-	public static final String MY_IMAGE_ROOT_URL = "http://data.brandonbowles.com/images/";
+	public static final String MY_ROOT_URL_GS = "http://commondatastorage.googleapis.com/data.brandonbowles.com";
+	public static final String MY_IMAGE_ROOT_URL = MY_ROOT_URL + "/images/";
+	public static final String MY_IMAGE_ROOT_URL_GS = MY_ROOT_URL_GS + "/images/";
 	public static final String ONLINE_GALLERY_URL = MY_ROOT_URL + "/dynapaper/gallery.php";
 	public static final String ONLINE_IMAGE_URL = MY_ROOT_URL + "/dynapaper/get_image.php";
 	public static final int REQ_SELECT_GALLERY = 1;
@@ -26,11 +33,12 @@ public class WallChangerActivity extends Activity
 	protected Resources mResources;
 	protected Preferences prefs;
 	protected Cursor mGalleryCursor;
-	protected String mUser = "";
+	private static String mUser = "";
 	private int mHomeWidth = 0;
 	private int mHomeHeight = 0;
-	public final static int mUploadQuality = 100;
-	private final static Boolean bPaidMode = false; 
+	private final static int mUploadQuality = 100;
+	private final static Boolean bPaidMode = false;
+	private final static Boolean bTesting = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +46,34 @@ public class WallChangerActivity extends Activity
 		super.onCreate(savedInstanceState);
 
         mResources = getResources();
-        prefs = Preferences.getPreferences(this);
+        prefs = Preferences.getPreferences(getApplicationContext());
 	}
+	
+	public void addAds()
+    {
+    	/*
+    	Log.i(LOG_KEY, "IAB_LEADERBOARD: " + AdSize.IAB_LEADERBOARD.getWidth() + "x" + AdSize.IAB_LEADERBOARD.getHeight());
+    	Log.i(LOG_KEY, "IAB_MRECT: " + AdSize.IAB_MRECT.getWidth() + "x" + AdSize.IAB_MRECT.getHeight());
+    	Log.i(LOG_KEY, "IAB_BANNER: " + AdSize.IAB_BANNER.getWidth() + "x" + AdSize.IAB_BANNER.getHeight());
+    	Log.i(LOG_KEY, "BANNER: " + AdSize.BANenabledNER.getWidth() + "x" + AdSize.BANNER.getHeight());
+    	*/
+    	//AdSize adsize = new AdSize(getWindowSize()[0], AdSize.BANNER.getHeight());
+    	
+    	try {
+	    	// Create the adView
+	        AdView adView = new AdView(this, AdSize.BANNER, MY_AD_UNIT_ID);
+	        // Lookup your LinearLayout assuming it’s been given
+	        // the attribute android:id="@+id/mainLayout"
+	        LinearLayout layout = (LinearLayout)findViewById(R.id.adLayout);
+	        if(layout == null) return;
+	        // Add the adView to it
+	        layout.addView(adView);
+	        // Initiate a generic request to load it with an ad
+	        AdRequest ad = new AdRequest();
+	        ad.setTesting(bTesting);
+	        adView.loadAd(ad);
+    	} catch(Exception ex) { Log.e(LOG_KEY, "Error adding ads: " + ex.toString()); }    
+    }
 	
 	public void LogError(String msg)
 	{
@@ -81,6 +115,10 @@ public class WallChangerActivity extends Activity
 		return mHomeHeight;
 	}
 	
+	public static int getUploadQuality() {
+		return mUploadQuality;
+	}
+
 	public static Bitmap getSizedBitmap(Bitmap bmp, int mw, int mh)
 	{
 		int w = bmp.getWidth();
@@ -100,7 +138,9 @@ public class WallChangerActivity extends Activity
 			}
 			Log.d(LOG_KEY, "Resizing to " + w + "x" + h);
 			try {
-				return Bitmap.createScaledBitmap(bmp, w, h, true);
+				bmp = Bitmap.createScaledBitmap(bmp, w, h, true);
+				//bmp.recycle();
+				//return ret;
 			} catch(Exception ex) {
 				Log.e(LOG_KEY, "Resizing Failed. Using original.");
 			}
@@ -120,4 +160,16 @@ public class WallChangerActivity extends Activity
             }
         });
     }
+
+	public static void setUser(String mUser) {
+		WallChangerActivity.mUser = mUser;
+	}
+
+	public static String getUser() { return getUser("",""); }
+	public static String getUser(String prefix) { return getUser(prefix,""); }
+	public static String getUser(String prefix, String suffix) {
+		if(mUser != null && mUser != "")
+			return prefix + mUser + suffix;
+		else return "";
+	}
 }

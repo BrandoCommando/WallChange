@@ -42,9 +42,9 @@ public class Preferences {
 	}
 	public Long getSetting(String key, Long defValue)
 	{
-		try {
+		//try {
 			return mStorage.getLong(key, defValue);
-		} catch(Throwable t) { return defValue; }
+		//} catch(Throwable t) { return defValue; }
 	}
 	public String getString(String key, String defValue) 	{ return getSetting(key, defValue); }
 	public int getInt(String key, int defValue) 			{ return getSetting(key, defValue); }

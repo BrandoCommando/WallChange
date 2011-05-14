@@ -22,7 +22,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.util.Log;
 import android.view.View;
 
-public class OnlineGalleryItem implements Serializable
+public class GalleryItem implements Serializable
 {
 	private static final long serialVersionUID = 5229961124433062997L;
 	private int ID;
@@ -34,7 +34,7 @@ public class OnlineGalleryItem implements Serializable
 	private Boolean mDownloading = false;
 	private Bitmap mBitmap;
 	
-	public OnlineGalleryItem(JSONObject obj)
+	public GalleryItem(JSONObject obj)
 	{
 		try {
 			if(obj.has("id"))
@@ -50,7 +50,7 @@ public class OnlineGalleryItem implements Serializable
 				mDownloadCount = obj.getInt("dl");
 		} catch(JSONException je) { }
 	}
-	public OnlineGalleryItem(Cursor cursor)
+	public GalleryItem(Cursor cursor)
 	{
 		ID = TryGet(cursor, GalleryDbAdapter.KEY_ID, 0);
 		mUrl = mTitle = TryGet(cursor, GalleryDbAdapter.KEY_URL, "");
