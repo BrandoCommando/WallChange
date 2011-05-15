@@ -28,26 +28,46 @@ public class GalleryItem implements Serializable
 	private int ID;
 	private String mUrl;
 	private String mTitle;
-	private double mRating = Double.NaN;
+	private float mRating = Float.NaN;
 	private int mDownloadCount = 0;
 	private Boolean mDownloaded = false;
 	private Boolean mDownloading = false;
+	private int mWidth = 0;
+	private int mHeight = 0;
 	private Bitmap mBitmap;
+	private String mTags;
 	
 	public GalleryItem(JSONObject obj)
 	{
 		try {
 			if(obj.has("id"))
-				ID = obj.getInt("id");
+				ID = Integer.parseInt(obj.getString("id"));
 			if(obj.has("url"))
 				mUrl = obj.getString("url");
 			if(obj.has("title"))
 				mTitle = obj.getString("title");
 			else mTitle = mUrl;
-			if(obj.has("rating"))
-				mRating = obj.getDouble("rating");
-			if(obj.has("dl"))
-				mDownloadCount = obj.getInt("dl");
+			if(obj.has("dim"))
+			{
+				String[] dims = obj.getString("dims").split("x");
+				try {
+					mWidth = mHeight = Integer.parseInt(dims[0]);
+					if(dims.length > 1)
+						mHeight = Integer.parseInt(dims[1]);
+				} catch(NumberFormatException nfe) { }
+			}
+			if(obj.has("tags"))
+				mTags = obj.getString("tags");
+			try {
+				mRating = Float.parseFloat(obj.getString("rating"));
+			} catch(NumberFormatException nfe) { mRating = (Float)null; }
+			try {
+				mDownloadCount = Integer.parseInt(obj.getString("dl"));
+				Log.i(Preferences.LOG_KEY, "Downloads: " + mDownloadCount);
+			} catch(NumberFormatException nfe) {
+				Log.w(Preferences.LOG_KEY, "Couldn't find Downloads");
+				mDownloadCount = 0;
+			}
 		} catch(JSONException je) { }
 	}
 	public GalleryItem(Cursor cursor)
@@ -55,7 +75,7 @@ public class GalleryItem implements Serializable
 		ID = TryGet(cursor, GalleryDbAdapter.KEY_ID, 0);
 		mUrl = mTitle = TryGet(cursor, GalleryDbAdapter.KEY_URL, "");
 		mTitle = TryGet(cursor, GalleryDbAdapter.KEY_TITLE, mTitle);
-		mRating = (double)TryGet(cursor, GalleryDbAdapter.KEY_RATING, 0.0f);
+		mRating = (float)TryGet(cursor, GalleryDbAdapter.KEY_RATING, 0.0f);
 		mDownloadCount = TryGet(cursor, GalleryDbAdapter.KEY_DOWNLOADS, 0);
 		byte[] data = TryGet(cursor, GalleryDbAdapter.KEY_DATA, (byte[])null);
 		if(data != null)
@@ -107,7 +127,7 @@ public class GalleryItem implements Serializable
 	public String getURL() { return mUrl; }
 	public String getTitle() { return mTitle; }
 	public void setURL(String url) { mUrl = url; }
-	public double getRating() { return mRating; }
+	public Float getRating() { return mRating; }
 	public Boolean isDownloaded() { return mDownloaded; }
 	public Boolean isStarted() { return mDownloaded || mDownloading; }
 	public void setIsDownloaded() { mDownloaded = true; setIsDownloading(false); }
@@ -163,5 +183,23 @@ public class GalleryItem implements Serializable
 				} catch(EOFException e3) { Log.e(Preferences.LOG_KEY, "Error getting bitmap: " + e3.toString()); }
 			} catch(EOFException e2) { Log.e(Preferences.LOG_KEY, "Error getting title: " + e2.toString()); }
 		} catch(EOFException e1) { Log.e(Preferences.LOG_KEY, "Error getting url: " + e1.toString()); }
+	}
+	public void setWidth(int mWidth) {
+		this.mWidth = mWidth;
+	}
+	public int getWidth() {
+		return mWidth;
+	}
+	public void setHeight(int mHeight) {
+		this.mHeight = mHeight;
+	}
+	public int getHeight() {
+		return mHeight;
+	}
+	public void setTags(String mTags) {
+		this.mTags = mTags;
+	}
+	public String getTags() {
+		return mTags;
 	}
 }

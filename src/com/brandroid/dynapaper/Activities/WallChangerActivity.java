@@ -27,6 +27,7 @@ public class WallChangerActivity extends Activity
 	public static final String MY_IMAGE_ROOT_URL_GS = MY_ROOT_URL_GS + "/images/";
 	public static final String ONLINE_GALLERY_URL = MY_ROOT_URL + "/dynapaper/gallery.php";
 	public static final String ONLINE_IMAGE_URL = MY_ROOT_URL + "/dynapaper/get_image.php";
+	public static final String EXTERNAL_ROOT = "/mnt/sdcard/wallchanger/";
 	public static final int REQ_SELECT_GALLERY = 1;
 	public static final int REQ_SELECT_ONLINE = 2;
 	public final static int REQ_UPDATE_GALLERY = 101;
@@ -38,7 +39,7 @@ public class WallChangerActivity extends Activity
 	private int mHomeHeight = 0;
 	private final static int mUploadQuality = 100;
 	private final static Boolean bPaidMode = false;
-	private final static Boolean bTesting = false;
+	private final static Boolean bTesting = true;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +97,7 @@ public class WallChangerActivity extends Activity
     {
     	if(sBase.contains("//") && !sBase.startsWith(MY_ROOT_URL))
     		return sBase;
-    	return MY_IMAGE_ROOT_URL + "full/" + sBase.substring(sBase.lastIndexOf("/") + 1);
+    	return ONLINE_IMAGE_URL + "?url=" + sBase.substring(sBase.lastIndexOf("/") + 1);
     }
 	
 	public int getHomeWidth()

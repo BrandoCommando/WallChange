@@ -1,42 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<manifest package="com.brandroid.dynapaper" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="0.012" android:versionCode="12">
-    <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="4"/>
-    <uses-feature name="android.hardware.touchscreen" required="false"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.SET_WALLPAPER"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <supports-screens android:anyDensity="true"
-        android:largeScreens="true" android:normalScreens="true"
-        android:resizeable="true" android:smallScreens="true"/>
-    <application android:icon="@drawable/icon" android:label="@string/app_name">
-        <activity android:label="@string/app_name" android:name="com.brandroid.dynapaper.Activities.WallChanger"/>
-        <activity android:label="@string/create_shortcut"
-            android:name="com.brandroid.dynapaper.Activities.WallChangerHidden" android:theme="@android:style/Theme.Dialog">
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity>
-        <activity-alias
-            android:name="com.brandroid.dynapaper.Activities.WallChangerShortcut" android:targetActivity="com.brandroid.dynapaper.Activities.WallChanger">
-            <intent-filter>
-                <action android:name="android.intent.action.CREATE_SHORTCUT"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity-alias>
-        <activity android:name="com.google.ads.AdActivity" android:configChanges="keyboard|keyboardHidden|orientation" />
-        <activity android:name="com.brandroid.dynapaper.Activities.WallChangerNew" android:configChanges="keyboard|keyboardHidden|orientation">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-        <activity android:name="com.brandroid.dynapaper.Activities.GalleryPicker">
-            <intent-filter>
-                <action android:name="android.intent.action.GET_CONTENT"/>
-            </intent-filter>
-        </activity>
-        <activity android:name="com.brandroid.dynapaper.Activities.GalleryUpdater" android:theme="@android:style/Theme.Dialog">
-        </activity>
-    </application>
+<manifest package="com.brandroid.dynapaper" xmlns:android="http://schemas.android.com/apk/res/android"
+	android:versionName="0.012" android:versionCode="12">
+	<uses-sdk android:minSdkVersion="4" android:targetSdkVersion="4" />
+	<uses-feature name="android.hardware.touchscreen"
+		required="false" />
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.SET_WALLPAPER" />
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<supports-screens android:anyDensity="true"
+		android:largeScreens="true" android:normalScreens="true"
+		android:resizeable="true" android:smallScreens="true" />
+	<application android:icon="@drawable/icon" android:label="@string/app_name">
+		<activity android:label="@string/app_name"
+			android:name="com.brandroid.dynapaper.Activities.WallChanger" />
+		<activity android:label="@string/create_shortcut"
+			android:name="com.brandroid.dynapaper.Activities.WallChangerHidden"
+			android:theme="@android:style/Theme.Dialog">
+			<intent-filter>
+				<category android:name="android.intent.category.DEFAULT" />
+			</intent-filter>
+		</activity>
+		<activity-alias
+			android:name="com.brandroid.dynapaper.Activities.WallChangerShortcut"
+			android:targetActivity="com.brandroid.dynapaper.Activities.WallChanger">
+			<intent-filter>
+				<action android:name="android.intent.action.CREATE_SHORTCUT" />
+				<category android:name="android.intent.category.DEFAULT" />
+			</intent-filter>
+		</activity-alias>
+		<activity android:name="com.google.ads.AdActivity"
+			android:configChanges="keyboard|keyboardHidden|orientation" />
+		<activity android:name="com.brandroid.dynapaper.Activities.WallChangerNew"
+			android:configChanges="keyboard|keyboardHidden|orientation">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<activity android:name="com.brandroid.dynapaper.Activities.GalleryPicker">
+			<intent-filter>
+				<action android:name="android.intent.action.GET_CONTENT" />
+			</intent-filter>
+		</activity>
+		<activity android:name="com.brandroid.dynapaper.Activities.GalleryUpdater"
+			android:theme="@android:style/Theme.Dialog">
+		</activity>
+	</application>
 </manifest>

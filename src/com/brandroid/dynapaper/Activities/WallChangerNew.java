@@ -16,10 +16,12 @@ import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.http.client.HttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.brandroid.GalleryItem;
 import com.brandroid.JSON;
 import com.brandroid.dynapaper.GalleryDbAdapter;
 import com.brandroid.dynapaper.Preferences;
@@ -34,6 +36,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.MaskFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -433,6 +436,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		    		ret = sb.toString();
 		    		modified = uc.getLastModified();
 		    		jsonGallery = JSON.Parse(ret);
+		    		if(jsonGallery != null)
 	    			try {
 			    		if(jsonGallery.has("user") && jsonGallery.get("user") != getUser())
 			    		{
@@ -449,28 +453,11 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 						JSONArray jsonImages = jsonGallery.getJSONArray("images");
 						for(int imgIndex = 0; imgIndex < jsonImages.length(); imgIndex++)
 						{
-							JSONObject pic = jsonImages.getJSONObject(imgIndex);
-							int id = Integer.parseInt(pic.getString("id"));
-							if(cIDs.contains(","+id+",")) continue;
-							String purl = pic.getString("url");
-							String title = purl;
-							if(pic.has("title"))
-								title = pic.getString("title");
-							String tags = "";
-							Float rating = null;
-							int downloads = 0;
-							int width = 0;
-							int height = 0;
-							try {
-								String[] dims = pic.getString("dim").split("x");
-								width = Integer.parseInt(dims[0]);
-								height = Integer.parseInt(dims[1]);
-							} catch(Exception nfe) { }
-							if(pic.has("tags")) tags = pic.getString("tags");
-							try {
-								if(pic.has("rating")) rating = Float.parseFloat(pic.getString("rating"));
-							} catch(NumberFormatException nfe) { }
-							adds += gdb.createItem(id, title, purl, (byte[])null, width, height, tags, rating, downloads, true);
+							GalleryItem item = new GalleryItem(jsonImages.getJSONObject(imgIndex));
+							if(cIDs.contains(","+item.getID()+","))
+								adds += gdb.updateItem(item) ? 1 : 0;
+							else
+								adds += gdb.createItem(item);
 						}
 					} catch (JSONException je) {
 						Log.e(LOG_KEY, "JSONException getting images: " + je.toString());

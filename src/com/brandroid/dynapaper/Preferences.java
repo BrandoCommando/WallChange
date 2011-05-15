@@ -2,6 +2,7 @@ package com.brandroid.dynapaper;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Environment;
 
 public class Preferences {
 	public static final String LOG_KEY = "WallChanger";
@@ -9,12 +10,29 @@ public class Preferences {
 	public static final String EXTRA_SHORTCUT = "WallChangerShortcut";
 	public static final String MY_AD_UNIT_ID = "a14d9c70f03d5b2";
 	public static final String MY_ROOT_URL = "http://android.brandonbowles.com";
+	public static boolean ExternalStorageAvailable = false;
+	public static boolean ExternalStorageWriteable = false;
 	
 	private static Preferences preferences;
 	private SharedPreferences mStorage; 
 	
 	public Preferences(Context context)
 	{
+		String state = Environment.getExternalStorageState();
+
+		if (Environment.MEDIA_MOUNTED.equals(state)) {
+		    // We can read and write the media
+		    ExternalStorageAvailable = ExternalStorageWriteable = true;
+		} else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+		    // We can only read the media
+		    ExternalStorageAvailable = true;
+		    ExternalStorageWriteable = false;
+		} else {
+		    // Something else is wrong. It may be one of many other states, but all we need
+		    //  to know is we can neither read nor write
+		    ExternalStorageAvailable = ExternalStorageWriteable = false;
+		}
+		
 		mStorage = context.getSharedPreferences(PREFS_NAME, 0);
 	}
 	public static synchronized Preferences getPreferences(Context context)

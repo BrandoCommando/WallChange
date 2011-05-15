@@ -1,5 +1,7 @@
 package com.brandroid.dynapaper;
 
+import com.brandroid.GalleryItem;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -27,15 +29,16 @@ public class GalleryDbAdapter
     private DatabaseHelper mDbHelper;
     private SQLiteDatabase mDb;
     
-    private static final String DATABASE_NAME = "wallchange.db";
+    private static final String DATABASE_NAME = "wallchanger.db";
     private static final String DATABASE_TABLE = "gallery";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 6;
 
     private static final String DATABASE_CREATE =
         "create table gallery (" + KEY_ID + " integer primary key, "
-        + "title text not null, url text not null, data blob null, "
-        + "w int not null, h int not null, tags text not null, "
-        + "rating real null, downloads int null, visible integer not null default 1);";
+        + "title text null, url text not null, "
+        + "w int null default 0, h int null default 0, tags text null, "
+        + "rating real null, downloads int null, data blob null, "
+        + "visible int not null default 1);";
 
     private final Context mCtx;
 
@@ -107,6 +110,12 @@ public class GalleryDbAdapter
         	ret = mDb.update(DATABASE_TABLE, initialValues, KEY_ID + "=" + id, null) > 0 ? 1 : 0;
         return ret;
     }
+    public long createItem(GalleryItem item)
+    {
+    	return createItem(item.getID(), item.getTitle(), item.getURL(), (byte[])null,
+    			item.getWidth(), item.getHeight(), item.getTags(),
+    			(Float)item.getRating(), item.getDownloadCount(), true); 
+    }
     
     public boolean updateData(long Id, byte[] data)
     {
@@ -168,6 +177,12 @@ public class GalleryDbAdapter
     	//mDb.
     	return ret;
     }
+    public boolean updateItem(GalleryItem item)
+    {
+    	return updateItem(item.getID(), item.getTitle(), item.getURL(), (byte[])null,
+    			item.getWidth(), item.getHeight(), item.getTags(),
+    			(Float)item.getRating(), item.getDownloadCount(), true);
+    }
     public boolean updateItem(long Id, String title, String url, byte[] data,
     		Integer width, Integer height, String tags,
     		Float rating, Integer downloads, Boolean visible) {
@@ -183,7 +198,7 @@ public class GalleryDbAdapter
 		args.put(KEY_TAGS, tags);
 		args.put(KEY_VISIBLE, visible);
 
-        return mDb.update(DATABASE_TABLE, args, KEY_ID + "=" + Id, null) > 0;
+		return mDb.update(DATABASE_TABLE, args, KEY_ID + "=" + Id, null) > 0;
     }
     
 }

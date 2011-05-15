@@ -3,6 +3,6 @@
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:id="@+id/onlinePickerLayout" android:gravity="center|top"
 	android:orientation="vertical">
-    <LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/adLayout" android:layout_alignParentTop="true"></LinearLayout>
-    <GridView android:layout_below="@+id/adLayout" android:layout_alignWithParentIfMissing="true" android:numColumns="auto_fit" android:layout_height="fill_parent" android:layout_width="fill_parent" android:verticalSpacing="2dp" android:gravity="center" android:id="@+id/gridView1" android:stretchMode="columnWidth" android:columnWidth="90dp" android:horizontalSpacing="2dp"></GridView>
+    <GridView android:layout_alignParentTop="true" android:layout_above="@+id/adLayout" android:layout_alignWithParentIfMissing="true" android:numColumns="auto_fit" android:layout_height="fill_parent" android:layout_width="fill_parent" android:verticalSpacing="2dp" android:gravity="center" android:id="@+id/gridView1" android:stretchMode="columnWidth" android:columnWidth="90dp" android:horizontalSpacing="2dp"></GridView>
+    <LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/adLayout" android:layout_alignParentBottom="true" android:minHeight="50dip"></LinearLayout>
 </RelativeLayout>

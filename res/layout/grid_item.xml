@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/GridItem" android:layout_width="wrap_content"
 	android:gravity="center_horizontal" android:padding="6dip"
-	android:orientation="vertical" android:minHeight="160dip" android:layout_height="180dip">
+	android:orientation="vertical" android:minHeight="100dip" android:layout_height="120dip">
 
 	<ProgressBar android:id="@+id/grid_item_progress"
 		android:layout_width="wrap_content" android:layout_height="wrap_content" />
@@ -13,10 +13,10 @@
 		android:gravity="center_horizontal" android:layout_width="wrap_content"
 		android:text="TextView" android:layout_height="wrap_content"
 		android:layout_below="@+id/grid_item_image"
-		android:layout_alignWithParentIfMissing="true" />
+		android:layout_alignWithParentIfMissing="true" android:visibility="gone"/>
 	<RatingBar android:layout_width="wrap_content"
 		style="?android:attr/ratingBarStyleSmall" 
 		android:layout_height="wrap_content" android:id="@+id/grid_item_rating"
-		android:max="5" android:layout_below="@+id/grid_item_text" />
+		android:max="5" android:layout_below="@+id/grid_item_text" android:visibility="gone"/>
 
 </RelativeLayout>

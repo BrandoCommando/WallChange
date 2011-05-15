@@ -3,9 +3,12 @@ package com.brandroid.dynapaper.Activities;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import com.brandroid.GalleryItem;
 import com.brandroid.dynapaper.GalleryDbAdapter;
@@ -158,21 +161,24 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 	    // create a new ImageView for each item referencedimage by the Adapter
 		@Override
 	    public View getView(int position, View convertView, ViewGroup parent) {
-			if(!mCursor.moveToPosition(position)) return null;
-	        View view = convertView;
+			View view = convertView;
 	        GalleryItem item;
 	        //OnlineGalleryItem item = mGalleryItems[position]; 
 	        if (convertView == null) {  // if it's not recycled, initialize some attributes
+	        	if(!mCursor.moveToPosition(position)) return null;
 	        	item = new GalleryItem(mCursor);
-	            LayoutInflater li = getLayoutInflater();
+	        	LayoutInflater li = getLayoutInflater();
 	            view = li.inflate(R.layout.grid_item, null);
 	            view.findViewById(R.id.grid_item_image).setVisibility(View.GONE);
-	            view.findViewById(R.id.grid_item_rating).setVisibility(View.GONE);
-	            view.findViewById(R.id.grid_item_text).setVisibility(View.GONE);
+	            //view.findViewById(R.id.grid_item_rating).setVisibility(View.GONE);
+	            //view.findViewById(R.id.grid_item_text).setVisibility(View.GONE);
+	            //((TextView)view.findViewById(R.id.grid_item_text)).setText(item.getDownloadCount());
 	            //imageView.setTag();
 	            view.setTag(item);
 	        } else
 	        	item = (GalleryItem)view.getTag();
+	        
+	        //Log.i(LOG_KEY, "Rendering " + item.getID() + ":" + position + "(" + item.getDownloadCount() + ") - " + item.getURL());
 	        
 	        try {
 		        if(item.getBitmap() != null)
@@ -184,8 +190,7 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 		        	DownloadImageTask task = new DownloadImageTask(view);
 		        	mArrayDownloads.add(task);
 		        	task.execute(item);
-		        } else
-		        	Log.w(LOG_KEY, "Unknown sitch");
+		        } //else Log.w(LOG_KEY, "Unknown sitch");
 	        } catch(NullPointerException npe) {
 	        	LogError(npe.toString());
 	        	//new DownloadImageTask().execute(item);
@@ -212,9 +217,10 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 		    		String url = item.getURL();
 		    		if(url.startsWith("images/"))
 		    			url = url.substring(7);
-		    		url = MY_ROOT_URL + "/images/thumb.php?url=" + url;
+		    		url = getImageThumbUrl(url);
 		    		Log.i(Preferences.LOG_KEY, url);
-		    		URLConnection uc = new URL(url).openConnection();
+		    		HttpURLConnection uc = (HttpURLConnection)new URL(url).openConnection();
+		    		uc.setReadTimeout(5000);
 		    		uc.connect();
 		    		s = uc.getInputStream();
 		    		if(uc.getURL().toString() != url)
@@ -258,15 +264,17 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 		    	if(result.getBitmap() == null) { mView.setVisibility(View.GONE); return; }
 		    	ImageView imageView = (ImageView)mView.findViewById(R.id.grid_item_image);
 		    	ProgressBar progressBar = (ProgressBar)mView.findViewById(R.id.grid_item_progress);
+		    	/*
 		    	RatingBar ratingBar = (RatingBar)mView.findViewById(R.id.grid_item_rating);
 		    	TextView textView = (TextView)mView.findViewById(R.id.grid_item_text);
 		    	textView.setText("DL: " + result.getDownloadCount());
 		    	ratingBar.setRating((float)result.getRating());
+		    	textView.setVisibility(View.VISIBLE);
+		    	ratingBar.setVisibility(View.VISIBLE);
+		    	*/
 		    	imageView.setImageBitmap(result.getBitmap());
 		    	progressBar.setVisibility(View.GONE);
-		    	textView.setVisibility(View.VISIBLE);
 		    	imageView.setVisibility(View.VISIBLE);
-		    	ratingBar.setVisibility(View.VISIBLE);
 		    }
 		}
 	
