@@ -29,4 +29,5 @@
     <string name="btn_current">الحالية</string>
     <string name="btn_online">على الانترنت</string>
     <string name="menu_about">حول</string>
+    <string name="s_uploading">تحميل</string>
 </resources>

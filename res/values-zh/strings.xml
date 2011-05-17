@@ -29,4 +29,5 @@
     <string name="s_updating_options">更新选项。请稍候。</string>
     <string name="btn_zip">邮政编码</string>
     <string name="btn_gps">全球定位系统</string>
+    <string name="s_uploading">上传</string>
 </resources>

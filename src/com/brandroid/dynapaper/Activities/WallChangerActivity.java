@@ -31,6 +31,7 @@ public class WallChangerActivity extends Activity
 	public static final int REQ_SELECT_GALLERY = 1;
 	public static final int REQ_SELECT_ONLINE = 2;
 	public final static int REQ_UPDATE_GALLERY = 101;
+	public final static int DOWNLOAD_CHUNK_SIZE = 512;
 	protected Resources mResources;
 	protected Preferences prefs;
 	protected Cursor mGalleryCursor;

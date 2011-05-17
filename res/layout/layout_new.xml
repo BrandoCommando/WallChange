@@ -3,9 +3,9 @@
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:orientation="vertical" android:gravity="center|top" android:id="@+id/layoutMain"
 	android:isScrollContainer="true">
-	<ScrollView android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:layout_alignParentTop="true" android:layout_above="@+id/adLayout"
-		android:id="@+id/scrollView1">
+	<ScrollView android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_alignParentTop="true"
+		android:layout_above="@+id/adLayout" android:id="@+id/scrollView1">
 	<LinearLayout android:layout_width="fill_parent"
 		android:id="@+id/linearLayout4" android:layout_height="fill_parent"
 		android:orientation="vertical">
@@ -28,7 +28,7 @@
 				android:layout_width="wrap_content" android:soundEffectsEnabled="true"
 				android:text="@string/btn_url" android:id="@+id/btnURL"></Button>
 		</LinearLayout>
-		<EditText android:text="EditText" android:layout_height="wrap_content"
+		<EditText android:layout_height="wrap_content"
 			android:id="@+id/txtURL" android:layout_width="fill_parent"
 			android:singleLine="true"></EditText>
 		<TextView android:layout_height="wrap_content" android:id="@+id/textView2"
@@ -50,7 +50,9 @@
 				android:layout_width="wrap_content" android:id="@+id/btnGPS"
 				android:visibility="gone" android:checked="true" android:text="@string/btn_gps"></CheckBox>
 		</LinearLayout>
-		<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/textView3" android:text="@string/lbl_command"></TextView>
+		<TextView android:layout_height="wrap_content"
+			android:layout_width="fill_parent" android:id="@+id/textView3"
+			android:text="@string/lbl_command"></TextView>
 		<LinearLayout android:paddingLeft="1pt"
 			android:layout_width="fill_parent" android:id="@+id/linearLayout3"
 			android:layout_height="wrap_content">
@@ -63,18 +65,30 @@
 			<Button android:layout_height="wrap_content"
 				android:layout_width="wrap_content" android:text="@string/btn_undo"
 				android:id="@+id/btnUndo"></Button>
-			<ProgressBar android:layout_height="wrap_content"
-				android:id="@+id/progressBar1" android:layout_width="wrap_content"></ProgressBar>
 		</LinearLayout>
-		<FrameLayout android:layout_width="fill_parent"
-			android:id="@+id/frameLayout1" android:foregroundGravity="center"
-			android:layout_height="wrap_content">
-			<ImageView android:src="@drawable/picture"
-				android:layout_height="wrap_content" android:layout_width="fill_parent"
-				android:id="@+id/imageSample"></ImageView>
-		</FrameLayout>
+	<FrameLayout android:layout_width="fill_parent" android:id="@+id/frameLayout1"
+		android:foregroundGravity="center" android:layout_height="wrap_content">
+		<ImageView android:layout_width="fill_parent" android:id="@+id/imageSample"
+			android:layout_height="wrap_content" />
+	</FrameLayout>
 	</LinearLayout>
 	</ScrollView>
+	<RelativeLayout android:id="@+id/progress_layout" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_above="@+id/adLayout"
+		android:background="@color/translucent_dark">
+		<Button android:text="@string/btn_cancel"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:layout_alignParentRight="true"
+			android:id="@+id/progress_cancel"/>
+		<TextView android:id="@+id/progress_label" android:layout_alignParentLeft="true"
+			android:layout_alignTop="@+id/progress_cancel"
+			android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/s_downloading"/>
+		<ProgressBar android:id="@+id/progress_progress" android:layout_alignParentLeft="true"
+			android:layout_height="wrap_content"
+			android:layout_below="@+id/progress_label"
+			style="?android:attr/progressBarStyleHorizontal"
+			android:layout_toLeftOf="@+id/progress_cancel" android:layout_width="fill_parent"/>
+	</RelativeLayout>
 	<LinearLayout android:layout_alignParentBottom="true"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
 		android:id="@+id/adLayout" android:minHeight="50dip"></LinearLayout>

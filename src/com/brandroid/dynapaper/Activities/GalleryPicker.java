@@ -164,8 +164,8 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 			View view = convertView;
 	        GalleryItem item;
 	        //OnlineGalleryItem item = mGalleryItems[position]; 
+	        if(!mCursor.moveToPosition(position)) return null;
 	        if (convertView == null) {  // if it's not recycled, initialize some attributes
-	        	if(!mCursor.moveToPosition(position)) return null;
 	        	item = new GalleryItem(mCursor);
 	        	LayoutInflater li = getLayoutInflater();
 	            view = li.inflate(R.layout.grid_item, null);

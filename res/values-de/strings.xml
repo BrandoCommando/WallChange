@@ -29,4 +29,5 @@
     <string name="s_updating_options">Aktualisieren Sie Optionen. Bitte warten Sie.</string>
     <string name="btn_zip">Zip Code</string>
     <string name="btn_gps">GPS</string>
+    <string name="s_uploading">Hochladen</string>
 </resources>

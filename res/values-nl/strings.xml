@@ -29,4 +29,5 @@
     <string name="btn_current">Huidige</string>
     <string name="btn_online">Online</string>
     <string name="menu_about">Over</string>
+    <string name="s_uploading">Uploaden</string>
 </resources>

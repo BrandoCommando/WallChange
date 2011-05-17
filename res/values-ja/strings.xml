@@ -29,4 +29,5 @@
     <string name="s_updating_options">[オプション]を更新。しばらくお待ちください。</string>
     <string name="btn_zip">郵便番号</string>
     <string name="btn_gps">GPSを</string>
+    <string name="s_uploading">アップロード</string>
 </resources>

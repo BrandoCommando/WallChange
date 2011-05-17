@@ -1,7 +1,9 @@
 package com.brandroid.dynapaper.Activities;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,10 +15,11 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import org.apache.http.client.HttpClient;
+import org.apache.http.util.ByteArrayBuffer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,44 +29,44 @@ import com.brandroid.JSON;
 import com.brandroid.dynapaper.GalleryDbAdapter;
 import com.brandroid.dynapaper.Preferences;
 import com.brandroid.dynapaper.R;
-import com.google.ads.AdRequest;
-import com.google.ads.AdSize;
-import com.google.ads.AdView;
-
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
-import android.graphics.MaskFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.AsyncTask.Status;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewStub;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 public class WallChangerNew extends WallChangerActivity implements OnClickListener
 { 
 	private EditText mTxtURL, mTxtZip;
-	private ProgressBar mProgressBar;
 	private ImageView mImgPreview;
 	private Button mBtnSelect, mBtnTest, mBtnOnline;
 	private CheckBox mBtnWeather, mBtnGPS;
 	private Intent mIntent;
 	private Bitmap mCacheBitmap;
+	private View mPanelStatus;
+	private ProgressBar mProgressBar;
+	private TextView mProgressLabel;
+	private UploadTask mUploadTask;
+	private DownloadToWallpaperTask mDownloadTask;
 	//private String mGPSLocation = null;
 	
 	@Override
@@ -79,9 +82,20 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
         setContentView(R.layout.layout_new);
 		
         mBtnSelect = (Button)findViewById(R.id.btnSelect);
-		mBtnSelect.setOnClickListener(this);
 		mBtnTest = (Button)findViewById(R.id.btnTest);
+		mBtnWeather = (CheckBox)findViewById(R.id.btnWeather);
+		mBtnGPS = (CheckBox)findViewById(R.id.btnGPS);
+		mBtnOnline = (Button)findViewById(R.id.btnOnline);
+		
+		mPanelStatus = findViewById(R.id.progress_layout);
+		mProgressBar = (ProgressBar)findViewById(R.id.progress_progress);
+		mProgressLabel = (TextView)findViewById(R.id.progress_label);
+		
 		mBtnTest.setOnClickListener(this);
+		mBtnSelect.setOnClickListener(this);
+		mBtnWeather.setOnClickListener(this);
+		mBtnGPS.setOnClickListener(this);
+		mBtnOnline.setOnClickListener(this);
 		
 		findViewById(R.id.btnCurrent).setOnClickListener(this);
 		findViewById(R.id.btnGallery).setOnClickListener(this);
@@ -91,18 +105,13 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		findViewById(R.id.btnTest).setOnClickListener(this);
 		findViewById(R.id.btnUndo).setOnClickListener(this);
 		findViewById(R.id.btnURL).setOnClickListener(this);
+		findViewById(R.id.progress_cancel).setOnClickListener(this);
 		
-		mBtnWeather = (CheckBox)findViewById(R.id.btnWeather);
-		mBtnWeather.setOnClickListener(this);
-		mBtnGPS = (CheckBox)findViewById(R.id.btnGPS);
-		mBtnGPS.setOnClickListener(this);
+		mPanelStatus.setVisibility(View.GONE);
 		
-		mBtnOnline = (Button)findViewById(R.id.btnOnline);
-		mBtnOnline.setOnClickListener(this);
 		mBtnOnline.setEnabled(false);
 		
 		mTxtURL = (EditText)findViewById(R.id.txtURL);
-		mProgressBar = (ProgressBar)findViewById(R.id.progressBar1);
 		mImgPreview = (ImageView)findViewById(R.id.imageSample);
 		mTxtURL.addTextChangedListener(new TextWatcher(){
 			@Override
@@ -119,11 +128,8 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		mBtnTest.setEnabled(false);
 		mTxtZip = (EditText)findViewById(R.id.txtZip);
 		findViewById(R.id.txtURL).setVisibility(View.GONE);
-		findViewById(R.id.progressBar1).setVisibility(View.GONE);
 		
 		mTxtZip.setText(prefs.getString("zip", mTxtZip.getText().toString()));
-		
-		mImgPreview.setVisibility(View.INVISIBLE);
 		
 		new UpdateOnlineGalleryTask().execute((String[])null);
 		
@@ -159,7 +165,8 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 			case R.id.btnCurrent:
 				mCacheBitmap = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
 				mImgPreview.setImageBitmap(mCacheBitmap);
-				new UploadTask().execute(mCacheBitmap);
+				mUploadTask = new UploadTask();
+				mUploadTask.execute(mCacheBitmap);
 				break;
 			case R.id.btnGallery:
 				Intent intentGallery = new Intent();
@@ -172,6 +179,10 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				intentOnline.setAction(Intent.ACTION_GET_CONTENT);
 				intentOnline.setType("image/*");
 				startActivityForResult(intentOnline, REQ_SELECT_ONLINE);
+				break;
+			case R.id.progress_cancel:
+				onCancelUpload();
+				onCancelDownload();
 				break;
 			case R.id.btnGPS:
 				//mGPSLocation = null;
@@ -214,12 +225,14 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		{
 			Uri selUri = data.getData();
 			String selPath = getMediaPath(selUri);
-			Bitmap bmp = getSizedBitmap(BitmapFactory.decodeFile(selPath), getHomeWidth(), getHomeHeight());
+			Bitmap blg = BitmapFactory.decodeFile(selPath);
+			Bitmap bmp = getSizedBitmap(blg, getHomeWidth(), getHomeHeight());
+			blg = null;
 			if(bmp != null)
 			{
 				//mCacheBitmap = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
 				new UploadTask().execute(bmp);
-				mImgPreview.setVisibility(View.INVISIBLE);
+				//mImgPreview.setVisibility(View.GONE);
 				mImgPreview.setImageBitmap(bmp);
 			} else Log.e(LOG_KEY, "Unable to create thumbnail?");
 		} else if (requestCode == REQ_SELECT_ONLINE)
@@ -240,7 +253,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				Bitmap mGalleryBitmap = BitmapFactory.decodeByteArray(bmp, 0, bmp.length);
 				if(mGalleryBitmap != null)
 				{
-					new UploadTask().execute(mGalleryBitmap);
+					//new UploadTask().execute(mGalleryBitmap);
 					mImgPreview.setImageBitmap(mGalleryBitmap);
 				}
 			} else {
@@ -252,7 +265,6 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		}
 	}
 	
-    
     public Boolean setHomeWallpaper(Bitmap bmp)
     {
     	try {
@@ -284,7 +296,36 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
     	} catch(NoSuchAlgorithmException nsme) { Log.e(LOG_KEY, "WTF! No MD5!"); return null; }
     }
     
-	private class UploadTask extends AsyncTask<Bitmap, Void, String>
+	private void showPanel(View panel, boolean slideUp)
+	{
+		panel.startAnimation(AnimationUtils.loadAnimation(this, slideUp ? R.anim.slide_in : R.anim.slide_out_top));
+		panel.setVisibility(View.VISIBLE);
+	}
+	
+	private void hidePanel(View panel, boolean slideDown)
+	{
+		panel.startAnimation(AnimationUtils.loadAnimation(this, slideDown ? R.anim.slide_out : R.anim.slide_in_top));
+		panel.setVisibility(View.GONE);
+	}
+    
+    private void onCancelUpload()
+    {
+    	if(mUploadTask != null && mUploadTask.getStatus() == Status.RUNNING)
+    	{
+    		mUploadTask.cancel(true);
+    		mUploadTask = null;
+    	}
+    }
+    private void onCancelDownload()
+    {
+    	if(mDownloadTask != null && mDownloadTask.getStatus() == Status.RUNNING)
+    	{
+    		mDownloadTask.cancel(true);
+    		mDownloadTask = null;
+    	}
+    }
+    
+	private class UploadTask extends AsyncTask<Bitmap, Integer, String>
 	{
 
 		@Override
@@ -292,7 +333,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		{
 			URL url = null;
 			HttpURLConnection con = null;
-			OutputStream out = null;
+			BufferedOutputStream out = null;
 			InputStream in = null;
 			StringBuilder ret = new StringBuilder();
 			InputStreamReader sr = null;
@@ -300,6 +341,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				ByteArrayOutputStream stream = new ByteArrayOutputStream();
 				pics[0].compress(CompressFormat.JPEG, getUploadQuality(), stream);
 				byte[] data = stream.toByteArray(); 
+				int length = data.length;
 				String md5 = getMD5(data);
 				//Log.i(LOG_KEY, "MD5: " + md5);
 				url = new URL(MY_ROOT_URL + "/images/upload2.php" + getUser("?user=") + "&md5=" + md5);
@@ -320,9 +362,18 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 					con.setRequestMethod("POST");
 					con.setConnectTimeout(15000);
 					con.setDoOutput(true);
-					out = con.getOutputStream();
-					out.write(data);
+					out = new BufferedOutputStream(con.getOutputStream());
+					for(int i = 0; i < data.length; i += DOWNLOAD_CHUNK_SIZE)
+					{
+						int writelen = DOWNLOAD_CHUNK_SIZE;
+						if(writelen + i > data.length)
+							writelen = data.length - i;
+						if(writelen <= 0) break;
+						out.write(data, i, writelen);
+						publishProgress(i, length);
+					}
 					out.flush();
+					publishProgress(1,2);
 					in = con.getInputStream();
 					sr = new InputStreamReader(in);
 					char[] buf = new char[64];
@@ -332,6 +383,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 						if(buf.length < 64)
 							break;
 					}
+					publishProgress(-1);
 				}
 			} catch(Exception ex) {
 				DoLog("Exception Uploading. " + ex.toString());
@@ -353,12 +405,34 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		
 		@Override
 		protected void onPreExecute() {
-			super.onPreExecute();
+			mProgressBar.setProgress(0);
+			mProgressLabel.setText(getText(R.string.s_uploading));
+			showPanel(mPanelStatus, true);
+			
 			Log.i(LOG_KEY, "Uploading image");
-			mProgressBar.setVisibility(View.VISIBLE);
 			mBtnSelect.setEnabled(false);
 			mBtnTest.setEnabled(false);
 			findViewById(R.id.btnCurrent).setEnabled(false);
+		}
+		
+		@Override
+		protected void onCancelled() {
+			hidePanel(mPanelStatus, false);
+			mBtnSelect.setEnabled(true);
+			mBtnTest.setEnabled(true);
+			findViewById(R.id.btnCurrent).setEnabled(true);
+		}
+		
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			if(values.length > 1)
+			{
+				mProgressBar.setMax(values[1]);
+				mProgressBar.setProgress(values[0]);
+			} else if(values[0] == -1)
+				mProgressBar.setIndeterminate(true);
+			else if(values[0] == 0)
+				mProgressBar.setIndeterminate(false);
 		}
 		
 		@Override
@@ -366,6 +440,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 			if(result == null || result == "")
 				showToast("Invalid response");
 			else {
+				hidePanel(mPanelStatus, true);
 				Log.i(LOG_KEY, "Response received from upload.");
 				String mBaseUrl = result.replaceAll("[^A-Za-z0-9\\.\\/]", "");
 				mTxtURL.setText(mBaseUrl);
@@ -380,8 +455,8 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				mBtnTest.setEnabled(true);
 				findViewById(R.id.btnCurrent).setEnabled(true);
 			}
-			mProgressBar.setVisibility(View.GONE);
-			mImgPreview.setVisibility(View.VISIBLE);
+			//mProgressBar.setVisibility(View.GONE);
+			//mImgPreview.setVisibility(View.GONE);
 			//mImgSample.setImageDrawable(getWallpaper());
 			//mImgSample.setVisibility(View.VISIBLE);
 		}
@@ -459,8 +534,8 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 							else
 								adds += gdb.createItem(item);
 						}
-					} catch (JSONException je) {
-						Log.e(LOG_KEY, "JSONException getting images: " + je.toString());
+					} catch (Exception je) {
+						Log.e(LOG_KEY, "Exception getting images: " + je.toString());
 					}
 					
 					Log.i(LOG_KEY, "Successfully added " + adds + " records!");
@@ -496,7 +571,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		
 	}
 
-	private class DownloadToWallpaperTask extends AsyncTask<String, Void, Bitmap> {
+	private class DownloadToWallpaperTask extends AsyncTask<String, Integer, Bitmap> {
 		public Boolean Testing = false;
 		public DownloadToWallpaperTask() { Testing = false; }
 		public DownloadToWallpaperTask(Boolean doTest) { Testing = doTest; }
@@ -505,14 +580,29 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    protected Bitmap doInBackground(String... urls)
 	    {
 	    	Bitmap ret = null;
-	    	InputStream s = null;
+	    	BufferedInputStream s = null;
 	    	try {
+	    		publishProgress(0);
 	    		String url = urls[0];
-	    		URLConnection uc = new URL(url).openConnection();
+	    		HttpURLConnection uc = (HttpURLConnection)new URL(url).openConnection();
 	    		uc.setConnectTimeout(15000);
 	    		uc.connect();
-	    		s = uc.getInputStream();
-	    		ret = BitmapFactory.decodeStream(s);
+	    		if(uc.getResponseCode() >= 400) throw new IOException(uc.getResponseCode() + " " + uc.getResponseMessage());
+	    		Integer length = uc.getContentLength();
+	    		Log.i(LOG_KEY, "Response received. " + length + " bytes.");
+	    		s = new BufferedInputStream(uc.getInputStream(), DOWNLOAD_CHUNK_SIZE);
+	    		ByteArrayBuffer bab = new ByteArrayBuffer(length <= 0 ? 32 : length);
+	    		byte[] b = new byte[DOWNLOAD_CHUNK_SIZE];
+	    		int read = 0;
+	    		int position = 0;
+	    		while((read = s.read(b,0,DOWNLOAD_CHUNK_SIZE)) > 0)
+	    		{
+	    			position += read;
+	    			bab.append(b, 0, read);
+	    			publishProgress(position, length > position ? length : position + s.available());
+	    		}
+	    		b = bab.toByteArray();
+	    		ret = BitmapFactory.decodeByteArray(b, 0, b.length);
 	    	} catch(IOException ex) { Log.e(LOG_KEY, ex.toString()); }
 	    	finally {
 	    		try {
@@ -525,24 +615,43 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    
 	    @Override
 	    protected void onPreExecute() {
-	    	super.onPreExecute();
+	    	mProgressBar.setProgress(0);
+			mProgressLabel.setText(getText(R.string.s_downloading));
+			showPanel(mPanelStatus, true);
+			
 	    	//showToast("Downloading image.");
-	    	if(mImgPreview != null)
-	    		mImgPreview.setVisibility(View.INVISIBLE);
-	    	if(mProgressBar != null)
-	    		mProgressBar.setVisibility(View.VISIBLE);
 	    	mBtnSelect.setEnabled(false);
 	    	mBtnTest.setEnabled(false);
 	    	
 	    }
 	    
-	    /** The system calls this to perform work in the UI thread and delivers
+		@Override
+		protected void onCancelled() {
+			hidePanel(mPanelStatus, false);
+	    	mBtnSelect.setEnabled(true);
+	    	mBtnTest.setEnabled(true);
+		}
+		
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			if(values.length > 1)
+			{
+				mProgressBar.setMax(values[1]);
+				mProgressBar.setProgress(values[0]);
+			} else if(values[0] == -1)
+				mProgressBar.setIndeterminate(true);
+			else if(values[0] == 0)
+				mProgressBar.setIndeterminate(false);
+		}
+		
+		/** The system calls this to perform work in the UI thread and delivers
 	      * the result from doInBackground() */
 	    protected void onPostExecute(Bitmap result) {
 	    	if(result == null)
 	    		showToast("Invalid image.");
 	    	else {
-	    		mImgPreview.setVisibility(View.VISIBLE);
+	    		hidePanel(mPanelStatus, false);
+	    		//mImgPreview.setVisibility(View.VISIBLE);
 	    		mImgPreview.setImageBitmap(result);
 	    		if(!Testing)
 	    		{
@@ -553,8 +662,6 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		    	mBtnSelect.setEnabled(true);
 		    	mBtnTest.setEnabled(true);
 	    	}
-	    	if(mProgressBar != null)
-	    		mProgressBar.setVisibility(View.GONE);
 	    }
 	}
 	
@@ -581,15 +688,19 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	@Override
 	protected void onStart() {
 		super.onStart();
-		mTxtZip.setText(prefs.getSetting("zip", mTxtZip.getText().toString()));
-		mBtnWeather.setChecked(prefs.getBoolean("weather", mBtnWeather.isChecked()));
+		if(mTxtZip != null)
+			mTxtZip.setText(prefs.getSetting("zip", mTxtZip.getText().toString()));
+		if(mBtnWeather != null)
+			mBtnWeather.setChecked(prefs.getBoolean("weather", mBtnWeather.isChecked()));
 	}
 	
 	@Override
 	protected void onStop() {
 		super.onStop();
-		prefs.setSetting("zip", mTxtZip.getText().toString());
-		prefs.setSetting("weather", mBtnWeather.isChecked());
+		if(mTxtZip != null)
+			prefs.setSetting("zip", mTxtZip.getText().toString());
+		if(mBtnWeather != null)
+			prefs.setSetting("weather", mBtnWeather.isChecked());
 	}
 	
 	@Override
