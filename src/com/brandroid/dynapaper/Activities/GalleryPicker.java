@@ -35,6 +35,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 public class GalleryPicker extends WallChangerActivity implements OnItemClickListener
@@ -79,7 +80,9 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 			mArrayDownloads = new ArrayList<OnlineGalleryAdapter.DownloadImageTask>(mGalleryCursor.getCount());
 			startManagingCursor(mGalleryCursor);
 		}
-		mGridView.setAdapter(new OnlineGalleryAdapter(this, mGalleryCursor));
+		String[] from = new String[] { GalleryDbAdapter.KEY_DATA, GalleryDbAdapter.KEY_URL };
+		int[] to = new int[] { R.id.grid_item_image, R.id.grid_item_text };
+		mGridView.setAdapter(new OnlineGalleryAdapter(this, R.layout.grid_item, mGalleryCursor, from, to));
 		mGridView.setOnItemClickListener(this);
 	}
 	
@@ -135,18 +138,18 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 		mArrayDownloads.clear();
 	}
 	
-	public class OnlineGalleryAdapter extends BaseAdapter {
-	    @SuppressWarnings("unused")
+	public class OnlineGalleryAdapter extends SimpleCursorAdapter
+	{
 		private Context mContext;
-	    private Cursor mCursor;
+		
+	    public OnlineGalleryAdapter(Context context, int layout, Cursor c,
+				String[] from, int[] to) {
+			super(context, layout, c, from, to);
+			mContext = context;
+		}
 	    
-	    public OnlineGalleryAdapter(Context c, Cursor cursor) {
-	        mContext = c;
-	        mCursor = cursor;
-	    }
-
 	    public int getCount() {
-	    	return mCursor.getCount();
+	    	return getCursor().getCount();
 	        //return mGalleryItems.length;
 	    }
 
@@ -162,47 +165,143 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 		@Override
 	    public View getView(int position, View convertView, ViewGroup parent) {
 			View view = convertView;
-	        GalleryItem item;
+			DownloadImageTask task;
+			if(position < 0 || position >= getCursor().getCount()) return view;
+	        //GalleryItem item;
 	        //OnlineGalleryItem item = mGalleryItems[position]; 
-	        if(!mCursor.moveToPosition(position)) return null;
-	        if (convertView == null) {  // if it's not recycled, initialize some attributes
-	        	item = new GalleryItem(mCursor);
-	        	LayoutInflater li = getLayoutInflater();
+	        if (view == null) {  // if it's not recycled, initialize some attributes
+	        	//item = new GalleryItem(getCursor());
+	        	LayoutInflater li = LayoutInflater.from(mContext);
 	            view = li.inflate(R.layout.grid_item, null);
-	            view.findViewById(R.id.grid_item_image).setVisibility(View.GONE);
+	            //view.findViewById(R.id.grid_item_image).setVisibility(View.GONE);
 	            //view.findViewById(R.id.grid_item_rating).setVisibility(View.GONE);
 	            //view.findViewById(R.id.grid_item_text).setVisibility(View.GONE);
 	            //((TextView)view.findViewById(R.id.grid_item_text)).setText(item.getDownloadCount());
 	            //imageView.setTag();
-	            view.setTag(item);
-	        } else
-	        	item = (GalleryItem)view.getTag();
+	            //view.setTag(item);
+		        try {
+		        	Cursor c = getCursor();
+		        	c.moveToPosition(position);
+		        	byte[] data = c.getBlob(c.getColumnIndex(GalleryDbAdapter.KEY_DATA));
+		        	String url = c.getString(c.getColumnIndex(GalleryDbAdapter.KEY_URL));
+		        	//ImageView iv = ;
+			        if(data != null)
+			        	((ImageView)view.findViewById(R.id.grid_item_image)).setImageBitmap(BitmapFactory.decodeByteArray(data, 0, data.length));
+			        	//((ImageView)view.findViewById(R.id.grid_item_image)).setImageBitmap(item.getBitmap());
+			        else
+			        {
+			        	task = new DownloadImageTask(view);
+			            mArrayDownloads.add(task);
+			        	//item.setIsDownloading(true);
+	        			task.execute(url);
+			        } //else Log.w(LOG_KEY, "Unknown sitch");
+		        } catch(NullPointerException npe) {
+		        	LogError(npe.toString());
+		        	//new DownloadImageTask().execute(item);
+		        }
+	        } //else item = (GalleryItem)view.getTag();
+	      //  else task = (DownloadImageTask)view.getTag();
 	        
-	        //Log.i(LOG_KEY, "Rendering " + item.getID() + ":" + position + "(" + item.getDownloadCount() + ") - " + item.getURL());
-	        
-	        try {
-		        if(item.getBitmap() != null)
-		        	new DownloadImageTask(view).onPostExecute(item);
-		        	//((ImageView)view.findViewById(R.id.grid_item_image)).setImageBitmap(item.getBitmap());
-		        else if(!item.isStarted())
-		        {
-		        	item.setIsDownloading(true);
-		        	DownloadImageTask task = new DownloadImageTask(view);
-		        	mArrayDownloads.add(task);
-		        	task.execute(item);
-		        } //else Log.w(LOG_KEY, "Unknown sitch");
-	        } catch(NullPointerException npe) {
-	        	LogError(npe.toString());
-	        	//new DownloadImageTask().execute(item);
-	        }
+	        //if(!mCursor.moveToPosition(position)) return null;
+	         //Log.i(LOG_KEY, "Rendering " + item.getID() + ":" + position + "(" + item.getDownloadCount() + ") - " + item.getURL());
 	        
 	        return view;
 	    }
 		
-		private class DownloadImageTask extends AsyncTask<GalleryItem, Void, GalleryItem> {
+		private class DownloadImageTask extends AsyncTask<String, Void, byte[]> {
 			private View mView;
+			private Boolean isDone = false;
+			private Boolean isStarted = false;
 			
 			public DownloadImageTask(View v)
+			{
+				mView = v;
+			}
+			
+	        /** The system calls this to perform work in a worker thread and
+		      * delivers it the parameters given to AsyncTask.execute() */
+		    protected byte[] doInBackground(String... urls)
+		    {
+		    	isStarted = true;
+		    	//GalleryItem item = galleryItems[0];
+		    	InputStream s = null;
+		    	byte[] data = (byte[])null;
+		    	try {
+		    		String url = urls[0]; //item.getURL();
+		    		if(url.startsWith("images/"))
+		    			url = url.substring(7);
+		    		url = getImageThumbUrl(url);
+		    		Log.i(Preferences.LOG_KEY, url);
+		    		HttpURLConnection uc = (HttpURLConnection)new URL(url).openConnection();
+		    		uc.setReadTimeout(5000);
+		    		uc.connect();
+		    		s = uc.getInputStream();
+		    		//if(uc.getURL().toString() != url)
+		    		//	Log.i(LOG_KEY, "...redirected to " + uc.getURL());
+		    		Bitmap b = BitmapFactory.decodeStream(s);
+		    		//item.setIsDownloading(false);
+		    		if(b != null)
+		    		{
+		    			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		    			b.compress(CompressFormat.JPEG, 90, stream);
+		    			data = stream.toByteArray();
+		    			//mDb.updateData(item.getID(), data);
+		    			//mDb.updateItem(Id, title, url, data, width, height, tags, rating, downloads, visible)
+			    		//item.setBitmap(b);
+			    		//item.setIsDownloaded();
+		    		} //else mDb.hideItem(item.getID());
+		    	} catch(IOException ex) { Log.e(LOG_KEY, ex.toString()); }
+		    	finally {
+		    		try {
+		    			if(s != null)
+		    				s.close();
+		    		} catch(IOException ex) { Log.e(LOG_KEY, ex.toString()); }
+		    	}
+		    	return data;
+		    }
+		    
+		    @Override
+		    protected void onPreExecute() {
+		    	// TODO Auto-generated method stub
+		    	super.onPreExecute();
+		    	isStarted = true;
+		    	if(mView == null) return;
+		    	mView.findViewById(R.id.grid_item_image).setVisibility(View.GONE);
+		    }
+		    
+		    /** The system calls this to perform work in the UI thread and delivers
+		      * the result from doInBackground() */
+		    protected void onPostExecute(byte[] result) {
+		    	//if(--iDownloads==0);
+		    	//	mDb.close();
+		    	isDone = true;
+		    	mArrayDownloads.remove(this);
+		    	if(mView == null) return;
+		    	//if(result.getBitmap() == null) { mView.setVisibility(View.GONE); return; }
+		    	ImageView imageView = (ImageView)mView.findViewById(R.id.grid_item_image);
+		    	ProgressBar progressBar = (ProgressBar)mView.findViewById(R.id.grid_item_progress);
+		    	/*
+		    	RatingBar ratingBar = (RatingBar)mView.findViewById(R.id.grid_item_rating);
+		    	TextView textView = (TextView)mView.findViewById(R.id.grid_item_text);
+		    	textView.setText("DL: " + result.getDownloadCount());
+		    	ratingBar.setRating((float)result.getRating());
+		    	textView.setVisibility(View.VISIBLE);
+		    	ratingBar.setVisibility(View.VISIBLE);
+		    	*/
+		    	if(result != null)
+		    	{
+			    	Bitmap bmp = BitmapFactory.decodeByteArray(result, 0, result.length);
+			    	if(bmp != null)
+			    		imageView.setImageBitmap(bmp);
+			    	imageView.setVisibility(View.VISIBLE);
+		    	}
+		    	progressBar.setVisibility(View.GONE);
+		    }
+		}
+		private class DownloadItemTask extends AsyncTask<GalleryItem, Void, GalleryItem> {
+			private View mView;
+			
+			public DownloadItemTask(View v)
 			{
 				mView = v;
 			}
@@ -218,13 +317,13 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 		    		if(url.startsWith("images/"))
 		    			url = url.substring(7);
 		    		url = getImageThumbUrl(url);
-		    		Log.i(Preferences.LOG_KEY, url);
+		    		//Log.i(Preferences.LOG_KEY, url);
 		    		HttpURLConnection uc = (HttpURLConnection)new URL(url).openConnection();
 		    		uc.setReadTimeout(5000);
 		    		uc.connect();
 		    		s = uc.getInputStream();
-		    		if(uc.getURL().toString() != url)
-		    			Log.i(LOG_KEY, "...redirected to " + uc.getURL());
+		    		//if(uc.getURL().toString() != url)
+		    		//	Log.i(LOG_KEY, "...redirected to " + uc.getURL());
 		    		Bitmap b = BitmapFactory.decodeStream(s);
 		    		item.setIsDownloading(false);
 		    		if(b != null)

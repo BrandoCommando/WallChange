@@ -36,7 +36,7 @@ public class GalleryItem implements Serializable
 	private int mHeight = 0;
 	private Bitmap mBitmap;
 	private String mTags;
-	private int mStamp = 0;
+	private int mDays = 0;
 	
 	public GalleryItem(JSONObject obj)
 	{
@@ -66,8 +66,14 @@ public class GalleryItem implements Serializable
 				mDownloadCount = Integer.parseInt(obj.getString("dl"));
 				Log.i(Preferences.LOG_KEY, "Downloads: " + mDownloadCount);
 			} catch(NumberFormatException nfe) {
-				Log.w(Preferences.LOG_KEY, "Couldn't find Downloads");
+				Log.w(Preferences.LOG_KEY, "Couldn't parse Downloads");
 				mDownloadCount = 0;
+			}
+			try {
+				mDays = Integer.parseInt(obj.getString("days"));
+			} catch(NumberFormatException nfe) {
+				Log.w(Preferences.LOG_KEY, "Couldn't parse days", nfe);
+				mDays = -1;
 			}
 		} catch(JSONException je) { }
 	}
@@ -78,6 +84,7 @@ public class GalleryItem implements Serializable
 		mTitle = TryGet(cursor, GalleryDbAdapter.KEY_TITLE, mTitle);
 		mRating = (float)TryGet(cursor, GalleryDbAdapter.KEY_RATING, 0.0f);
 		mDownloadCount = TryGet(cursor, GalleryDbAdapter.KEY_DOWNLOADS, 0);
+		mDays = TryGet(cursor, GalleryDbAdapter.KEY_DAYS, 0);
 		byte[] data = TryGet(cursor, GalleryDbAdapter.KEY_DATA, (byte[])null);
 		if(data != null)
 		{
@@ -90,8 +97,10 @@ public class GalleryItem implements Serializable
 	public static String TryGet(Cursor c, String sKey, String sDefault)
 	{
 		int i = c.getColumnIndex(sKey);
-		if (i == -1) return sDefault;
-		if (c.getString(i) == null) return sDefault;
+		try {
+			if (i == -1) return sDefault;
+			if (c.getString(i) == null) return sDefault;
+		} catch(Exception e) { return sDefault; }
 		return c.getString(i);
 	}
 	public static int TryGet(Cursor c, String sKey, int iDefault)
@@ -203,10 +212,10 @@ public class GalleryItem implements Serializable
 	public String getTags() {
 		return mTags;
 	}
-	public void setStamp(int mStamp) {
-		this.mStamp = mStamp;
+	public void setDays(int mDays) {
+		this.mDays = mDays;
 	}
-	public int getStamp() {
-		return mStamp;
+	public int getDays() {
+		return mDays;
 	}
 }
