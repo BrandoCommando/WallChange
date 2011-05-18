@@ -36,6 +36,7 @@ public class GalleryItem implements Serializable
 	private int mHeight = 0;
 	private Bitmap mBitmap;
 	private String mTags;
+	private int mStamp = 0;
 	
 	public GalleryItem(JSONObject obj)
 	{
@@ -201,5 +202,11 @@ public class GalleryItem implements Serializable
 	}
 	public String getTags() {
 		return mTags;
+	}
+	public void setStamp(int mStamp) {
+		this.mStamp = mStamp;
+	}
+	public int getStamp() {
+		return mStamp;
 	}
 }

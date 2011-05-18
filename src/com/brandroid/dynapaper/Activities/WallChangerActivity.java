@@ -25,8 +25,11 @@ public class WallChangerActivity extends Activity
 	public static final String MY_ROOT_URL_GS = "http://commondatastorage.googleapis.com/data.brandonbowles.com";
 	public static final String MY_IMAGE_ROOT_URL = MY_ROOT_URL + "/images/";
 	public static final String MY_IMAGE_ROOT_URL_GS = MY_ROOT_URL_GS + "/images/";
-	public static final String ONLINE_GALLERY_URL = MY_ROOT_URL + "/dynapaper/gallery.php";
-	public static final String ONLINE_IMAGE_URL = MY_ROOT_URL + "/dynapaper/get_image.php";
+	public static final String MY_GALLERY_URL = MY_ROOT_URL + "/dynapaper/gallery2.php?user=%USER%";
+	public static final String MY_IMAGE_URL = MY_ROOT_URL + "/dynapaper/get_image.php?user=%USER%&url=%URL%";
+	public static final String MY_THUMB_URL = MY_ROOT_URL + "/dynapaper/get_thumb.php?url=%URL%";
+	public static final String MY_USER_IMAGE_URL = MY_ROOT_URL + "/dynapaper/get_user_image.php?user=%USER%&md5=%MD5%";
+	public static final String MY_UPLOAD_IMAGE_URL = MY_ROOT_URL + "/dynapaper/upload_user_image.php?user=%USER%&md5=%MD5%";
 	public static final String EXTERNAL_ROOT = "/mnt/sdcard/wallchanger/";
 	public static final int REQ_SELECT_GALLERY = 1;
 	public static final int REQ_SELECT_ONLINE = 2;
@@ -64,7 +67,7 @@ public class WallChangerActivity extends Activity
     	try {
 	    	// Create the adView
 	        AdView adView = new AdView(this, AdSize.BANNER, MY_AD_UNIT_ID);
-	        // Lookup your LinearLayout assuming it’s been given
+	        // Lookup your LinearLayout assuming its been given
 	        // the attribute android:id="@+id/mainLayout"
 	        LinearLayout layout = (LinearLayout)findViewById(R.id.adLayout);
 	        if(layout == null) return;
@@ -91,14 +94,14 @@ public class WallChangerActivity extends Activity
     
     protected String getImageThumbUrl(String sBase)
     {
-    	return MY_ROOT_URL + "/images/thumb.php?url=" + sBase.substring(sBase.lastIndexOf("/") + 1).replace("?", "&");
+    	return MY_THUMB_URL.replace("%URL%", sBase.substring(sBase.lastIndexOf("/") + 1).replace("?", "&"));
     }
     
     protected String getImageFullUrl(String sBase)
     {
     	if(sBase.contains("//") && !sBase.startsWith(MY_ROOT_URL))
     		return sBase;
-    	return ONLINE_IMAGE_URL + "?url=" + sBase.substring(sBase.lastIndexOf("/") + 1);
+    	return MY_IMAGE_URL.replace("%URL%", sBase.substring(sBase.lastIndexOf("/") + 1));
     }
 	
 	public int getHomeWidth()

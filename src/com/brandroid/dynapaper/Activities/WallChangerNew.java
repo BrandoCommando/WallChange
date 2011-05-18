@@ -18,6 +18,10 @@ import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
+import java.util.zip.ZipInputStream;
 
 import org.apache.http.util.ByteArrayBuffer;
 import org.json.JSONArray;
@@ -147,7 +151,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		if(url == "")
 			url = "schema.jpg";
 		if(mBtnWeather.isChecked())
-			url = MY_ROOT_URL + "/images/weather.php?source=google&format=image&" +
+			url = MY_ROOT_URL + "/images/weather.php?source=google&format=image&type=png&gs=0&" +
 				"&x=26&w=" + getHomeWidth() + "&h=" + getHomeHeight() +
 				(mTxtZip.getText().length() > 0 ? "&zip=" + mTxtZip.getText() : "") +
 				"&i1=" + URLEncoder.encode(url.replace(MY_ROOT_URL + "/images/", "").replace(MY_ROOT_URL, ""));
@@ -234,7 +238,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				new UploadTask().execute(bmp);
 				//mImgPreview.setVisibility(View.GONE);
 				mImgPreview.setImageBitmap(bmp);
-			} else Log.e(LOG_KEY, "Unable to create thumbnail?");
+			} else Log.w(LOG_KEY, "Unable to create thumbnail?");
 		} else if (requestCode == REQ_SELECT_ONLINE)
 		{
 			String url = data.getStringExtra("url");
@@ -272,7 +276,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
     		showToast(getResourceString(R.string.s_updated));
             return true;
         } catch (Exception ex) {
-        	Log.e(LOG_KEY, "Wallchanger Exception during update: " + ex.toString());
+        	Log.e(LOG_KEY, "Wallchanger Exception during update: " + ex.toString(), ex);
         	showToast(getResourceString(R.string.s_invalid));
             return false;
         }
@@ -293,7 +297,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    	for(int i = 0; i < msgDigest.length; i++)
 	    		sb.append(Integer.toHexString(0xFF & msgDigest[i]));
 	    	return sb.toString();
-    	} catch(NoSuchAlgorithmException nsme) { Log.e(LOG_KEY, "WTF! No MD5!"); return null; }
+    	} catch(NoSuchAlgorithmException nsme) { Log.e(LOG_KEY, "WTF! No MD5!", nsme); return null; }
     }
     
 	private void showPanel(View panel, boolean slideUp)
@@ -337,6 +341,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 			InputStream in = null;
 			StringBuilder ret = new StringBuilder();
 			InputStreamReader sr = null;
+			publishProgress(-1);
 			try {
 				ByteArrayOutputStream stream = new ByteArrayOutputStream();
 				pics[0].compress(CompressFormat.JPEG, getUploadQuality(), stream);
@@ -344,25 +349,32 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				int length = data.length;
 				String md5 = getMD5(data);
 				//Log.i(LOG_KEY, "MD5: " + md5);
-				url = new URL(MY_ROOT_URL + "/images/upload2.php" + getUser("?user=") + "&md5=" + md5);
-				Log.i(LOG_KEY, "Checking " + url.toString() + " for " + md5);
+				url = new URL(MY_USER_IMAGE_URL.replace("%USER%", getUser()).replace("%MD5%", md5));
+				Log.i(LOG_KEY, "Checking " + url.toString());
 				con = (HttpURLConnection)url.openConnection();
-				con.setRequestProperty("If-None-Match", md5);
-				con.setRequestMethod("HEAD");
+				//con.setRequestProperty("If-None-Match", md5);
+				con.setInstanceFollowRedirects(false);
 				con.setConnectTimeout(5000);
 				con.connect();
+				int iResponse = con.getResponseCode();
+				Log.i(LOG_KEY, "Response code: " + iResponse);
 				if(con.getResponseCode() == 304) {
 					Log.i(LOG_KEY, "Image already uploaded. No need to re-upload.");
-					ret.append("user/" + getUser("","_") + md5 + ".jpg");
+					String sLocation = con.getHeaderField("Location");
+					sLocation = sLocation.replace(MY_IMAGE_ROOT_URL, "");
+					//ret.append()
+					ret.append(sLocation);
 				} else
 				{
 					Log.i(LOG_KEY, "New upload!");
 					con.disconnect();
+					url = new URL(MY_UPLOAD_IMAGE_URL.replace("%USER%", getUser()).replace("%MD5%", md5));
 					con = (HttpURLConnection)url.openConnection();
 					con.setRequestMethod("POST");
 					con.setConnectTimeout(15000);
 					con.setDoOutput(true);
 					out = new BufferedOutputStream(con.getOutputStream());
+					publishProgress(0, length);
 					for(int i = 0; i < data.length; i += DOWNLOAD_CHUNK_SIZE)
 					{
 						int writelen = DOWNLOAD_CHUNK_SIZE;
@@ -373,7 +385,6 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 						publishProgress(i, length);
 					}
 					out.flush();
-					publishProgress(1,2);
 					in = con.getInputStream();
 					sr = new InputStreamReader(in);
 					char[] buf = new char[64];
@@ -462,7 +473,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		}
 	}
 	
-	private class UpdateOnlineGalleryTask extends AsyncTask<String, Void, Boolean> {
+	private class UpdateOnlineGalleryTask extends AsyncTask<String, Integer, Boolean> {
 
 		@Override
 		protected Boolean doInBackground(String... params)
@@ -471,7 +482,8 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 			gdb.open();
 			
 			String cIDs = gdb.fetchAllIDs();
-			Log.i(LOG_KEY, "IDs fetched: " + cIDs);
+			Integer cStampMax = gdb.fetchLatestStamp();
+			Log.i(LOG_KEY, "Latest stamp: " + cStampMax);
 			
 			String ret = null;
 	    	String line = null;
@@ -483,10 +495,11 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    	JSONObject jsonGallery = null;
 	    	Boolean success = false;
 	    	
-	    	String url = Preferences.MY_ROOT_URL + "/dynapaper/gallery.php" + getUser("?user=");
+	    	String url = MY_GALLERY_URL.replace("%USER%", getUser());
 	    	
 	    	try {
 	    		uc = (HttpURLConnection)new URL(url).openConnection();
+	    		uc.addRequestProperty("Accept-Encoding", "gzip, deflate");
 	    		if(prefs.hasSetting("gallery_update"))
 	    		{
 	    			String sLastMod = prefs.getString("gallery_update", "");
@@ -503,52 +516,67 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    		uc.connect();
 	    		if(uc.getResponseCode() == HttpURLConnection.HTTP_OK)
 	    		{
-	    			in = new BufferedInputStream(uc.getInputStream());
-		    		br = new BufferedReader(new InputStreamReader(in));
+	    			String encoding = uc.getContentEncoding();
+	    			Log.i(LOG_KEY, "Encoding: " + encoding);
+	    			if(encoding != null && encoding.equalsIgnoreCase("gzip"))
+	    				in = new GZIPInputStream(uc.getInputStream());
+	    			else if(encoding != null && encoding.equalsIgnoreCase("deflate"))
+	    				in = new InflaterInputStream(uc.getInputStream(), new Inflater(true));
+	    			else
+	    				in = new BufferedInputStream(uc.getInputStream());
+	    			br = new BufferedReader(new InputStreamReader(in));
 		    		sb = new StringBuilder();
 		    		while((line = br.readLine()) != null)
 		    			sb.append(line + '\n');
 		    		ret = sb.toString();
+		    		//Log.i(LOG_KEY, "Gallery Response: " + sb.toString());
 		    		modified = uc.getLastModified();
 		    		jsonGallery = JSON.Parse(ret);
 		    		if(jsonGallery != null)
-	    			try {
-			    		if(jsonGallery.has("user") && jsonGallery.get("user") != getUser())
-			    		{
-			    			String user = jsonGallery.getString("user");
-			    			setUser(user);
-			    			prefs.setSetting("user", user);
-			    			Log.i(LOG_KEY, "New User: " + user);
-			    		}
-					} catch (JSONException je) {
-						Log.e(LOG_KEY, "JSONException getting user: " + je.toString());
-					}
-					int adds = 0;
-					try {
-						JSONArray jsonImages = jsonGallery.getJSONArray("images");
-						for(int imgIndex = 0; imgIndex < jsonImages.length(); imgIndex++)
-						{
-							GalleryItem item = new GalleryItem(jsonImages.getJSONObject(imgIndex));
-							if(cIDs.contains(","+item.getID()+","))
-								adds += gdb.updateItem(item) ? 1 : 0;
-							else
-								adds += gdb.createItem(item);
+		    		{
+		    			try {
+				    		if(jsonGallery.has("user") && jsonGallery.get("user") != getUser())
+				    		{
+				    			String user = jsonGallery.getString("user");
+				    			setUser(user);
+				    			prefs.setSetting("user", user);
+				    			Log.i(LOG_KEY, "New User: " + user);
+				    		}
+			    			if(jsonGallery.has("zip"))
+				    		{
+			    				try {
+					    			String zip = jsonGallery.getString("zip");
+					    			Log.i(LOG_KEY, "Found zipcode: " + zip);
+					    			publishProgress(Integer.parseInt(zip));
+					    		} catch(Exception ex) { }
+				    		}
+							int adds = 0;
+							try {
+								JSONArray jsonImages = jsonGallery.getJSONArray("images");
+								for(int imgIndex = 0; imgIndex < jsonImages.length(); imgIndex++)
+								{
+									GalleryItem item = new GalleryItem(jsonImages.getJSONObject(imgIndex));
+									if(cIDs.contains(","+item.getID()+","))
+										adds += gdb.updateItem(item) ? 1 : 0;
+									else
+										adds += gdb.createItem(item);
+								}
+								
+								Log.i(LOG_KEY, "Successfully added " + adds + " records!");
+								success = true;
+								prefs.setSetting("gallery_update", modified.toString());
+							} catch (Exception je) {
+								Log.e(LOG_KEY, "Exception getting images: " + je.toString(), je);
+							}
+						} catch (JSONException je) {
+							Log.e(LOG_KEY, "JSONException getting user: " + je.toString(), je);
 						}
-					} catch (Exception je) {
-						Log.e(LOG_KEY, "Exception getting images: " + je.toString());
-					}
-					
-					Log.i(LOG_KEY, "Successfully added " + adds + " records!");
-					success = true;
-			    	//setResult(RESULT_OK, mIntent);
-					
-		    		//gdb.createItem(id, title, url, data, width, height, tags, rating, downloads, visible)
-	    			prefs.setSetting("gallery_update", modified.toString());
+		    		} else Log.w(LOG_KEY, "Gallery response is null.");
 	    		}
 			}
-			catch(MalformedURLException mex) { Log.e(LOG_KEY, mex.toString()); }
-			catch(ProtocolException pex) { Log.e(LOG_KEY, pex.toString()); }
-			catch(IOException ex) { Log.e(LOG_KEY, ex.toString()); }
+			catch(MalformedURLException mex) { Log.e(LOG_KEY, mex.toString(), mex); }
+			catch(ProtocolException pex) { Log.e(LOG_KEY, pex.toString(), pex); }
+			catch(IOException ex) { Log.e(LOG_KEY, ex.toString(), ex); }
 	    	finally {
 				if(uc != null) uc.disconnect();
 				in = null;
@@ -560,6 +588,16 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    	mGalleryCursor = gdb.fetchAllItems();
 	    	gdb.close();
 	    	return success;
+		}
+		
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			super.onProgressUpdate(values);
+			if(values.length == 1)
+			{
+				prefs.setSetting("zip", values[0]);
+				mTxtZip.setText(values[0].toString());
+			}
 		}
 
 		@Override
@@ -582,11 +620,12 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    	Bitmap ret = null;
 	    	BufferedInputStream s = null;
 	    	try {
-	    		publishProgress(0);
+	    		publishProgress(-1);
 	    		String url = urls[0];
 	    		HttpURLConnection uc = (HttpURLConnection)new URL(url).openConnection();
 	    		uc.setConnectTimeout(15000);
 	    		uc.connect();
+	    		publishProgress(0);
 	    		if(uc.getResponseCode() >= 400) throw new IOException(uc.getResponseCode() + " " + uc.getResponseMessage());
 	    		Integer length = uc.getContentLength();
 	    		Log.i(LOG_KEY, "Response received. " + length + " bytes.");
@@ -603,12 +642,12 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    		}
 	    		b = bab.toByteArray();
 	    		ret = BitmapFactory.decodeByteArray(b, 0, b.length);
-	    	} catch(IOException ex) { Log.e(LOG_KEY, ex.toString()); }
+	    	} catch(IOException ex) { Log.e(LOG_KEY, ex.toString(), ex); }
 	    	finally {
 	    		try {
 	    			if(s != null)
 	    				s.close();
-	    		} catch(IOException ex) { Log.e(LOG_KEY, ex.toString()); }
+	    		} catch(IOException ex) { Log.e(LOG_KEY, ex.toString(), ex); }
 	    	}
 	    	return ret;
 	    }
@@ -647,10 +686,10 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		/** The system calls this to perform work in the UI thread and delivers
 	      * the result from doInBackground() */
 	    protected void onPostExecute(Bitmap result) {
+    		hidePanel(mPanelStatus, true);
 	    	if(result == null)
 	    		showToast("Invalid image.");
 	    	else {
-	    		hidePanel(mPanelStatus, false);
 	    		//mImgPreview.setVisibility(View.VISIBLE);
 	    		mImgPreview.setImageBitmap(result);
 	    		if(!Testing)
@@ -676,7 +715,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	
     private void DoLog(String txt)
     {
-    	Log.e(Preferences.LOG_KEY, txt);
+    	Log.w(Preferences.LOG_KEY, txt);
     }
 	
 	@Override
@@ -692,6 +731,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 			mTxtZip.setText(prefs.getSetting("zip", mTxtZip.getText().toString()));
 		if(mBtnWeather != null)
 			mBtnWeather.setChecked(prefs.getBoolean("weather", mBtnWeather.isChecked()));
+		setUser(prefs.getSetting("user", getUser()));
 	}
 	
 	@Override
@@ -701,6 +741,8 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 			prefs.setSetting("zip", mTxtZip.getText().toString());
 		if(mBtnWeather != null)
 			prefs.setSetting("weather", mBtnWeather.isChecked());
+		if(getUser() != null && getUser() != "")
+			prefs.setSetting("user", getUser());
 	}
 	
 	@Override

@@ -22,6 +22,7 @@ public class GalleryDbAdapter
     public static final String KEY_HEIGHT = "h";
     public static final String KEY_TAGS = "tags";
     public static final String KEY_VISIBLE = "visible";
+    public static final String KEY_STAMP = "stamp";
     
     private static String mCurrentIDs = null;
 
@@ -31,14 +32,14 @@ public class GalleryDbAdapter
     
     private static final String DATABASE_NAME = "wallchanger.db";
     private static final String DATABASE_TABLE = "gallery";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     private static final String DATABASE_CREATE =
         "create table gallery (" + KEY_ID + " integer primary key, "
         + "title text null, url text not null, "
         + "w int null default 0, h int null default 0, tags text null, "
         + "rating real null, downloads int null, data blob null, "
-        + "visible int not null default 1);";
+        + "visible int not null default 1, stamp int null default 0);";
 
     private final Context mCtx;
 
@@ -85,7 +86,7 @@ public class GalleryDbAdapter
     
     public long createItem(int id, String title, String url, byte[] data,
     		Integer width, Integer height, String tags,
-    		Float rating, Integer downloads, Boolean visible) {
+    		Float rating, Integer downloads, Boolean visible, Integer stamp) {
     	if(!mDb.isOpen()) open();
     	ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_ID, id);
@@ -100,6 +101,7 @@ public class GalleryDbAdapter
 		initialValues.put(KEY_HEIGHT, height);
 		initialValues.put(KEY_TAGS, tags);
 		initialValues.put(KEY_VISIBLE, visible);
+		initialValues.put(KEY_STAMP, stamp);
 
         long ret = 0;
         try {
@@ -114,7 +116,7 @@ public class GalleryDbAdapter
     {
     	return createItem(item.getID(), item.getTitle(), item.getURL(), (byte[])null,
     			item.getWidth(), item.getHeight(), item.getTags(),
-    			(Float)item.getRating(), item.getDownloadCount(), true); 
+    			item.getRating(), item.getDownloadCount(), true, item.getStamp()); 
     }
     
     public boolean updateData(long Id, byte[] data)
@@ -134,7 +136,7 @@ public class GalleryDbAdapter
     public Cursor fetchAllItems() {
     	if(!mDb.isOpen()) open();
     	return mDb.query(DATABASE_TABLE,
-    			new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_DATA, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS},
+    			new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_DATA, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS, KEY_STAMP},
     			KEY_VISIBLE + " = 1", null, null, null, "downloads DESC, rating DESC");
     }
     
@@ -151,11 +153,18 @@ public class GalleryDbAdapter
     	return sb.toString();
     }
     
+    public int fetchLatestStamp()
+    {
+    	Cursor c = mDb.query(DATABASE_TABLE, new String[] {KEY_STAMP}, KEY_VISIBLE + " = 1", null, null, null, "stamp DESC");
+    	c.moveToFirst();
+    	return c.getInt(0);
+    }
+    
     public Cursor fetchItem(long Id) throws SQLException {
     	if(!mDb.isOpen()) open();
     	Cursor mCursor =
             mDb.query(true, DATABASE_TABLE,
-            		new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_DATA, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS},
+            		new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_DATA, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS, KEY_STAMP},
             		KEY_ID + "=" + Id, null,
                     null, null, null, null);
         if (mCursor != null) {
@@ -181,11 +190,11 @@ public class GalleryDbAdapter
     {
     	return updateItem(item.getID(), item.getTitle(), item.getURL(), (byte[])null,
     			item.getWidth(), item.getHeight(), item.getTags(),
-    			(Float)item.getRating(), item.getDownloadCount(), true);
+    			(Float)item.getRating(), item.getDownloadCount(), true, item.getStamp());
     }
     public boolean updateItem(long Id, String title, String url, byte[] data,
     		Integer width, Integer height, String tags,
-    		Float rating, Integer downloads, Boolean visible) {
+    		Float rating, Integer downloads, Boolean visible, Integer stamp) {
     	if(!mDb.isOpen()) open();
     	ContentValues args = new ContentValues();
         args.put(KEY_TITLE, title);
@@ -197,6 +206,7 @@ public class GalleryDbAdapter
 		args.put(KEY_HEIGHT, height);
 		args.put(KEY_TAGS, tags);
 		args.put(KEY_VISIBLE, visible);
+		args.put(KEY_STAMP, stamp);
 
 		return mDb.update(DATABASE_TABLE, args, KEY_ID + "=" + Id, null) > 0;
     }
