@@ -35,9 +35,9 @@ public class WallChangerActivity extends Activity
 	public static final int REQ_SELECT_ONLINE = 2;
 	public final static int REQ_UPDATE_GALLERY = 101;
 	public final static int DOWNLOAD_CHUNK_SIZE = 512;
+	public final static Boolean OPTION_SHOW_GALLERY_INFO = false;
 	protected Resources mResources;
 	protected Preferences prefs;
-	protected Cursor mGalleryCursor;
 	private static String mUser = "";
 	private int mHomeWidth = 0;
 	private int mHomeHeight = 0;
@@ -47,7 +47,6 @@ public class WallChangerActivity extends Activity
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 
         mResources = getResources();

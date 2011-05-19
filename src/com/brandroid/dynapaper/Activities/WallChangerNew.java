@@ -499,6 +499,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    	
 	    	try {
 	    		uc = (HttpURLConnection)new URL(url).openConnection();
+	    		uc.setReadTimeout(10000);
 	    		uc.addRequestProperty("Accept-Encoding", "gzip, deflate");
 	    		if(prefs.hasSetting("gallery_update"))
 	    		{
@@ -585,7 +586,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				uc = null;
 				jsonGallery = null;
 	    	}
-	    	mGalleryCursor = gdb.fetchAllItems();
+	    	//mGalleryCursor = gdb.fetchAllItems();
 	    	gdb.close();
 	    	return success;
 		}

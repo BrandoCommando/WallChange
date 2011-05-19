@@ -3,6 +3,7 @@ package com.brandroid.dynapaper;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
+import android.util.Log;
 
 public class Preferences {
 	public static final String LOG_KEY = "WallChanger";
@@ -44,7 +45,9 @@ public class Preferences {
 	
 	public String getSetting(String key, String defValue)
 	{
-		return mStorage.getString(key, defValue);
+		try {
+			return mStorage.getString(key, defValue);
+		} catch(ClassCastException cce) { Log.e(LOG_KEY, "Couldn't get string from Prefs.", cce); return defValue; }
 	}
 	public int getSetting(String key, int defValue)
 	{
