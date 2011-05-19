@@ -30,18 +30,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class GalleryPicker extends WallChangerActivity implements OnItemClickListener
+public class GalleryPicker extends WallChangerActivity implements OnItemClickListener, OnItemSelectedListener
 {
 	private GridView mGridView = null;
+	private Spinner mSorting = null;
 	private GalleryDbAdapter mDb = null;
 	private ArrayList<OnlineGalleryAdapter.DownloadImageTask> mArrayDownloads;
 	private GalleryItem[] mGalleryItems;
@@ -57,7 +62,14 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 		
 		prefs = Preferences.getPreferences(GalleryPicker.this);
 		
-		mGridView = (GridView)findViewById(R.id.gridView1);
+		mGridView = (GridView)findViewById(R.id.picker_grid);
+		
+		mSorting = (Spinner)findViewById(R.id.picker_sort);
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+	            this, R.array.picker_sort_options, android.R.layout.simple_spinner_item);
+	    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+	    mSorting.setAdapter(adapter);
+	    mSorting.setOnItemSelectedListener(this);
 		
 		setTitle(getResourceString(R.string.btn_online));
 		
@@ -122,6 +134,17 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 		}
 		finish();
 	}
+
+	public void onItemSelected(AdapterView<?> parent, View view, int pos, long id)
+	{
+		String sSort = parent.getItemAtPosition(pos).toString();
+		//Toast.makeText(getApplicationContext(), sSort, Toast.LENGTH_SHORT).show();
+	}
+
+	public void onNothingSelected(AdapterView parent) {
+		// Do nothing.
+	}
+
 	
 	@Override
 	protected void onStart() {
@@ -320,4 +343,5 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 		}
 	
 	}
+
 }

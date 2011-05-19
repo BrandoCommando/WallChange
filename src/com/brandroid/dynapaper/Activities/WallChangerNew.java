@@ -235,7 +235,8 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 			if(bmp != null)
 			{
 				//mCacheBitmap = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
-				new UploadTask().execute(bmp);
+				mUploadTask = new UploadTask();
+				mUploadTask.execute(bmp);
 				//mImgPreview.setVisibility(View.GONE);
 				mImgPreview.setImageBitmap(bmp);
 			} else Log.w(LOG_KEY, "Unable to create thumbnail?");
@@ -329,9 +330,69 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
     	}
     }
     
+    public JSONObject downloadJSON(String url)
+    {
+    	HttpURLConnection uc = null;
+    	InputStream in;
+    	BufferedReader br;
+    	StringBuilder sb;
+    	JSONObject ret = null;
+    	try {
+    		uc = (HttpURLConnection)new URL(url).openConnection();
+    		uc.setReadTimeout(10000);
+    		uc.addRequestProperty("Accept-Encoding", "gzip, deflate");
+    		uc.connect();
+    		if(uc.getResponseCode() == HttpURLConnection.HTTP_OK)
+    		{
+    			String encoding = uc.getContentEncoding();
+    			if(encoding != null && encoding.equalsIgnoreCase("gzip"))
+    				in = new GZIPInputStream(uc.getInputStream());
+    			else if(encoding != null && encoding.equalsIgnoreCase("deflate"))
+    				in = new InflaterInputStream(uc.getInputStream(), new Inflater(true));
+    			else
+    				in = new BufferedInputStream(uc.getInputStream());
+    			br = new BufferedReader(new InputStreamReader(in));
+	    		sb = new StringBuilder();
+	    		String line = "";
+	    		while((line = br.readLine()) != null)
+	    			sb.append(line + '\n');
+	    		ret = JSON.Parse(sb.toString());
+	    		if(ret == null)
+	    			Log.w(LOG_KEY, "Unable to parse JSON: " + sb.toString());
+    		} else Log.w(LOG_KEY, uc.getResponseCode() + " returned for " + uc.getURL().toString());
+    	} catch(Exception ex) { Log.e(LOG_KEY, "Exception reading JSON from " + url, ex); }
+    	return ret;
+    }
+    
+    private class MonitorUploadTask extends AsyncTask<String, Integer, String>
+    {
+    	private final static int iUpdateIntervalMS = 500;
+    	private final static int iUpdateMax = 10;
+    	
+    	@Override
+		protected String doInBackground(String... arg0)
+		{
+    		String sKey = arg0[0];
+			String url = MY_UPLOAD_PROGRESS_URL.replace("%KEY%", sKey);
+			for(int i = 0; i < iUpdateMax; i++)
+			{
+				JSONObject j = downloadJSON(url);
+				if(j != null)
+					Log.i(LOG_KEY, "Upload JSON: " + j.toString());
+				else
+					Log.w(LOG_KEY, "Upload JSON NULL!");
+				try {
+					Thread.sleep((long)iUpdateIntervalMS);
+				} catch (InterruptedException e) { }
+			}
+			return null;
+		}
+    }
+    
 	private class UploadTask extends AsyncTask<Bitmap, Integer, String>
 	{
-
+		private MonitorUploadTask mMonitor;
+		
 		@Override
 		protected String doInBackground(Bitmap... pics)
 		{
@@ -366,6 +427,8 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 					ret.append(sLocation);
 				} else
 				{
+					mMonitor = new MonitorUploadTask();
+					mMonitor.execute(md5);
 					Log.i(LOG_KEY, "New upload!");
 					con.disconnect();
 					url = new URL(MY_UPLOAD_IMAGE_URL.replace("%USER%", getUser()).replace("%MD5%", md5));
@@ -428,6 +491,8 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		
 		@Override
 		protected void onCancelled() {
+			if(mMonitor != null && mMonitor.getStatus() == Status.RUNNING)
+				mMonitor.cancel(true);
 			hidePanel(mPanelStatus, false);
 			mBtnSelect.setEnabled(true);
 			mBtnTest.setEnabled(true);
@@ -448,6 +513,8 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		
 		@Override
 		protected void onPostExecute(String result) {
+			if(mMonitor != null && mMonitor.getStatus() == Status.RUNNING)
+				mMonitor.cancel(true);
 			if(result == null || result == "")
 				showToast("Invalid response");
 			else {
@@ -472,6 +539,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 			//mImgSample.setVisibility(View.VISIBLE);
 		}
 	}
+
 	
 	private class UpdateOnlineGalleryTask extends AsyncTask<String, Integer, Boolean> {
 

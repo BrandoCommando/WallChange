@@ -29,7 +29,8 @@ public class WallChangerActivity extends Activity
 	public static final String MY_IMAGE_URL = MY_ROOT_URL + "/dynapaper/get_image.php?user=%USER%&url=%URL%";
 	public static final String MY_THUMB_URL = MY_ROOT_URL + "/dynapaper/get_thumb.php?url=%URL%";
 	public static final String MY_USER_IMAGE_URL = MY_ROOT_URL + "/dynapaper/get_user_image.php?user=%USER%&md5=%MD5%";
-	public static final String MY_UPLOAD_IMAGE_URL = MY_ROOT_URL + "/dynapaper/upload_user_image.php?user=%USER%&md5=%MD5%";
+	public static final String MY_UPLOAD_IMAGE_URL = MY_ROOT_URL + "/dynapaper/upload_user_image.php?user=%USER%&md5=%MD5%&UPLOAD_IDENTIFIER=%MD5%&APC_UPLOAD_PROGRESS=%MD5%";
+	public static final String MY_UPLOAD_PROGRESS_URL = MY_ROOT_URL + "/dynapaper/upload_progress.php?key=%KEY%";
 	public static final String EXTERNAL_ROOT = "/mnt/sdcard/wallchanger/";
 	public static final int REQ_SELECT_GALLERY = 1;
 	public static final int REQ_SELECT_ONLINE = 2;

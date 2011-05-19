@@ -22,9 +22,8 @@ import android.graphics.Bitmap.CompressFormat;
 import android.util.Log;
 import android.view.View;
 
-public class GalleryItem implements Serializable
+public class GalleryItem
 {
-	private static final long serialVersionUID = 5229961124433062997L;
 	private int ID;
 	private String mUrl;
 	private String mTitle;

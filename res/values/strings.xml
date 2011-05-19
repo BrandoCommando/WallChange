@@ -30,4 +30,10 @@
     <string name="btn_zip">Zip Code</string>
     <string name="btn_gps">GPS</string>
     <string name="s_uploading">Uploading</string>
+    <string-array name="picker_sort_options">
+        <item>Downloads</item>
+        <item>Rating</item>
+        <item>Date Added</item>
+    </string-array>
+    <string name="picker_sort_prompt">Sort Options</string>
 </resources>
