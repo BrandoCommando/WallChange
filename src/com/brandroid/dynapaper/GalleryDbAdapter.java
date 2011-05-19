@@ -157,7 +157,7 @@ public class GalleryDbAdapter
     public int fetchLatestStamp()
     {
     	if(!mDb.isOpen()) open();
-    	Cursor c = mDb.query(DATABASE_TABLE, new String[] {KEY_DAYS}, KEY_VISIBLE + " = 1", null, null, null, "days DESC LIMIT 1");
+    	Cursor c = mDb.query(DATABASE_TABLE, new String[] {KEY_DAYS}, KEY_VISIBLE + " = 1", null, null, null, "days LIMIT 1");
     	if(c.getCount() == 0) return 0;
     	c.moveToFirst();
     	return c.getInt(0);
