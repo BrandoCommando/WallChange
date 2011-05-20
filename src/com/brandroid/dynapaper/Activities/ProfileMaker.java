@@ -1,28 +1,22 @@
 package com.brandroid.dynapaper.Activities;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
-import java.util.zip.ZipInputStream;
-
 import org.apache.http.util.ByteArrayBuffer;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,9 +24,12 @@ import org.json.JSONObject;
 
 import com.brandroid.GalleryItem;
 import com.brandroid.JSON;
-import com.brandroid.dynapaper.GalleryDbAdapter;
-import com.brandroid.dynapaper.Preferences;
+import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
+import com.brandroid.dynapaper.Utils;
+import com.brandroid.dynapaper.WallChanger;
+import com.brandroid.dynapaper.Database.GalleryDbAdapter;
+
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -49,7 +46,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewStub;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -58,7 +54,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-public class WallChangerNew extends WallChangerActivity implements OnClickListener
+public class ProfileMaker extends BaseActivity implements OnClickListener
 { 
 	private EditText mTxtURL, mTxtZip;
 	private ImageView mImgPreview;
@@ -83,7 +79,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
         if(mIntent == null)
         	mIntent = new Intent();
         
-        setContentView(R.layout.layout_new);
+        setContentView(R.layout.profile_maker);
 		
         mBtnSelect = (Button)findViewById(R.id.btnSelect);
 		mBtnTest = (Button)findViewById(R.id.btnTest);
@@ -136,9 +132,6 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		mTxtZip.setText(prefs.getString("zip", mTxtZip.getText().toString()));
 		
 		new UpdateOnlineGalleryTask().execute((String[])null);
-		
-		if(!isPaidMode())
-			addAds();
 	}
 	
 	public String getDynaURL()
@@ -151,13 +144,13 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		if(url == "")
 			url = "schema.jpg";
 		if(mBtnWeather.isChecked())
-			url = MY_ROOT_URL + "/images/weather.php?source=google&format=image&type=png&gs=0&" +
+			url = WallChanger.MY_ROOT_URL + "/images/weather.php?source=google&format=image&type=png&gs=0&" +
 				"&x=26&w=" + getHomeWidth() + "&h=" + getHomeHeight() +
 				(mTxtZip.getText().length() > 0 ? "&zip=" + mTxtZip.getText() : "") +
-				"&i1=" + URLEncoder.encode(url.replace(MY_ROOT_URL + "/images/", "").replace(MY_ROOT_URL, ""));
+				"&i1=" + URLEncoder.encode(url.replace(WallChanger.MY_ROOT_URL + "/images/", "").replace(WallChanger.MY_ROOT_URL, ""));
 		else
-			url = getImageFullUrl(url);
-		Log.i(LOG_KEY, "Final DynaURL: " + url);
+			url = WallChanger.getImageFullUrl(url);
+		WallChanger.LogInfo("Final DynaURL: " + url);
 		return url;
 	}
 
@@ -176,13 +169,13 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				Intent intentGallery = new Intent();
 				intentGallery.setType("image/*");
 				intentGallery.setAction(Intent.ACTION_GET_CONTENT);
-				startActivityForResult(Intent.createChooser(intentGallery, getResourceString(R.string.s_select_base)), REQ_SELECT_GALLERY);
+				startActivityForResult(Intent.createChooser(intentGallery, getResourceString(R.string.s_select_base)), WallChanger.REQ_SELECT_GALLERY);
 				break;
 			case R.id.btnOnline:
 				Intent intentOnline = new Intent(getApplicationContext(), GalleryPicker.class);
 				intentOnline.setAction(Intent.ACTION_GET_CONTENT);
 				intentOnline.setType("image/*");
-				startActivityForResult(intentOnline, REQ_SELECT_ONLINE);
+				startActivityForResult(intentOnline, WallChanger.REQ_SELECT_ONLINE);
 				break;
 			case R.id.progress_cancel:
 				onCancelUpload();
@@ -225,12 +218,12 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if(resultCode == RESULT_CANCELED) return;
-		if(requestCode == REQ_SELECT_GALLERY)
+		if(requestCode == WallChanger.REQ_SELECT_GALLERY)
 		{
 			Uri selUri = data.getData();
 			String selPath = getMediaPath(selUri);
 			Bitmap blg = BitmapFactory.decodeFile(selPath);
-			Bitmap bmp = getSizedBitmap(blg, getHomeWidth(), getHomeHeight());
+			Bitmap bmp = Utils.getSizedBitmap(blg, getHomeWidth(), getHomeHeight());
 			blg = null;
 			if(bmp != null)
 			{
@@ -239,19 +232,19 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				mUploadTask.execute(bmp);
 				//mImgPreview.setVisibility(View.GONE);
 				mImgPreview.setImageBitmap(bmp);
-			} else Log.w(LOG_KEY, "Unable to create thumbnail?");
-		} else if (requestCode == REQ_SELECT_ONLINE)
+			} else WallChanger.LogWarning("Unable to create thumbnail?");
+		} else if (requestCode == WallChanger.REQ_SELECT_ONLINE)
 		{
 			String url = data.getStringExtra("url");
 			//int id = data.getIntExtra("id", -1);
 			//if(id > -1)
 			//	url = Preferences.MY_ROOT_URL + "/dynapaper/get_image.php?id=" + id;
-			Log.i(LOG_KEY, "Selected URL: " + url);
+			WallChanger.LogInfo("Selected URL: " + url);
 			byte[] bmp = data.getByteArrayExtra("data");
 			//OnlineGalleryItem item = (OnlineGalleryItem)data.getSerializableExtra("item");
 			mTxtURL.setText(url);
 			if(!url.startsWith("http"))
-				url = getImageFullUrl(url);
+				url = WallChanger.getImageFullUrl(url);
 			mCacheBitmap = ((BitmapDrawable)getWallpaper()).getBitmap(); 
 			if(bmp != null && bmp.length > 0)
 			{
@@ -262,8 +255,8 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 					mImgPreview.setImageBitmap(mGalleryBitmap);
 				}
 			} else {
-				String sThumbUrl = getImageThumbUrl(mTxtURL.getText().toString() + "?w=" + (getHomeWidth() / 2));
-				Log.w(LOG_KEY, "Couldn't find image in Intent. Re-downloading " + sThumbUrl);
+				String sThumbUrl = WallChanger.getImageThumbUrl(mTxtURL.getText().toString() + "?w=" + (getHomeWidth() / 2));
+				WallChanger.LogWarning("Couldn't find image in Intent. Re-downloading " + sThumbUrl);
 				new DownloadToWallpaperTask(true).execute(sThumbUrl);
 			}
 	    	//new DownloadToWallpaperTask().execute(selURL);
@@ -277,7 +270,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
     		showToast(getResourceString(R.string.s_updated));
             return true;
         } catch (Exception ex) {
-        	Log.e(LOG_KEY, "Wallchanger Exception during update: " + ex.toString(), ex);
+        	WallChanger.LogError("Wallchanger Exception during update: " + ex.toString(), ex);
         	showToast(getResourceString(R.string.s_invalid));
             return false;
         }
@@ -298,7 +291,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    	for(int i = 0; i < msgDigest.length; i++)
 	    		sb.append(Integer.toHexString(0xFF & msgDigest[i]));
 	    	return sb.toString();
-    	} catch(NoSuchAlgorithmException nsme) { Log.e(LOG_KEY, "WTF! No MD5!", nsme); return null; }
+    	} catch(NoSuchAlgorithmException nsme) { WallChanger.LogError("WTF! No MD5!", nsme); return null; }
     }
     
 	private void showPanel(View panel, boolean slideUp)
@@ -358,29 +351,29 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    			sb.append(line + '\n');
 	    		ret = JSON.Parse(sb.toString());
 	    		if(ret == null)
-	    			Log.w(LOG_KEY, "Unable to parse JSON: " + sb.toString());
-    		} else Log.w(LOG_KEY, uc.getResponseCode() + " returned for " + uc.getURL().toString());
-    	} catch(Exception ex) { Log.e(LOG_KEY, "Exception reading JSON from " + url, ex); }
+	    			WallChanger.LogWarning("Unable to parse JSON: " + sb.toString());
+    		} else WallChanger.LogWarning(uc.getResponseCode() + " returned for " + uc.getURL().toString());
+    	} catch(Exception ex) { WallChanger.LogError("Exception reading JSON from " + url, ex); }
     	return ret;
     }
     
     private class MonitorUploadTask extends AsyncTask<String, Integer, String>
     {
-    	private final static int iUpdateIntervalMS = 500;
-    	private final static int iUpdateMax = 10;
+    	private final static int iUpdateIntervalMS = 1000;
+    	private final static int iUpdateMax = 15;
     	
     	@Override
 		protected String doInBackground(String... arg0)
 		{
     		String sKey = arg0[0];
-			String url = MY_UPLOAD_PROGRESS_URL.replace("%KEY%", sKey);
+			String url = WallChanger.MY_UPLOAD_PROGRESS_URL.replace("%KEY%", sKey);
 			for(int i = 0; i < iUpdateMax; i++)
 			{
 				JSONObject j = downloadJSON(url);
 				if(j != null)
-					Log.i(LOG_KEY, "Upload JSON: " + j.toString());
+					WallChanger.LogInfo("Upload JSON: " + j.toString());
 				else
-					Log.w(LOG_KEY, "Upload JSON NULL!");
+					WallChanger.LogWarning("Upload JSON NULL!");
 				try {
 					Thread.sleep((long)iUpdateIntervalMS);
 				} catch (InterruptedException e) { }
@@ -398,56 +391,73 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		{
 			URL url = null;
 			HttpURLConnection con = null;
-			BufferedOutputStream out = null;
+			DataOutputStream out = null;
 			InputStream in = null;
 			StringBuilder ret = new StringBuilder();
 			InputStreamReader sr = null;
 			publishProgress(-1);
 			try {
 				ByteArrayOutputStream stream = new ByteArrayOutputStream();
-				pics[0].compress(CompressFormat.JPEG, getUploadQuality(), stream);
+				pics[0].compress(CompressFormat.JPEG, WallChanger.getUploadQuality(), stream);
 				byte[] data = stream.toByteArray(); 
-				int length = data.length;
+				//int length = data.length;
 				String md5 = getMD5(data);
-				//Log.i(LOG_KEY, "MD5: " + md5);
-				url = new URL(MY_USER_IMAGE_URL.replace("%USER%", getUser()).replace("%MD5%", md5));
-				Log.i(LOG_KEY, "Checking " + url.toString());
+				//WallChanger.LogInfo("MD5: " + md5);
+				url = new URL(WallChanger.MY_USER_IMAGE_URL.replace("%USER%", WallChanger.getUser()).replace("%MD5%", md5));
+				WallChanger.LogInfo("Checking " + url.toString());
 				con = (HttpURLConnection)url.openConnection();
 				//con.setRequestProperty("If-None-Match", md5);
 				con.setInstanceFollowRedirects(false);
 				con.setConnectTimeout(5000);
 				con.connect();
 				int iResponse = con.getResponseCode();
-				Log.i(LOG_KEY, "Response code: " + iResponse);
+				WallChanger.LogInfo("Response code: " + iResponse);
 				if(con.getResponseCode() == 304) {
-					Log.i(LOG_KEY, "Image already uploaded. No need to re-upload.");
+					WallChanger.LogInfo("Image already uploaded. No need to re-upload.");
 					String sLocation = con.getHeaderField("Location");
-					sLocation = sLocation.replace(MY_IMAGE_ROOT_URL, "");
+					sLocation = sLocation.replace(WallChanger.MY_IMAGE_ROOT_URL, "");
 					//ret.append()
 					ret.append(sLocation);
 				} else
 				{
 					mMonitor = new MonitorUploadTask();
 					mMonitor.execute(md5);
-					Log.i(LOG_KEY, "New upload!");
+					WallChanger.LogInfo("New upload!");
 					con.disconnect();
-					url = new URL(MY_UPLOAD_IMAGE_URL.replace("%USER%", getUser()).replace("%MD5%", md5));
+					url = new URL(WallChanger.MY_UPLOAD_IMAGE_URL.replace("%USER%", WallChanger.getUser()).replace("%MD5%", md5));
 					con = (HttpURLConnection)url.openConnection();
 					con.setRequestMethod("POST");
 					con.setConnectTimeout(15000);
 					con.setDoOutput(true);
-					out = new BufferedOutputStream(con.getOutputStream());
-					publishProgress(0, length);
-					for(int i = 0; i < data.length; i += DOWNLOAD_CHUNK_SIZE)
+					con.setDoInput(true);
+					con.setUseCaches(false);
+					//con.setRequestProperty("Connection", "Keep-Alive");
+					con.setRequestProperty("Content-Type", "multipart/form-data; boundary=*****");
+
+					out = new DataOutputStream( con.getOutputStream() );
+
+					out.writeBytes("--*****\n");
+					out.writeBytes("Content-Disposition: form-data; name=\"file\"; filename=\"" + md5 + ".jpg\"\n");
+					out.writeBytes("Content-Type: image/jpeg\n\n");
+
+					// create a buffer of maximum size
+					int bytesAvailable = data.length;
+					int maxBufferSize = WallChanger.DOWNLOAD_CHUNK_SIZE;
+					int bufferSize = Math.min(bytesAvailable, maxBufferSize);
+					for(int i = 0; i < bytesAvailable; i += bufferSize)
 					{
-						int writelen = DOWNLOAD_CHUNK_SIZE;
-						if(writelen + i > data.length)
-							writelen = data.length - i;
-						if(writelen <= 0) break;
-						out.write(data, i, writelen);
-						publishProgress(i, length);
+						publishProgress(i, bytesAvailable);
+						out.write(data, i, Math.min(data.length - i, bufferSize));
 					}
+					
+					// send multipart form data necesssary after file data...
+					out.writeBytes("--*****--");
+					
+					publishProgress(-1);
+					// close streams
 					out.flush();
+					out.close();
+
 					in = con.getInputStream();
 					sr = new InputStreamReader(in);
 					char[] buf = new char[64];
@@ -483,7 +493,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 			mProgressLabel.setText(getText(R.string.s_uploading));
 			showPanel(mPanelStatus, true);
 			
-			Log.i(LOG_KEY, "Uploading image");
+			WallChanger.LogInfo("Uploading image");
 			mBtnSelect.setEnabled(false);
 			mBtnTest.setEnabled(false);
 			findViewById(R.id.btnCurrent).setEnabled(false);
@@ -501,8 +511,13 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		
 		@Override
 		protected void onProgressUpdate(Integer... values) {
+			String vals = "";
+			for(int i = 0; i < values.length; i++)
+				vals += values[i] + ",";
+			WallChanger.LogInfo("Progress: " + vals);
 			if(values.length > 1)
 			{
+				mProgressBar.setIndeterminate(false);
 				mProgressBar.setMax(values[1]);
 				mProgressBar.setProgress(values[0]);
 			} else if(values[0] == -1)
@@ -519,7 +534,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 				showToast("Invalid response");
 			else {
 				hidePanel(mPanelStatus, true);
-				Log.i(LOG_KEY, "Response received from upload.");
+				WallChanger.LogInfo("Response received from upload.");
 				String mBaseUrl = result.replaceAll("[^A-Za-z0-9\\.\\/]", "");
 				mTxtURL.setText(mBaseUrl);
 				prefs.setSetting("baseUrl", mBaseUrl);
@@ -551,7 +566,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 			
 			String cIDs = gdb.fetchAllIDs();
 			Integer cStampMax = gdb.fetchLatestStamp();
-			Log.i(LOG_KEY, "Latest stamp: " + cStampMax);
+			WallChanger.LogInfo("Latest stamp: " + cStampMax);
 			
 			String ret = null;
 	    	String line = null;
@@ -563,7 +578,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    	JSONObject jsonGallery = null;
 	    	Boolean success = false;
 	    	
-	    	String url = MY_GALLERY_URL.replace("%USER%", getUser());
+	    	String url = WallChanger.MY_GALLERY_URL.replace("%USER%", WallChanger.getUser());
 	    	
 	    	try {
 	    		uc = (HttpURLConnection)new URL(url).openConnection();
@@ -586,7 +601,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    		if(uc.getResponseCode() == HttpURLConnection.HTTP_OK)
 	    		{
 	    			String encoding = uc.getContentEncoding();
-	    			Log.i(LOG_KEY, "Encoding: " + encoding);
+	    			WallChanger.LogInfo("Encoding: " + encoding);
 	    			if(encoding != null && encoding.equalsIgnoreCase("gzip"))
 	    				in = new GZIPInputStream(uc.getInputStream());
 	    			else if(encoding != null && encoding.equalsIgnoreCase("deflate"))
@@ -598,24 +613,23 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 		    		while((line = br.readLine()) != null)
 		    			sb.append(line + '\n');
 		    		ret = sb.toString();
-		    		//Log.i(LOG_KEY, "Gallery Response: " + sb.toString());
+		    		//WallChanger.LogInfo("Gallery Response: " + sb.toString());
 		    		modified = uc.getLastModified();
 		    		jsonGallery = JSON.Parse(ret);
 		    		if(jsonGallery != null)
 		    		{
 		    			try {
-				    		if(jsonGallery.has("user") && jsonGallery.get("user") != getUser())
+				    		if(jsonGallery.has("user") && jsonGallery.get("user") != WallChanger.getUser())
 				    		{
 				    			String user = jsonGallery.getString("user");
-				    			setUser(user);
-				    			prefs.setSetting("user", user);
-				    			Log.i(LOG_KEY, "New User: " + user);
+				    			if(user.length()>1)
+				    				WallChanger.setUser(user);
 				    		}
 			    			if(jsonGallery.has("zip"))
 				    		{
 			    				try {
 					    			String zip = jsonGallery.getString("zip");
-					    			Log.i(LOG_KEY, "Found zipcode: " + zip);
+					    			WallChanger.LogInfo("Found zipcode: " + zip);
 					    			publishProgress(Integer.parseInt(zip));
 					    		} catch(Exception ex) { }
 				    		}
@@ -631,21 +645,21 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 										adds += gdb.createItem(item);
 								}
 								
-								Log.i(LOG_KEY, "Successfully added " + adds + " records!");
+								WallChanger.LogInfo("Successfully added " + adds + " records!");
 								success = true;
 								prefs.setSetting("gallery_update", modified.toString());
 							} catch (Exception je) {
-								Log.e(LOG_KEY, "Exception getting images: " + je.toString(), je);
+								WallChanger.LogError("Exception getting images: " + je.toString(), je);
 							}
 						} catch (JSONException je) {
-							Log.e(LOG_KEY, "JSONException getting user: " + je.toString(), je);
+							WallChanger.LogError("JSONException getting user: " + je.toString(), je);
 						}
-		    		} else Log.w(LOG_KEY, "Gallery response is null.");
+		    		} else WallChanger.LogWarning("Gallery response is null.");
 	    		}
 			}
-			catch(MalformedURLException mex) { Log.e(LOG_KEY, mex.toString(), mex); }
-			catch(ProtocolException pex) { Log.e(LOG_KEY, pex.toString(), pex); }
-			catch(IOException ex) { Log.e(LOG_KEY, ex.toString(), ex); }
+			catch(MalformedURLException mex) { WallChanger.LogError(mex.toString(), mex); }
+			catch(ProtocolException pex) { WallChanger.LogError(pex.toString(), pex); }
+			catch(IOException ex) { WallChanger.LogError(ex.toString(), ex); }
 	    	finally {
 				if(uc != null) uc.disconnect();
 				in = null;
@@ -697,13 +711,13 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    		publishProgress(0);
 	    		if(uc.getResponseCode() >= 400) throw new IOException(uc.getResponseCode() + " " + uc.getResponseMessage());
 	    		Integer length = uc.getContentLength();
-	    		Log.i(LOG_KEY, "Response received. " + length + " bytes.");
-	    		s = new BufferedInputStream(uc.getInputStream(), DOWNLOAD_CHUNK_SIZE);
+	    		WallChanger.LogInfo("Response received. " + length + " bytes.");
+	    		s = new BufferedInputStream(uc.getInputStream(), WallChanger.DOWNLOAD_CHUNK_SIZE);
 	    		ByteArrayBuffer bab = new ByteArrayBuffer(length <= 0 ? 32 : length);
-	    		byte[] b = new byte[DOWNLOAD_CHUNK_SIZE];
+	    		byte[] b = new byte[WallChanger.DOWNLOAD_CHUNK_SIZE];
 	    		int read = 0;
 	    		int position = 0;
-	    		while((read = s.read(b,0,DOWNLOAD_CHUNK_SIZE)) > 0)
+	    		while((read = s.read(b,0,WallChanger.DOWNLOAD_CHUNK_SIZE)) > 0)
 	    		{
 	    			position += read;
 	    			bab.append(b, 0, read);
@@ -711,12 +725,12 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	    		}
 	    		b = bab.toByteArray();
 	    		ret = BitmapFactory.decodeByteArray(b, 0, b.length);
-	    	} catch(IOException ex) { Log.e(LOG_KEY, ex.toString(), ex); }
+	    	} catch(IOException ex) { WallChanger.LogError(ex.toString(), ex); }
 	    	finally {
 	    		try {
 	    			if(s != null)
 	    				s.close();
-	    		} catch(IOException ex) { Log.e(LOG_KEY, ex.toString(), ex); }
+	    		} catch(IOException ex) { WallChanger.LogError(ex.toString(), ex); }
 	    	}
 	    	return ret;
 	    }
@@ -784,7 +798,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 	
     private void DoLog(String txt)
     {
-    	Log.w(Preferences.LOG_KEY, txt);
+    	Log.w(Prefs.LOG_KEY, txt);
     }
 	
 	@Override
@@ -800,7 +814,7 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 			mTxtZip.setText(prefs.getSetting("zip", mTxtZip.getText().toString()));
 		if(mBtnWeather != null)
 			mBtnWeather.setChecked(prefs.getBoolean("weather", mBtnWeather.isChecked()));
-		setUser(prefs.getSetting("user", getUser()));
+		WallChanger.setUser(prefs.getSetting("user", WallChanger.getUser()));
 	}
 	
 	@Override
@@ -810,8 +824,8 @@ public class WallChangerNew extends WallChangerActivity implements OnClickListen
 			prefs.setSetting("zip", mTxtZip.getText().toString());
 		if(mBtnWeather != null)
 			prefs.setSetting("weather", mBtnWeather.isChecked());
-		if(getUser() != null && getUser() != "")
-			prefs.setSetting("user", getUser());
+		if(WallChanger.getUser() != null && WallChanger.getUser() != "")
+			prefs.setSetting("user", WallChanger.getUser());
 	}
 	
 	@Override

@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Environment;
 import android.util.Log;
 
-public class Preferences {
+public class Prefs {
 	public static final String LOG_KEY = "WallChanger";
 	public static final String PREFS_NAME = "WallChangerPrefs";
 	public static final String EXTRA_SHORTCUT = "WallChangerShortcut";
@@ -14,10 +14,10 @@ public class Preferences {
 	public static boolean ExternalStorageAvailable = false;
 	public static boolean ExternalStorageWriteable = false;
 	
-	private static Preferences preferences;
+	private static Prefs preferences;
 	private SharedPreferences mStorage; 
 	
-	public Preferences(Context context)
+	public Prefs(Context context)
 	{
 		String state = Environment.getExternalStorageState();
 
@@ -36,10 +36,10 @@ public class Preferences {
 		
 		mStorage = context.getSharedPreferences(PREFS_NAME, 0);
 	}
-	public static synchronized Preferences getPreferences(Context context)
+	public static synchronized Prefs getPreferences(Context context)
 	{
 		if(preferences == null)
-			preferences = new Preferences(context);
+			preferences = new Prefs(context);
 		return preferences;
 	}
 	
@@ -51,21 +51,37 @@ public class Preferences {
 	}
 	public int getSetting(String key, int defValue)
 	{
-		return mStorage.getInt(key, defValue);
+		//return mStorage.getInt(key, defValue);
+		try {
+			String s = mStorage.getString(key, ""+defValue);
+			return Integer.parseInt(s);
+		} catch(Exception e) { return defValue; }
 	}
 	public float getSetting(String key, float defValue)
 	{
-		return mStorage.getFloat(key, defValue);
+		//return mStorage.getFloat(key, defValue);
+		try {
+			String s = mStorage.getString(key, ""+defValue);
+			return Float.parseFloat(s);
+		} catch(Exception e) { return defValue; }
 	}
 	public Boolean getSetting(String key, Boolean defValue)
 	{
-		return mStorage.getBoolean(key, defValue);
+		//return mStorage.getBoolean(key, defValue);
+		try {
+			String s = mStorage.getString(key, ""+defValue);
+			return Boolean.parseBoolean(s);
+		} catch(Exception e) { return defValue; }
 	}
 	public Long getSetting(String key, Long defValue)
 	{
 		//try {
-			return mStorage.getLong(key, defValue);
+			//return mStorage.getLong(key, defValue);
 		//} catch(Throwable t) { return defValue; }
+		try {
+			String s = mStorage.getString(key, ""+defValue);
+			return Long.parseLong(s);
+		} catch(Exception e) { return defValue; }
 	}
 	public String getString(String key, String defValue) 	{ return getSetting(key, defValue); }
 	public int getInt(String key, int defValue) 			{ return getSetting(key, defValue); }
@@ -76,19 +92,22 @@ public class Preferences {
 	public void setSetting(String key, String value)
 	{
 		SharedPreferences.Editor editor = getPreferences().edit();
-		editor.putString(key, value);
+		editor.putString(key, value.toString());
+		//editor.putString(key, value);
 		editor.commit();
 	}
 	public void setSetting(String key, Boolean value)
 	{
 		SharedPreferences.Editor editor = getPreferences().edit();
-		editor.putBoolean(key, value);
+		editor.putString(key, value.toString());
+		//editor.putBoolean(key, value);
 		editor.commit();
 	}
-	public void setSetting(String key, int value)
+	public void setSetting(String key, Integer value)
 	{
 		SharedPreferences.Editor editor = getPreferences().edit();
-		editor.putInt(key, value);
+		editor.putString(key, value.toString());
+		//editor.putInt(key, value);
 		editor.commit();
 	}
 	public Boolean hasSetting(String key)

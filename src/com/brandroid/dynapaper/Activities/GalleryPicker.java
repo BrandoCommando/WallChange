@@ -3,18 +3,15 @@ package com.brandroid.dynapaper.Activities;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 
-import javax.net.ssl.HttpsURLConnection;
-
 import com.brandroid.GalleryItem;
-import com.brandroid.dynapaper.GalleryDbAdapter;
-import com.brandroid.dynapaper.Preferences;
+import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
+import com.brandroid.dynapaper.WallChanger;
+import com.brandroid.dynapaper.Database.GalleryDbAdapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -38,12 +35,10 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
-public class GalleryPicker extends WallChangerActivity implements OnItemClickListener, OnItemSelectedListener
+public class GalleryPicker extends BaseActivity implements OnItemClickListener, OnItemSelectedListener
 {
 	private GridView mGridView = null;
 	private Spinner mSorting = null;
@@ -58,9 +53,9 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 		if(intent == null)
 			intent = new Intent();
 		//String action = intent.getAction();
-		setContentView(R.layout.online_picker);
+		setContentView(R.layout.gallery_picker);
 		
-		prefs = Preferences.getPreferences(GalleryPicker.this);
+		prefs = Prefs.getPreferences(GalleryPicker.this);
 		
 		mGridView = (GridView)findViewById(R.id.picker_grid);
 		
@@ -112,7 +107,7 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 		if(view.getTag() == null)
 			setResult(RESULT_CANCELED);
 		else {
-			Log.i(LOG_KEY, "Selected item #" + position);
+			Log.i(WallChanger.LOG_KEY, "Selected item #" + position);
 			GalleryItem item = (GalleryItem)view.getTag();
 			if(item == null && position > 0 && position < mGalleryItems.length - 1)
 				item = mGalleryItems[position];
@@ -137,11 +132,11 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 
 	public void onItemSelected(AdapterView<?> parent, View view, int pos, long id)
 	{
-		String sSort = parent.getItemAtPosition(pos).toString();
+		//String sSort = parent.getItemAtPosition(pos).toString();
 		//Toast.makeText(getApplicationContext(), sSort, Toast.LENGTH_SHORT).show();
 	}
 
-	public void onNothingSelected(AdapterView parent) {
+	public void onNothingSelected(AdapterView<?> parent) {
 		// Do nothing.
 	}
 
@@ -167,7 +162,7 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 			try {
 				OnlineGalleryAdapter.DownloadImageTask task = mArrayDownloads.get(i);
 				task.cancel(true);
-			} catch(Exception e) { Log.e(LOG_KEY, "Error clearing downloads. " + e.toString()); }
+			} catch(Exception e) { LogError("Error clearing downloads. " + e.toString()); }
 		}
 		mArrayDownloads.clear();
 	}
@@ -220,7 +215,7 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 		        	Bitmap data = item.getBitmap(); //c.getBlob(c.getColumnIndex(GalleryDbAdapter.KEY_DATA));
 		        	String url = item.getURL(); //c.getString(c.getColumnIndex(GalleryDbAdapter.KEY_URL));
 		        	ImageView iv = ((ImageView)view.findViewById(R.id.grid_item_image));
-			    	if(OPTION_SHOW_GALLERY_INFO)
+			    	if(WallChanger.OPTION_SHOW_GALLERY_INFO)
 			    	{
 			    		RatingBar ratingBar = (RatingBar)view.findViewById(R.id.grid_item_rating);
 				    	TextView textView = (TextView)view.findViewById(R.id.grid_item_text);
@@ -249,14 +244,16 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 	      //  else task = (DownloadImageTask)view.getTag();
 	        
 	        //if(!mCursor.moveToPosition(position)) return null;
-	         //Log.i(LOG_KEY, "Rendering " + item.getID() + ":" + position + "(" + item.getDownloadCount() + ") - " + item.getURL());
+	         //LogInfo("Rendering " + item.getID() + ":" + position + "(" + item.getDownloadCount() + ") - " + item.getURL());
 	        
 	        return view;
 	    }
 		
 		private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 			private View mView;
+			@SuppressWarnings("unused")
 			private Boolean isDone = false;
+			@SuppressWarnings("unused")
 			private Boolean isStarted = false;
 			private GalleryItem mItem;
 			
@@ -273,20 +270,19 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 		    	isStarted = true;
 		    	//GalleryItem item = galleryItems[0];
 		    	BufferedInputStream s = null;
-		    	byte[] data = (byte[])null;
 		    	Bitmap ret = null;
 		    	try {
 		    		String url = urls[0]; //item.getURL();
 		    		if(url.startsWith("images/"))
 		    			url = url.substring(7);
-		    		url = getImageThumbUrl(url);
+		    		url = WallChanger.getImageThumbUrl(url);
 		    		//Log.i(Preferences.LOG_KEY, url);
 		    		HttpURLConnection uc = (HttpURLConnection)new URL(url).openConnection();
 		    		uc.setReadTimeout(5000);
 		    		uc.connect();
 		    		s = new BufferedInputStream(uc.getInputStream());
 		    		if(uc.getURL().toString() != url)
-		    			Log.i(LOG_KEY, "Redirected to " + uc.getURL() + " from " + url);
+		    			LogInfo("Redirected to " + uc.getURL() + " from " + url);
 		    		ret = BitmapFactory.decodeStream(s);
 		    		//item.setIsDownloading(false);
 		    		if(ret != null)
@@ -300,12 +296,12 @@ public class GalleryPicker extends WallChangerActivity implements OnItemClickLis
 			    		//item.setBitmap(b);
 			    		//item.setIsDownloaded();
 		    		} //else mDb.hideItem(item.getID());
-		    	} catch(IOException ex) { Log.e(LOG_KEY, ex.toString()); }
+		    	} catch(IOException ex) { LogError(ex.toString()); }
 		    	finally {
 		    		try {
 		    			if(s != null)
 		    				s.close();
-		    		} catch(IOException ex) { Log.e(LOG_KEY, ex.toString()); }
+		    		} catch(IOException ex) { LogError(ex.toString()); }
 		    	}
 		    	return ret;
 		    }

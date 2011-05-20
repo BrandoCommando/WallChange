@@ -1,6 +1,7 @@
-package com.brandroid.dynapaper;
+package com.brandroid.dynapaper.Database;
 
 import com.brandroid.GalleryItem;
+import com.brandroid.dynapaper.Prefs;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -24,8 +25,6 @@ public class GalleryDbAdapter
     public static final String KEY_VISIBLE = "visible";
     public static final String KEY_DAYS = "days";
     
-    private static String mCurrentIDs = null;
-
     //private static final String TAG = "WallChangeGalleryDbAdapter";
     private DatabaseHelper mDbHelper;
     private SQLiteDatabase mDb;
@@ -52,13 +51,13 @@ public class GalleryDbAdapter
         @Override
         public void onCreate(SQLiteDatabase db)
         {
-        	Log.i(Preferences.LOG_KEY, "Creating database");
+        	Log.i(Prefs.LOG_KEY, "Creating database");
             db.execSQL(DATABASE_CREATE);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.w(Preferences.LOG_KEY, "Upgrading database from version " + oldVersion + " to "
+            Log.w(Prefs.LOG_KEY, "Upgrading database from version " + oldVersion + " to "
                     + newVersion + ", which will destroy all old data");
             db.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE);
             onCreate(db);
