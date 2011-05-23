@@ -24,6 +24,7 @@ import org.json.JSONObject;
 
 import com.brandroid.GalleryItem;
 import com.brandroid.JSON;
+import com.brandroid.dynapaper.MediaIO;
 import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.Utils;
@@ -78,6 +79,8 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 
         if(mIntent == null)
         	mIntent = new Intent();
+        
+        MediaIO.init(this);
         
         setContentView(R.layout.profile_maker);
 		
@@ -209,7 +212,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 						setWallpaper(mCacheBitmap);
 					}
 				} catch (IOException e) {
-					DoLog(e.toString());
+					LogError("Can't undo", e);
 				}
 				break;
 		}
@@ -470,18 +473,18 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 					publishProgress(-1);
 				}
 			} catch(Exception ex) {
-				DoLog("Exception Uploading. " + ex.toString());
+				LogError("Uploading error.", ex);
 			}
 			finally {
 				try {
 					if(out!=null) out.close();
-				} catch(IOException ex) { DoLog("Trying to close output. " + ex.toString()); }
+				} catch(IOException ex) { LogError("Trying to close output.", ex); }
 				try {
 					if(sr!=null) sr.close();
-				}catch(IOException ex) { DoLog("Trying to close Stream Reader. " + ex.toString()); }
+				}catch(IOException ex) { LogError("Trying to close Stream Reader.", ex); }
 				try {
 					if(in!=null) in.close();
-				}catch(IOException ex) { DoLog("Trying to close input. " + ex.toString()); }
+				}catch(IOException ex) { LogError("Trying to close input.", ex); }
 				
 			}
 			return ret.toString();
@@ -582,7 +585,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	    	
 	    	try {
 	    		uc = (HttpURLConnection)new URL(url).openConnection();
-	    		uc.setReadTimeout(10000);
+	    		uc.setReadTimeout(20000);
 	    		uc.addRequestProperty("Accept-Encoding", "gzip, deflate");
 	    		if(prefs.hasSetting("gallery_update"))
 	    		{
@@ -788,19 +791,13 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	}
 	
 	public String getMediaPath(Uri uri) {
-	    String[] projection = { MediaStore.Images.Media.DATA };
+		String[] projection = { MediaStore.Images.Media.DATA };
 	    Cursor cursor = managedQuery(uri, projection, null, null, null);
 	    int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
 	    cursor.moveToFirst();
 	    return cursor.getString(column_index);
 	}
 
-	
-    private void DoLog(String txt)
-    {
-    	Log.w(Prefs.LOG_KEY, txt);
-    }
-	
 	@Override
 	protected void onDestroy() {
 		// TODO Auto-generated method stub

@@ -1,9 +1,8 @@
 package com.brandroid.dynapaper;
 
-import android.app.Activity;
 import android.util.Log;
 
-public class WallChanger extends Activity
+public class WallChanger
 {
 	public static final String LOG_KEY = "WallChanger";
 	public static final String MY_AD_UNIT_ID = "a14d9c70f03d5b2";
@@ -30,23 +29,23 @@ public class WallChanger extends Activity
 
 	public static void LogError(String msg)
 	{
-		Log.e(WallChanger.LOG_KEY, msg);
+		Logger.LogError(msg);
 	}
 	public static void LogError(String msg, Throwable ex)
 	{
-		Log.e(WallChanger.LOG_KEY, msg, ex);
+		Logger.LogError(msg, ex);
 	}
 	public static void LogWarning(String msg)
 	{
-		Log.w(WallChanger.LOG_KEY, msg);
+		Logger.LogWarning(msg);
 	}
 	public static void LogInfo(String msg)
 	{
-		Log.i(WallChanger.LOG_KEY, msg);
+		Logger.LogInfo(msg);
 	}
 	public static void LogDebug(String msg)
 	{
-		Log.d(WallChanger.LOG_KEY, msg);
+		Logger.LogDebug(msg);
 	}
 	
 	public static String getUser() { return getUser("",""); }
@@ -78,5 +77,6 @@ public class WallChanger extends Activity
     		return sBase;
     	return MY_IMAGE_URL.replace("%URL%", sBase.substring(sBase.lastIndexOf("/") + 1));
     }
-
+    
+    
 }

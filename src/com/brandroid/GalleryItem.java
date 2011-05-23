@@ -3,11 +3,15 @@ package com.brandroid;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.brandroid.dynapaper.MediaIO;
 import com.brandroid.dynapaper.Prefs;
+import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.dynapaper.Database.GalleryDbAdapter;
 
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.CompressFormat;
 import android.util.Log;
 
 public class GalleryItem
@@ -60,6 +64,7 @@ public class GalleryItem
 				Log.w(Prefs.LOG_KEY, "Couldn't parse days", nfe);
 				mDays = -1;
 			}
+			mBitmap = MediaIO.readFileBitmap(getID() + ".jpg", true);
 		} catch(JSONException je) { }
 	}
 	public GalleryItem(Cursor cursor)
@@ -70,6 +75,7 @@ public class GalleryItem
 		mRating = (float)TryGet(cursor, GalleryDbAdapter.KEY_RATING, 0.0f);
 		mDownloadCount = TryGet(cursor, GalleryDbAdapter.KEY_DOWNLOADS, 0);
 		mDays = TryGet(cursor, GalleryDbAdapter.KEY_DAYS, 0);
+		mBitmap = MediaIO.readFileBitmap(getID() + ".jpg", true);
 		/*
 		byte[] data = TryGet(cursor, GalleryDbAdapter.KEY_DATA, (byte[])null);
 		if(data != null)
@@ -126,7 +132,10 @@ public class GalleryItem
 	public void setURL(String url) { mUrl = url; }
 	public Float getRating() { return mRating; }
 	public int getDownloadCount() { return mDownloadCount; }
-	public void setBitmap(Bitmap bmp) { mBitmap = bmp; }
+	public void setBitmap(Bitmap bmp) {
+		mBitmap = bmp;
+		MediaIO.writeFile(getID() + ".jpg", bmp, true);
+	}
 	public Bitmap getBitmap() { return mBitmap; }
 
 	public void setWidth(int mWidth) {

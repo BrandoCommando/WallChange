@@ -215,20 +215,23 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 		        	Bitmap data = item.getBitmap(); //c.getBlob(c.getColumnIndex(GalleryDbAdapter.KEY_DATA));
 		        	String url = item.getURL(); //c.getString(c.getColumnIndex(GalleryDbAdapter.KEY_URL));
 		        	ImageView iv = ((ImageView)view.findViewById(R.id.grid_item_image));
+		        	RatingBar ratingBar = (RatingBar)view.findViewById(R.id.grid_item_rating);
+			    	TextView textView = (TextView)view.findViewById(R.id.grid_item_text);
+			    	ProgressBar progressBar = (ProgressBar)view.findViewById(R.id.grid_item_progress);
 			    	if(WallChanger.OPTION_SHOW_GALLERY_INFO)
 			    	{
-			    		RatingBar ratingBar = (RatingBar)view.findViewById(R.id.grid_item_rating);
-				    	TextView textView = (TextView)view.findViewById(R.id.grid_item_text);
-				    	textView.setText("DL: " + item.getDownloadCount());
+			    		textView.setText("DL: " + item.getDownloadCount());
 				    	ratingBar.setRating((float)item.getRating());
 			    		textView.setVisibility(View.VISIBLE);
 			    		ratingBar.setVisibility(View.VISIBLE);
 			    	}
 		        	//ImageView iv = ;
 			        if(data != null)
+			        {
 			        	iv.setImageBitmap(data);
+			        	progressBar.setVisibility(View.GONE);
 			        	//((ImageView)view.findViewById(R.id.grid_item_image)).setImageBitmap(item.getBitmap());
-			        else if(iv.getTag() == null)
+			        }else if(iv.getTag() == null)
 			        {
 			        	iv.setTag(true);
 			        	task = new DownloadImageTask(view, item);

@@ -1,6 +1,6 @@
 package com.brandroid.dynapaper;
 
-public class PaperProfile
+public class WallProfile
 {
 	
 

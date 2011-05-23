@@ -30,6 +30,12 @@
     <string name="btn_zip">Zip Code</string>
     <string name="btn_gps">GPS</string>
     <string name="s_uploading">Uploading</string>
+
+    <string name="local_storage_provider_external_label">External storage (SD card)</string>
+    <string name="local_storage_provider_internal_label">Regular internal storage</string>
+    <string name="local_storage_provider_samsunggalaxy_label">%1$s additional internal storage</string>
+    <string name="local_storage_provider_label">Storage location</string>
+
     <string-array name="picker_sort_options">
         <item>Downloads</item>
         <item>Rating</item>
