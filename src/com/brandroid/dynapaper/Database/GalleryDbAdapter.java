@@ -1,6 +1,6 @@
 package com.brandroid.dynapaper.Database;
 
-import com.brandroid.GalleryItem;
+import com.brandroid.dynapaper.GalleryItem;
 import com.brandroid.dynapaper.Prefs;
 
 import android.content.ContentValues;
@@ -16,7 +16,6 @@ public class GalleryDbAdapter
 	public static final String KEY_ID = "_id";
     public static final String KEY_TITLE = "title";
     public static final String KEY_URL = "url";
-    public static final String KEY_DATA = "data";
     public static final String KEY_RATING = "rating";
     public static final String KEY_DOWNLOADS = "downloads";
     public static final String KEY_WIDTH = "w";
@@ -25,19 +24,18 @@ public class GalleryDbAdapter
     public static final String KEY_VISIBLE = "visible";
     public static final String KEY_DAYS = "days";
     
-    //private static final String TAG = "WallChangeGalleryDbAdapter";
     private DatabaseHelper mDbHelper;
     private SQLiteDatabase mDb;
     
     private static final String DATABASE_NAME = "wallchanger.db";
     private static final String DATABASE_TABLE = "gallery";
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 9;
 
     private static final String DATABASE_CREATE =
         "create table " + DATABASE_TABLE + " (" + KEY_ID + " integer primary key, "
         + "title text null, url text not null, "
         + "w int null default 0, h int null default 0, tags text null, "
-        + "rating real null, downloads int null, data blob null, "
+        + "rating real null, downloads int null, "
         + "visible int not null default 1, days int null default 0);";
 
     private final Context mCtx;
@@ -94,8 +92,6 @@ public class GalleryDbAdapter
         if(rating != null)
         	initialValues.put(KEY_RATING, rating);
         initialValues.put(KEY_DOWNLOADS, downloads);
-        if(data != null && data.length > 0)
-        	initialValues.put(KEY_DATA, data);
 		initialValues.put(KEY_WIDTH, width);
 		initialValues.put(KEY_HEIGHT, height);
 		initialValues.put(KEY_TAGS, tags);
@@ -118,15 +114,6 @@ public class GalleryDbAdapter
     			item.getRating(), item.getDownloadCount(), true, item.getDays()); 
     }
     
-    public boolean updateData(long Id, byte[] data)
-    {
-    	if(!mDb.isOpen()) open();
-    	ContentValues args = new ContentValues();
-    	//args.put(KEY_ID, Id);
-    	args.put(KEY_DATA, data);
-    	return mDb.update(DATABASE_TABLE, args, KEY_ID + "=" + Id, null) > 0;
-    }
-    
     public boolean deleteItem(long rowId) {
     	if(!mDb.isOpen()) open();
     	return mDb.delete(DATABASE_TABLE, KEY_ID + "=" + rowId, null) > 0;
@@ -135,7 +122,7 @@ public class GalleryDbAdapter
     public Cursor fetchAllItems() {
     	if(!mDb.isOpen()) open();
     	return mDb.query(DATABASE_TABLE,
-    			new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_DATA, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS, KEY_DAYS},
+    			new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS, KEY_DAYS},
     			KEY_VISIBLE + " = 1", null, null, null, "downloads DESC, rating DESC");
     }
     
@@ -166,7 +153,7 @@ public class GalleryDbAdapter
     	if(!mDb.isOpen()) open();
     	Cursor mCursor =
             mDb.query(true, DATABASE_TABLE,
-            		new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_DATA, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS, KEY_DAYS},
+            		new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS, KEY_DAYS},
             		KEY_ID + "=" + Id, null,
                     null, null, null, null);
         if (mCursor != null) {
@@ -179,7 +166,6 @@ public class GalleryDbAdapter
     	if(!mDb.isOpen()) open();
     	ContentValues args = new ContentValues();
     	args.put(KEY_VISIBLE, false);
-    	args.put(KEY_DATA, (byte[])null);
     	return mDb.update(DATABASE_TABLE, args, KEY_ID + "=" + Id, null) > 0;
     }
     public boolean exists(long Id)
@@ -203,7 +189,6 @@ public class GalleryDbAdapter
         args.put(KEY_URL, url);
         args.put(KEY_RATING, rating);
         args.put(KEY_DOWNLOADS, downloads);
-		args.put(KEY_DATA, data);
 		args.put(KEY_WIDTH, width);
 		args.put(KEY_HEIGHT, height);
 		args.put(KEY_TAGS, tags);

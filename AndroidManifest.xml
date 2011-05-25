@@ -25,7 +25,8 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name="com.brandroid.dynapaper.Activities.GalleryPicker">
+			android:name="com.brandroid.dynapaper.Activities.GalleryPicker"
+			android:configChanges="keyboard|keyboardHidden|orientation">
 			<intent-filter>
 				<action android:name="android.intent.action.GET_CONTENT" />
 				<data android:mimeType="image/jpeg" />

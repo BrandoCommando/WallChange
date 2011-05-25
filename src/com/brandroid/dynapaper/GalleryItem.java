@@ -1,11 +1,9 @@
-package com.brandroid;
+package com.brandroid.dynapaper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.brandroid.dynapaper.MediaIO;
-import com.brandroid.dynapaper.Prefs;
-import com.brandroid.dynapaper.WallChanger;
+import com.brandroid.MediaUtils;
 import com.brandroid.dynapaper.Database.GalleryDbAdapter;
 
 import android.database.Cursor;
@@ -23,7 +21,7 @@ public class GalleryItem
 	private int mDownloadCount = 0;
 	private int mWidth = 0;
 	private int mHeight = 0;
-	private Bitmap mBitmap;
+	private Bitmap mThumbnail;
 	private String mTags;
 	private int mDays = 0;
 	
@@ -64,7 +62,7 @@ public class GalleryItem
 				Log.w(Prefs.LOG_KEY, "Couldn't parse days", nfe);
 				mDays = -1;
 			}
-			mBitmap = MediaIO.readFileBitmap(getID() + ".jpg", true);
+			mThumbnail = MediaUtils.readFileBitmap(getID() + ".jpg", true);
 		} catch(JSONException je) { }
 	}
 	public GalleryItem(Cursor cursor)
@@ -75,7 +73,7 @@ public class GalleryItem
 		mRating = (float)TryGet(cursor, GalleryDbAdapter.KEY_RATING, 0.0f);
 		mDownloadCount = TryGet(cursor, GalleryDbAdapter.KEY_DOWNLOADS, 0);
 		mDays = TryGet(cursor, GalleryDbAdapter.KEY_DAYS, 0);
-		mBitmap = MediaIO.readFileBitmap(getID() + ".jpg", true);
+		mThumbnail = MediaUtils.readFileBitmap(getID() + ".jpg", true);
 		/*
 		byte[] data = TryGet(cursor, GalleryDbAdapter.KEY_DATA, (byte[])null);
 		if(data != null)
@@ -132,11 +130,15 @@ public class GalleryItem
 	public void setURL(String url) { mUrl = url; }
 	public Float getRating() { return mRating; }
 	public int getDownloadCount() { return mDownloadCount; }
-	public void setBitmap(Bitmap bmp) {
-		mBitmap = bmp;
-		MediaIO.writeFile(getID() + ".jpg", bmp, true);
+	public void setThumbnail(Bitmap bmp) {
+		mThumbnail = bmp;
+		MediaUtils.writeFile(getID() + ".jpg", bmp, true);
 	}
-	public Bitmap getBitmap() { return mBitmap; }
+	public Bitmap getThumbnail() {
+		if(mThumbnail == null)
+			mThumbnail = MediaUtils.readFileBitmap(getID() + ".jpg", true);
+		return mThumbnail;
+	}
 
 	public void setWidth(int mWidth) {
 		this.mWidth = mWidth;

@@ -1,5 +1,7 @@
 package com.brandroid.dynapaper;
 
+import com.brandroid.Logger;
+
 import android.util.Log;
 
 public class WallChanger
@@ -24,33 +26,12 @@ public class WallChanger
 	public static final int REQ_SELECT_ONLINE = 2;
 	public final static int REQ_UPDATE_GALLERY = 101;
 	public final static int DOWNLOAD_CHUNK_SIZE = 512;
-	public final static Boolean OPTION_SHOW_GALLERY_INFO = false;
+	public final static Boolean OPTION_SHOW_GALLERY_INFO = true;
 	private static String mUser = "";
 	private static int mUploadQuality = 100;
 	private static Boolean bPaidMode = false;
 	private static Boolean bTesting = true;
 
-	public static void LogError(String msg)
-	{
-		Logger.LogError(msg);
-	}
-	public static void LogError(String msg, Throwable ex)
-	{
-		Logger.LogError(msg, ex);
-	}
-	public static void LogWarning(String msg)
-	{
-		Logger.LogWarning(msg);
-	}
-	public static void LogInfo(String msg)
-	{
-		Logger.LogInfo(msg);
-	}
-	public static void LogDebug(String msg)
-	{
-		Logger.LogDebug(msg);
-	}
-	
 	public static String getUser() { return getUser("",""); }
 	public static String getUser(String prefix) { return getUser(prefix,""); }
 	public static String getUser(String prefix, String suffix) {
@@ -61,7 +42,7 @@ public class WallChanger
 	public static void setUser(String user)
 	{
 		if(user.equalsIgnoreCase(mUser)) return;
-		LogInfo("New User: " + user);
+		Logger.LogInfo("New User: " + user + " (from " + mUser + ")");
 		mUser = user;
 	}
 	
@@ -69,7 +50,7 @@ public class WallChanger
 	public final static Boolean isTesting() { return bTesting; }
 	public static int getUploadQuality() { return mUploadQuality; }
     
-    public static String getImageThumbUrl(String sBase)
+	public static String getImageThumbUrl(String sBase)
     {
     	return MY_THUMB_URL.replace("%URL%", sBase.substring(sBase.lastIndexOf("/") + 1).replace("?", "&"));
     }
@@ -78,7 +59,7 @@ public class WallChanger
     {
     	if(sBase.contains("//") && !sBase.startsWith(MY_ROOT_URL))
     		return sBase;
-    	return MY_IMAGE_URL.replace("%URL%", sBase.substring(sBase.lastIndexOf("/") + 1));
+    	return MY_IMAGE_URL.replace("%USER%", getUser()).replace("%URL%", sBase.substring(sBase.lastIndexOf("/") + 1));
     }
     
     

@@ -45,7 +45,7 @@
 				android:text="@string/btn_stocks" android:id="@+id/btnStocks"></Button>
 			<EditText android:layout_height="wrap_content"
 				android:layout_width="100dip" android:id="@+id/txtZip"
-				android:enabled="true" android:text="90210"></EditText>
+				android:enabled="true"></EditText>
 			<CheckBox android:layout_height="wrap_content"
 				android:layout_width="wrap_content" android:id="@+id/btnGPS"
 				android:visibility="gone" android:checked="true" android:text="@string/btn_gps"></CheckBox>
@@ -62,9 +62,6 @@
 			<Button android:layout_height="wrap_content"
 				android:layout_width="wrap_content" android:text="@string/btn_test"
 				android:id="@+id/btnTest"></Button>
-			<Button android:layout_height="wrap_content"
-				android:layout_width="wrap_content" android:text="@string/btn_undo"
-				android:id="@+id/btnUndo"></Button>
 		</LinearLayout>
 	<FrameLayout android:layout_width="fill_parent" android:id="@+id/frameLayout1"
 		android:foregroundGravity="center" android:layout_height="wrap_content">

@@ -7,10 +7,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-import com.brandroid.GalleryItem;
+import com.brandroid.Logger;
+import com.brandroid.dynapaper.GalleryItem;
 import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
+import com.brandroid.dynapaper.Activities.GalleryPicker.OnlineGalleryAdapter.DownloadImageTask;
 import com.brandroid.dynapaper.Database.GalleryDbAdapter;
 
 import android.content.Context;
@@ -35,6 +37,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -44,16 +47,18 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 	private Spinner mSorting = null;
 	private GalleryDbAdapter mDb = null;
 	private ArrayList<OnlineGalleryAdapter.DownloadImageTask> mArrayDownloads;
-	private GalleryItem[] mGalleryItems;
+	//private GalleryItem[] mGalleryItems;
+	private Cursor mGalleryCursor;
+	private int mGalleryCount;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
 		Intent intent = getIntent();
 		if(intent == null)
 			intent = new Intent();
 		//String action = intent.getAction();
 		setContentView(R.layout.gallery_picker);
+		super.onCreate(savedInstanceState);
 		
 		prefs = Prefs.getPreferences(GalleryPicker.this);
 		
@@ -72,31 +77,23 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 		
 		addAds();
 		
-		//SimpleCursorAdapter items = new SimpleCursorAdapter(this, R.layout.grid_item, mGalleryCursor, from, to);
-		
-		//mGridView.setAdapter(items);
-		
 		//new DownloadStringTask().execute(ONLINE_GALLERY_URL);
 	}
 	
 	private void setupCursor()
 	{
-		if(mGalleryItems == null || mGalleryItems.length == 0)
+		if(mGalleryCursor == null)
 		{
 			if(mDb == null)
 				mDb = new GalleryDbAdapter(this).open();
-			Cursor c = mDb.fetchAllItems();
-			int count = c.getCount();
-			mArrayDownloads = new ArrayList<OnlineGalleryAdapter.DownloadImageTask>(count);
-			//startManagingCursor(mGalleryCursor);
-			mGalleryItems = new GalleryItem[count];
-			c.moveToFirst();
-			for(int i = 0; i < count; i++)
-				if(c.moveToNext())
-					mGalleryItems[i] = new GalleryItem(c);
-			c.close();
-			
+			mGalleryCursor = mDb.fetchAllItems();
+			mArrayDownloads = new ArrayList<OnlineGalleryAdapter.DownloadImageTask>(mGalleryCursor.getCount());
+			startManagingCursor(mGalleryCursor);
+			mGalleryCursor.moveToFirst();
+			mGalleryCount = mGalleryCursor.getCount();
 		}
+		//SimpleCursorAdapter items = new SimpleCursorAdapter(this, R.layout.gallery_grid_item, mGalleryCursor, from, to);
+		//mGridView.setAdapter(items);
 		mGridView.setAdapter(new OnlineGalleryAdapter(this));
 		mGridView.setOnItemClickListener(this);
 	}
@@ -104,29 +101,21 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 	@Override
 	public void onItemClick(AdapterView<?> adapter, View view, int position, long id)
 	{
-		if(view.getTag() == null)
+		Logger.LogInfo("Selected item #" + position);
+		Intent intentResult = new Intent();
+		if(position < 0 || position >= mGalleryCount)
+		{
+			showToast("Invalid selection.");
 			setResult(RESULT_CANCELED);
-		else {
-			Log.i(WallChanger.LOG_KEY, "Selected item #" + position);
-			GalleryItem item = (GalleryItem)view.getTag();
-			if(item == null && position > 0 && position < mGalleryItems.length - 1)
-				item = mGalleryItems[position];
-			else if(item == null)
-			{
-				setResult(RESULT_CANCELED);
-				finish();
-			}
-			Intent intentResult = new Intent();
-			intentResult.putExtra("url", item.getURL());
-			intentResult.putExtra("id", item.getID());
-			ByteArrayOutputStream stream = new ByteArrayOutputStream();
-			item.getBitmap().compress(CompressFormat.PNG, 100, stream);
-			intentResult.putExtra("bmp", stream.toByteArray());
-			//intentResult.putExtra("item", item);
-			intentResult.putExtra("pos", position);
-			intentResult.setData(Uri.parse(item.getURL()));
-			setResult(RESULT_OK, intentResult);
+			finish();
 		}
+		mGalleryCursor.moveToPosition(position);
+		GalleryItem item = new GalleryItem(mGalleryCursor);
+		intentResult.putExtra("url", item.getURL());
+		intentResult.putExtra("id", item.getID());
+		intentResult.putExtra("pos", position);
+		//intentResult.setData(Uri.parse(item.getURL()));
+		setResult(RESULT_OK, intentResult);
 		finish();
 	}
 
@@ -162,7 +151,7 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 			try {
 				OnlineGalleryAdapter.DownloadImageTask task = mArrayDownloads.get(i);
 				task.cancel(true);
-			} catch(Exception e) { LogError("Error clearing downloads. " + e.toString()); }
+			} catch(Exception e) { Logger.LogWarning("Error clearing downloads.", e); }
 		}
 		mArrayDownloads.clear();
 	}
@@ -177,7 +166,7 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 		}
 	    
 	    public int getCount() {
-	    	return mGalleryItems.length;
+	    	return mGalleryCount;
 	    	//return getCursor().getCount();
 	        //return mGalleryItems.length;
 	    }
@@ -194,25 +183,27 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 		@Override
 	    public View getView(int position, View convertView, ViewGroup parent) {
 			View view = convertView;
-			DownloadImageTask task;
-			if(position < 0 || position >= mGalleryItems.length) return view;
+			if(position < 0 || position >= mGalleryCount) return view;
 	        //GalleryItem item;
 	        //OnlineGalleryItem item = mGalleryItems[position]; 
 	        if (view == null) {  // if it's not recycled, initialize some attributes
 	        	//item = new GalleryItem(getCursor());
 	        	LayoutInflater li = LayoutInflater.from(mContext);
-	            view = li.inflate(R.layout.grid_item, null);
+	            view = li.inflate(R.layout.gallery_grid_item, null);
 	            //view.findViewById(R.id.grid_item_image).setVisibility(View.GONE);
 	            //view.findViewById(R.id.grid_item_rating).setVisibility(View.GONE);
 	            //view.findViewById(R.id.grid_item_text).setVisibility(View.GONE);
 	            //((TextView)view.findViewById(R.id.grid_item_text)).setText(item.getDownloadCount());
 	            //imageView.setTag();
 	            //view.setTag(item);
-		        try {
+	        }
+	            try {
 		        	//Cursor c = getCursor();
 		        	//c.moveToPosition(position);
-		        	GalleryItem item = mGalleryItems[position];
-		        	Bitmap data = item.getBitmap(); //c.getBlob(c.getColumnIndex(GalleryDbAdapter.KEY_DATA));
+		        	mGalleryCursor.moveToPosition(position);
+		        	GalleryItem item = new GalleryItem(mGalleryCursor);
+		        	int id = item.getID();
+		        	Bitmap data = item.getThumbnail(); //c.getBlob(c.getColumnIndex(GalleryDbAdapter.KEY_DATA));
 		        	String url = item.getURL(); //c.getString(c.getColumnIndex(GalleryDbAdapter.KEY_URL));
 		        	ImageView iv = ((ImageView)view.findViewById(R.id.grid_item_image));
 		        	RatingBar ratingBar = (RatingBar)view.findViewById(R.id.grid_item_rating);
@@ -220,30 +211,39 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 			    	ProgressBar progressBar = (ProgressBar)view.findViewById(R.id.grid_item_progress);
 			    	if(WallChanger.OPTION_SHOW_GALLERY_INFO)
 			    	{
-			    		textView.setText("DL: " + item.getDownloadCount());
-				    	ratingBar.setRating((float)item.getRating());
 			    		textView.setVisibility(View.VISIBLE);
 			    		ratingBar.setVisibility(View.VISIBLE);
+			    		if(item.getDownloadCount() > 0)
+			    			textView.setText("DL: " + item.getDownloadCount());
+			    		else textView.setVisibility(View.GONE);
+			    		if(item.getRating() > 0)
+			    			ratingBar.setRating(item.getRating());
+			    		else
+			    			ratingBar.setVisibility(View.GONE);
+			    	} else {
+			    		textView.setVisibility(View.GONE);
+			    		ratingBar.setVisibility(View.GONE);
 			    	}
 		        	//ImageView iv = ;
-			        if(data != null)
+			    	if(iv.getTag() == null && data == null)
+			    	{
+			    		iv.setTag(true);
+			    		DownloadImageTask task = new DownloadImageTask(view, item);
+			    		mArrayDownloads.add(task);
+			    		task.execute(url);
+			    	}
+			    	else if(data != null)
 			        {
+			    		iv.setTag(true);
 			        	iv.setImageBitmap(data);
 			        	progressBar.setVisibility(View.GONE);
 			        	//((ImageView)view.findViewById(R.id.grid_item_image)).setImageBitmap(item.getBitmap());
-			        }else if(iv.getTag() == null)
-			        {
-			        	iv.setTag(true);
-			        	task = new DownloadImageTask(view, item);
-			            mArrayDownloads.add(task);
-			        	//item.setIsDownloading(true);
-	        			task.execute(url);
-			        } //else Log.w(LOG_KEY, "Unknown sitch");
+			        } else Logger.LogWarning("Unknown sitch");
 		        } catch(NullPointerException npe) {
-		        	LogError(npe.toString());
+		        	Logger.LogError("Null pointer getting picker view.", npe);
 		        	//new DownloadImageTask().execute(item);
 		        }
-	        } //else item = (GalleryItem)view.getTag();
+	        //} //else item = (GalleryItem)view.getTag();
 	      //  else task = (DownloadImageTask)view.getTag();
 	        
 	        //if(!mCursor.moveToPosition(position)) return null;
@@ -252,7 +252,8 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 	        return view;
 	    }
 		
-		private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+		public class DownloadImageTask extends AsyncTask<String, Void, Bitmap>
+		{
 			private View mView;
 			@SuppressWarnings("unused")
 			private Boolean isDone = false;
@@ -285,12 +286,12 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 		    		uc.connect();
 		    		s = new BufferedInputStream(uc.getInputStream());
 		    		if(uc.getURL().toString() != url)
-		    			LogInfo("Redirected to " + uc.getURL() + " from " + url);
+		    			Logger.LogInfo("Redirected to " + uc.getURL() + " from " + url);
 		    		ret = BitmapFactory.decodeStream(s);
 		    		//item.setIsDownloading(false);
 		    		if(ret != null)
 		    		{
-		    			mItem.setBitmap(ret);
+		    			mItem.setThumbnail(ret);
 		    			//ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		    			//b.compress(CompressFormat.JPEG, 90, stream);
 		    			//data = stream.toByteArray();
@@ -299,12 +300,12 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 			    		//item.setBitmap(b);
 			    		//item.setIsDownloaded();
 		    		} //else mDb.hideItem(item.getID());
-		    	} catch(IOException ex) { LogError(ex.toString()); }
+		    	} catch(IOException ex) { Logger.LogError(ex.toString()); }
 		    	finally {
 		    		try {
 		    			if(s != null)
 		    				s.close();
-		    		} catch(IOException ex) { LogError(ex.toString()); }
+		    		} catch(IOException ex) { Logger.LogError(ex.toString()); }
 		    	}
 		    	return ret;
 		    }

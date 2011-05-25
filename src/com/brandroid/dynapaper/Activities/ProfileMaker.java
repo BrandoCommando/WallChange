@@ -24,12 +24,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.brandroid.GalleryItem;
 import com.brandroid.JSON;
-import com.brandroid.dynapaper.MediaIO;
-import com.brandroid.dynapaper.Prefs;
+import com.brandroid.Logger;
+import com.brandroid.MediaUtils;
+import com.brandroid.dynapaper.GalleryItem;
 import com.brandroid.dynapaper.R;
-import com.brandroid.dynapaper.Utils;
 import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.dynapaper.Database.GalleryDbAdapter;
 
@@ -46,7 +45,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AnimationUtils;
@@ -64,35 +62,40 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	private Button mBtnSelect, mBtnTest, mBtnOnline;
 	private CheckBox mBtnWeather, mBtnGPS;
 	private Intent mIntent;
-	private Bitmap mCacheBitmap;
-	private View mPanelStatus;
+	private View mProgressPanel;
 	private ProgressBar mProgressBar;
 	private TextView mProgressLabel;
 	private UploadTask mUploadTask;
 	private DownloadToWallpaperTask mDownloadTask;
+	private GalleryDbAdapter gdb;
+	
 	//private String mGPSLocation = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-        
         mIntent = getIntent();
         //final String action = intent.getAction();
 
         if(mIntent == null)
         	mIntent = new Intent();
         
-        MediaIO.init(this);
-        
         setContentView(R.layout.profile_maker);
+		super.onCreate(savedInstanceState);
 		
-        mBtnSelect = (Button)findViewById(R.id.btnSelect);
+		MediaUtils.init(this);
+		
+		gdb = new GalleryDbAdapter(getApplicationContext());
+		gdb.open();
+		Cursor c = gdb.fetchAllItems();
+		startManagingCursor(c);
+		
+		mBtnSelect = (Button)findViewById(R.id.btnSelect);
 		mBtnTest = (Button)findViewById(R.id.btnTest);
 		mBtnWeather = (CheckBox)findViewById(R.id.btnWeather);
 		mBtnGPS = (CheckBox)findViewById(R.id.btnGPS);
 		mBtnOnline = (Button)findViewById(R.id.btnOnline);
 		
-		mPanelStatus = findViewById(R.id.progress_layout);
+		mProgressPanel = findViewById(R.id.progress_layout);
 		mProgressBar = (ProgressBar)findViewById(R.id.progress_progress);
 		mProgressLabel = (TextView)findViewById(R.id.progress_label);
 		
@@ -108,13 +111,10 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		//findViewById(R.id.btnStocks).setOnClickListener(this);
 		findViewById(R.id.btnGPS).setOnClickListener(this);
 		findViewById(R.id.btnTest).setOnClickListener(this);
-		findViewById(R.id.btnUndo).setOnClickListener(this);
 		findViewById(R.id.btnURL).setOnClickListener(this);
 		findViewById(R.id.progress_cancel).setOnClickListener(this);
 		
-		mPanelStatus.setVisibility(View.GONE);
-		
-		mBtnOnline.setEnabled(false);
+		mProgressPanel.setVisibility(View.GONE);
 		
 		mTxtURL = (EditText)findViewById(R.id.txtURL);
 		mImgPreview = (ImageView)findViewById(R.id.imageSample);
@@ -128,13 +128,16 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 				mBtnSelect.setEnabled(true);
 				mBtnTest.setEnabled(true);
 			} });
-		findViewById(R.id.btnUndo).setEnabled(false);
 		mBtnSelect.setEnabled(false);
 		mBtnTest.setEnabled(false);
 		mTxtZip = (EditText)findViewById(R.id.txtZip);
 		findViewById(R.id.txtURL).setVisibility(View.GONE);
 		
-		mTxtZip.setText(prefs.getString("zip", mTxtZip.getText().toString()));
+		getSavedSettings();
+		
+		mBtnOnline.setEnabled(c.getCount() > 0);
+		
+		//mTxtZip.setText(prefs.getString("zip", mTxtZip.getText().toString()));
 		
 		new UpdateOnlineGalleryTask().execute((String[])null);
 	}
@@ -149,14 +152,50 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		if(url == "")
 			url = "schema.jpg";
 		if(mBtnWeather.isChecked())
-			url = WallChanger.MY_WEATHER_URL + "?source=google&format=image&type=image&gs=0" +
+			url = WallChanger.MY_WEATHER_URL.replace("%USER%", WallChanger.getUser()) + "&source=google&format=image&type=image" +
 				"&x=26&w=" + getHomeWidth() + "&h=" + getHomeHeight() +
 				(mTxtZip.getText().length() > 0 ? "&zip=" + mTxtZip.getText() : "") +
 				"&i1=" + URLEncoder.encode(url.replace(WallChanger.MY_ROOT_URL + "/images/", "").replace(WallChanger.MY_ROOT_URL, ""));
 		else
 			url = WallChanger.getImageFullUrl(url);
-		WallChanger.LogInfo("Final DynaURL: " + url);
+		Logger.LogInfo("Final DynaURL: " + url);
 		return url;
+	}
+	
+	public void onClickCurrent()
+	{
+		Bitmap mCurrent = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
+		//mImgPreview.setImageBitmap(mCacheBitmap);
+		onCancelUpload();
+		mUploadTask = new UploadTask();
+		mUploadTask.execute(mCurrent);
+	}
+	public void onClickLocalGallery()
+	{
+		Intent intentGallery = new Intent();
+		intentGallery.setType("image/*");
+		intentGallery.setAction(Intent.ACTION_GET_CONTENT);
+		startActivityForResult(Intent.createChooser(intentGallery, getResourceString(R.string.s_select_base)), WallChanger.REQ_SELECT_GALLERY);
+	}
+	public void onClickOnlineGallery()
+	{
+		Intent intentOnline = new Intent(getApplicationContext(), GalleryPicker.class);
+		intentOnline.setAction(Intent.ACTION_GET_CONTENT);
+		intentOnline.setType("image/*");
+		startActivityForResult(intentOnline, WallChanger.REQ_SELECT_ONLINE);
+	}
+	public void onClickPreview()
+	{
+		new DownloadToWallpaperTask(true).execute(getDynaURL());
+	}
+	public void onClickSelect()
+	{
+		new DownloadToWallpaperTask().execute(getDynaURL());
+	}
+	public void onClickGPS()
+	{
+		// TODO: Add GPS!!
+		mTxtZip.setEnabled(mBtnGPS.isChecked());
 	}
 
 	@Override
@@ -165,92 +204,70 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		switch(v.getId())
 		{
 			case R.id.btnCurrent:
-				mCacheBitmap = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
-				mImgPreview.setImageBitmap(mCacheBitmap);
-				mUploadTask = new UploadTask();
-				mUploadTask.execute(mCacheBitmap);
+				onClickCurrent();
 				break;
 			case R.id.btnGallery:
-				Intent intentGallery = new Intent();
-				intentGallery.setType("image/*");
-				intentGallery.setAction(Intent.ACTION_GET_CONTENT);
-				startActivityForResult(Intent.createChooser(intentGallery, getResourceString(R.string.s_select_base)), WallChanger.REQ_SELECT_GALLERY);
+				onClickLocalGallery();
 				break;
 			case R.id.btnOnline:
-				Intent intentOnline = new Intent(getApplicationContext(), GalleryPicker.class);
-				intentOnline.setAction(Intent.ACTION_GET_CONTENT);
-				intentOnline.setType("image/*");
-				startActivityForResult(intentOnline, WallChanger.REQ_SELECT_ONLINE);
+				onClickOnlineGallery();
 				break;
 			case R.id.progress_cancel:
 				onCancelUpload();
 				onCancelDownload();
 				break;
 			case R.id.btnGPS:
-				//mGPSLocation = null;
-				mTxtZip.setEnabled(mBtnGPS.isChecked());
+				onClickGPS();
 				break;
 			case R.id.btnTest:
-				new DownloadToWallpaperTask(true).execute(getDynaURL());
+				onClickPreview();
 				break;
 			case R.id.btnSelect:
-				new DownloadToWallpaperTask().execute(getDynaURL());
+				onClickSelect();
 				break;
 			case R.id.btnWeather:
-				Boolean bWeather = mBtnWeather.isChecked();
-				//Boolean bGPS = mBtnGPS.isChecked();
-				mTxtZip.setEnabled(bWeather);
-				//mBtnGPS.setEnabled(bWeather);
+				mTxtZip.setEnabled(mBtnWeather.isChecked());
 				break;
 			case R.id.btnURL:
-				Boolean bURLMode = mTxtURL.getVisibility() == View.GONE;
-				mTxtURL.setVisibility(bURLMode ? View.VISIBLE : View.GONE);
-				break;
-			case R.id.btnUndo:
-				try {
-					if(mCacheBitmap != null)
-					{
-						mImgPreview.setImageBitmap(mCacheBitmap);
-						setWallpaper(mCacheBitmap);
-					}
-				} catch (IOException e) {
-					LogError("Can't undo", e);
-				}
+				mTxtURL.setVisibility(mTxtURL.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
 				break;
 		}
 	}
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if(resultCode == RESULT_CANCELED) return;
+		if(resultCode == RESULT_CANCELED) {
+			Logger.LogVerbose("Cancel for " + requestCode + ".");
+			return;
+		}
 		if(requestCode == WallChanger.REQ_SELECT_GALLERY)
 		{
 			Uri selUri = data.getData();
 			String selPath = getMediaPath(selUri);
 			Bitmap blg = BitmapFactory.decodeFile(selPath);
-			Bitmap bmp = Utils.getSizedBitmap(blg, getHomeWidth(), getHomeHeight());
+			Bitmap bmp = MediaUtils.getSizedBitmap(blg, getHomeWidth(), getHomeHeight());
 			blg = null;
 			if(bmp != null)
 			{
 				//mCacheBitmap = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
+				onCancelUpload();
 				mUploadTask = new UploadTask();
 				mUploadTask.execute(bmp);
 				//mImgPreview.setVisibility(View.GONE);
 				mImgPreview.setImageBitmap(bmp);
-			} else WallChanger.LogWarning("Unable to create thumbnail?");
+			} else Logger.LogWarning("Unable to create thumbnail?");
 		} else if (requestCode == WallChanger.REQ_SELECT_ONLINE)
 		{
 			String url = data.getStringExtra("url");
 			//int id = data.getIntExtra("id", -1);
 			//if(id > -1)
 			//	url = Preferences.MY_ROOT_URL + "/dynapaper/get_image.php?id=" + id;
-			WallChanger.LogInfo("Selected URL: " + url);
-			byte[] bmp = data.getByteArrayExtra("data");
+			Logger.LogInfo("Selected URL: " + url);
 			//OnlineGalleryItem item = (OnlineGalleryItem)data.getSerializableExtra("item");
 			mTxtURL.setText(url);
 			if(!url.startsWith("http"))
 				url = WallChanger.getImageFullUrl(url);
-			mCacheBitmap = ((BitmapDrawable)getWallpaper()).getBitmap(); 
+			byte[] bmp = data.getByteArrayExtra("data");
 			if(bmp != null && bmp.length > 0)
 			{
 				Bitmap mGalleryBitmap = BitmapFactory.decodeByteArray(bmp, 0, bmp.length);
@@ -261,7 +278,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 				}
 			} else {
 				String sThumbUrl = WallChanger.getImageThumbUrl(mTxtURL.getText().toString() + "?w=" + (getHomeWidth() / 2));
-				WallChanger.LogWarning("Couldn't find image in Intent. Re-downloading " + sThumbUrl);
+				Logger.LogWarning("Couldn't find image in Intent. Re-downloading " + sThumbUrl, new Exception("Dummy"));
 				new DownloadToWallpaperTask(true).execute(sThumbUrl);
 			}
 	    	//new DownloadToWallpaperTask().execute(selURL);
@@ -275,7 +292,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
     		showToast(getResourceString(R.string.s_updated));
             return true;
         } catch (Exception ex) {
-        	WallChanger.LogError("Wallchanger Exception during update: " + ex.toString(), ex);
+        	Logger.LogError("Wallchanger Exception during update: " + ex.toString(), ex);
         	showToast(getResourceString(R.string.s_invalid));
             return false;
         }
@@ -296,7 +313,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	    	for(int i = 0; i < msgDigest.length; i++)
 	    		sb.append(Integer.toHexString(0xFF & msgDigest[i]));
 	    	return sb.toString();
-    	} catch(NoSuchAlgorithmException nsme) { WallChanger.LogError("WTF! No MD5!", nsme); return null; }
+    	} catch(NoSuchAlgorithmException nsme) { Logger.LogError("WTF! No MD5!", nsme); return null; }
     }
     
 	private void showPanel(View panel, boolean slideUp)
@@ -356,9 +373,9 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	    			sb.append(line + '\n');
 	    		ret = JSON.Parse(sb.toString());
 	    		if(ret == null)
-	    			WallChanger.LogWarning("Unable to parse JSON: " + sb.toString());
-    		} else WallChanger.LogWarning(uc.getResponseCode() + " returned for " + uc.getURL().toString());
-    	} catch(Exception ex) { WallChanger.LogError("Exception reading JSON from " + url, ex); }
+	    			Logger.LogWarning("Unable to parse JSON: " + sb.toString());
+    		} else Logger.LogWarning(uc.getResponseCode() + " returned for " + uc.getURL().toString());
+    	} catch(Exception ex) { Logger.LogError("Exception reading JSON from " + url, ex); }
     	return ret;
     }
     
@@ -376,9 +393,9 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 			{
 				JSONObject j = downloadJSON(url);
 				if(j != null)
-					WallChanger.LogInfo("Upload JSON: " + j.toString());
+					Logger.LogInfo("Upload JSON: " + j.toString());
 				else
-					WallChanger.LogWarning("Upload JSON NULL!");
+					Logger.LogWarning("Upload JSON NULL!");
 				try {
 					Thread.sleep((long)iUpdateIntervalMS);
 				} catch (InterruptedException e) { }
@@ -407,18 +424,18 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 				byte[] data = stream.toByteArray(); 
 				//int length = data.length;
 				String md5 = getMD5(data);
-				//WallChanger.LogInfo("MD5: " + md5);
+				//Logger.LogInfo("MD5: " + md5);
 				url = new URL(WallChanger.MY_USER_IMAGE_URL.replace("%USER%", WallChanger.getUser()).replace("%MD5%", md5));
-				WallChanger.LogInfo("Checking " + url.toString());
+				Logger.LogInfo("Checking " + url.toString());
 				con = (HttpURLConnection)url.openConnection();
 				//con.setRequestProperty("If-None-Match", md5);
 				con.setInstanceFollowRedirects(false);
 				con.setConnectTimeout(5000);
 				con.connect();
 				int iResponse = con.getResponseCode();
-				WallChanger.LogInfo("Response code: " + iResponse);
+				Logger.LogInfo("Response code: " + iResponse);
 				if(con.getResponseCode() == 304) {
-					WallChanger.LogInfo("Image already uploaded. No need to re-upload.");
+					Logger.LogInfo("Image already uploaded. No need to re-upload.");
 					String sLocation = con.getHeaderField("Location");
 					sLocation = sLocation.replace(WallChanger.MY_IMAGE_ROOT_URL, "");
 					//ret.append()
@@ -427,7 +444,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 				{
 					//mMonitor = new MonitorUploadTask();
 					//mMonitor.execute(md5);
-					WallChanger.LogInfo("New upload!");
+					Logger.LogInfo("New upload!");
 					con.disconnect();
 					url = new URL(WallChanger.MY_UPLOAD_IMAGE_URL.replace("%USER%", WallChanger.getUser()).replace("%MD5%", md5));
 					con = (HttpURLConnection)url.openConnection();
@@ -452,18 +469,18 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 					}
 				}
 			} catch(Exception ex) {
-				LogError("Uploading error.", ex);
+				Logger.LogError("Uploading error.", ex);
 			}
 			finally {
 				try {
 					if(out!=null) out.close();
-				} catch(IOException ex) { LogError("Trying to close output.", ex); }
+				} catch(IOException ex) { Logger.LogError("Trying to close output.", ex); }
 				try {
 					if(sr!=null) sr.close();
-				}catch(IOException ex) { LogError("Trying to close Stream Reader.", ex); }
+				}catch(IOException ex) { Logger.LogError("Trying to close Stream Reader.", ex); }
 				try {
 					if(in!=null) in.close();
-				}catch(IOException ex) { LogError("Trying to close input.", ex); }
+				}catch(IOException ex) { Logger.LogError("Trying to close input.", ex); }
 				
 			}
 			return ret.toString();
@@ -471,7 +488,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		
 		public void writeDataToStream(byte[] data, OutputStream s) throws IOException
 		{
-			BufferedOutputStream out = new BufferedOutputStream(s);
+			BufferedOutputStream out = new BufferedOutputStream(s, 1);
 			publishProgress(0, data.length);
 			for(int i = 0; i < data.length; i += WallChanger.DOWNLOAD_CHUNK_SIZE)
 			{
@@ -483,44 +500,18 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 				publishProgress(i, data.length);
 			}
 			out.flush();
-			publishProgress(-1);
-		}
-
-		public void writeFormDataToStream(byte[] data, String md5, OutputStream s) throws IOException
-		{
-			DataOutputStream out = new DataOutputStream( s );
-			
-			out.writeBytes("--*****\n");
-			out.writeBytes("Content-Disposition: form-data; name=\"file\"; filename=\"" + md5 + ".jpg\"\n");
-			out.writeBytes("Content-Type: image/jpeg\n\n");
-
-			// create a buffer of maximum size
-			int bytesAvailable = data.length;
-			int maxBufferSize = WallChanger.DOWNLOAD_CHUNK_SIZE;
-			int bufferSize = Math.min(bytesAvailable, maxBufferSize);
-			for(int i = 0; i < bytesAvailable; i += bufferSize)
-			{
-				publishProgress(i, bytesAvailable);
-				out.write(data, i, Math.min(data.length - i, bufferSize));
-			}
-			
-			// send multipart form data necesssary after file data...
-			out.writeBytes("--*****--");
-			
-			publishProgress(-1);
-			// close streams
-			out.flush();
+			publishProgress(data.length, data.length);
 			out.close();
-
+			publishProgress(-1);
 		}
-		
+
 		@Override
 		protected void onPreExecute() {
 			mProgressBar.setProgress(0);
 			mProgressLabel.setText(getText(R.string.s_uploading));
-			showPanel(mPanelStatus, true);
+			showPanel(mProgressPanel, true);
 			
-			WallChanger.LogInfo("Uploading image");
+			Logger.LogInfo("Uploading image");
 			mBtnSelect.setEnabled(false);
 			mBtnTest.setEnabled(false);
 			findViewById(R.id.btnCurrent).setEnabled(false);
@@ -530,18 +521,15 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		protected void onCancelled() {
 			if(mMonitor != null && mMonitor.getStatus() == Status.RUNNING)
 				mMonitor.cancel(true);
-			hidePanel(mPanelStatus, false);
+			hidePanel(mProgressPanel, false);
 			mBtnSelect.setEnabled(true);
 			mBtnTest.setEnabled(true);
 			findViewById(R.id.btnCurrent).setEnabled(true);
 		}
 		
 		@Override
-		protected void onProgressUpdate(Integer... values) {
-			String vals = "";
-			for(int i = 0; i < values.length; i++)
-				vals += values[i] + ",";
-			WallChanger.LogInfo("Progress: " + vals);
+		protected void onProgressUpdate(Integer... values)
+		{
 			if(values.length > 1)
 			{
 				mProgressBar.setIndeterminate(false);
@@ -560,8 +548,8 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 			if(result == null || result == "")
 				showToast("Invalid response");
 			else {
-				hidePanel(mPanelStatus, true);
-				WallChanger.LogInfo("Response received from upload.");
+				hidePanel(mProgressPanel, true);
+				Logger.LogInfo("Response received from upload.");
 				String mBaseUrl = result.replaceAll("[^A-Za-z0-9\\.\\/]", "");
 				mTxtURL.setText(mBaseUrl);
 				prefs.setSetting("baseUrl", mBaseUrl);
@@ -569,7 +557,6 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 				//	mDynaUrl = mDynaUrl.substring(0, mDynaUrl.indexOf("&i1="));
 				//mDynaUrl += "&i1=" + mBaseUrl;
 				//mTextUrl.setText(mDynaUrl);
-				findViewById(R.id.btnUndo).setEnabled(true);
 				//mTextUrl.setEnabled(true);
 				mBtnSelect.setEnabled(true);
 				mBtnTest.setEnabled(true);
@@ -588,12 +575,9 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		@Override
 		protected Boolean doInBackground(String... params)
 		{
-			GalleryDbAdapter gdb = new GalleryDbAdapter(getApplicationContext());
-			gdb.open();
-			
 			String cIDs = gdb.fetchAllIDs();
 			Integer cStampMax = gdb.fetchLatestStamp();
-			WallChanger.LogInfo("Latest stamp: " + cStampMax);
+			Logger.LogInfo("Latest stamp: " + cStampMax);
 			
 			String ret = null;
 	    	String line = null;
@@ -628,7 +612,8 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	    		if(uc.getResponseCode() == HttpURLConnection.HTTP_OK)
 	    		{
 	    			String encoding = uc.getContentEncoding();
-	    			WallChanger.LogInfo("Encoding: " + encoding);
+	    			prefs.setSetting("gallery_update", ((Long)uc.getLastModified()).toString());
+	    			Logger.LogInfo("Encoding: " + encoding + " @ " + uc.getLastModified());
 	    			if(encoding != null && encoding.equalsIgnoreCase("gzip"))
 	    				in = new GZIPInputStream(uc.getInputStream());
 	    			else if(encoding != null && encoding.equalsIgnoreCase("deflate"))
@@ -640,7 +625,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		    		while((line = br.readLine()) != null)
 		    			sb.append(line + '\n');
 		    		ret = sb.toString();
-		    		//WallChanger.LogInfo("Gallery Response: " + sb.toString());
+		    		//Logger.LogInfo("Gallery Response: " + sb.toString());
 		    		modified = uc.getLastModified();
 		    		jsonGallery = JSON.Parse(ret);
 		    		if(jsonGallery != null)
@@ -656,7 +641,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 				    		{
 			    				try {
 					    			String zip = jsonGallery.getString("zip");
-					    			WallChanger.LogInfo("Found zipcode: " + zip);
+					    			Logger.LogInfo("Found zipcode: " + zip);
 					    			publishProgress(Integer.parseInt(zip));
 					    		} catch(Exception ex) { }
 				    		}
@@ -672,21 +657,21 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 										adds += gdb.createItem(item);
 								}
 								
-								WallChanger.LogInfo("Successfully added " + adds + " records!");
+								Logger.LogInfo("Successfully added " + adds + " records!");
 								success = true;
 								prefs.setSetting("gallery_update", modified.toString());
 							} catch (Exception je) {
-								WallChanger.LogError("Exception getting images: " + je.toString(), je);
+								Logger.LogError("Exception getting images: " + je.toString(), je);
 							}
 						} catch (JSONException je) {
-							WallChanger.LogError("JSONException getting user: " + je.toString(), je);
+							Logger.LogError("JSONException getting user: " + je.toString(), je);
 						}
-		    		} else WallChanger.LogWarning("Gallery response is null.");
+		    		} else Logger.LogWarning("Gallery response is null.");
 	    		}
 			}
-			catch(MalformedURLException mex) { WallChanger.LogError(mex.toString(), mex); }
-			catch(ProtocolException pex) { WallChanger.LogError(pex.toString(), pex); }
-			catch(IOException ex) { WallChanger.LogError(ex.toString(), ex); }
+			catch(MalformedURLException mex) { Logger.LogError(mex.toString(), mex); }
+			catch(ProtocolException pex) { Logger.LogError(pex.toString(), pex); }
+			catch(IOException ex) { Logger.LogError(ex.toString(), ex); }
 	    	finally {
 				if(uc != null) uc.disconnect();
 				in = null;
@@ -713,8 +698,8 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		@Override
 		protected void onPostExecute(Boolean success)
 		{
-			if(mBtnOnline != null)
-				mBtnOnline.setEnabled(success);
+			if(mBtnOnline != null && success)
+				mBtnOnline.setEnabled(true);
 		}
 		
 	}
@@ -736,9 +721,9 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	    		uc.setConnectTimeout(15000);
 	    		uc.connect();
 	    		publishProgress(0);
-	    		if(uc.getResponseCode() >= 400) throw new IOException(uc.getResponseCode() + " " + uc.getResponseMessage());
+	    		if(uc.getResponseCode() >= 400) throw new IOException(uc.getResponseCode() + " on " + url);
 	    		Integer length = uc.getContentLength();
-	    		WallChanger.LogInfo("Response received. " + length + " bytes.");
+	    		Logger.LogInfo("Response received. " + length + " bytes.");
 	    		s = new BufferedInputStream(uc.getInputStream(), WallChanger.DOWNLOAD_CHUNK_SIZE);
 	    		ByteArrayBuffer bab = new ByteArrayBuffer(length <= 0 ? 32 : length);
 	    		byte[] b = new byte[WallChanger.DOWNLOAD_CHUNK_SIZE];
@@ -752,12 +737,12 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	    		}
 	    		b = bab.toByteArray();
 	    		ret = BitmapFactory.decodeByteArray(b, 0, b.length);
-	    	} catch(IOException ex) { WallChanger.LogError(ex.toString(), ex); }
+	    	} catch(IOException ex) { Logger.LogError(ex.toString(), ex); }
 	    	finally {
 	    		try {
 	    			if(s != null)
 	    				s.close();
-	    		} catch(IOException ex) { WallChanger.LogError(ex.toString(), ex); }
+	    		} catch(IOException ex) { Logger.LogError(ex.toString(), ex); }
 	    	}
 	    	return ret;
 	    }
@@ -766,7 +751,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	    protected void onPreExecute() {
 	    	mProgressBar.setProgress(0);
 			mProgressLabel.setText(getText(R.string.s_downloading));
-			showPanel(mPanelStatus, true);
+			showPanel(mProgressPanel, true);
 			
 	    	//showToast("Downloading image.");
 	    	mBtnSelect.setEnabled(false);
@@ -776,7 +761,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	    
 		@Override
 		protected void onCancelled() {
-			hidePanel(mPanelStatus, false);
+			hidePanel(mProgressPanel, false);
 	    	mBtnSelect.setEnabled(true);
 	    	mBtnTest.setEnabled(true);
 		}
@@ -796,7 +781,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		/** The system calls this to perform work in the UI thread and delivers
 	      * the result from doInBackground() */
 	    protected void onPostExecute(Bitmap result) {
-    		hidePanel(mPanelStatus, true);
+    		hidePanel(mProgressPanel, true);
 	    	if(result == null)
 	    		showToast("Invalid image.");
 	    	else {
@@ -821,16 +806,9 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	    cursor.moveToFirst();
 	    return cursor.getString(column_index);
 	}
-
-	@Override
-	protected void onDestroy() {
-		// TODO Auto-generated method stub
-		super.onDestroy();
-	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
+	
+	public void getSavedSettings()
+	{
 		if(mTxtZip != null)
 			mTxtZip.setText(prefs.getSetting("zip", mTxtZip.getText().toString()));
 		if(mBtnWeather != null)
@@ -838,9 +816,8 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		WallChanger.setUser(prefs.getSetting("user", WallChanger.getUser()));
 	}
 	
-	@Override
-	protected void onStop() {
-		super.onStop();
+	public void setSavedSettings()
+	{
 		if(mTxtZip != null)
 			prefs.setSetting("zip", mTxtZip.getText().toString());
 		if(mBtnWeather != null)
@@ -848,16 +825,32 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		if(WallChanger.getUser() != null && WallChanger.getUser() != "")
 			prefs.setSetting("user", WallChanger.getUser());
 	}
+
+	@Override
+	protected void onDestroy() {
+		Logger.LogVerbose("onDestroy");
+		super.onDestroy();
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		getSavedSettings();
+	}
+	
+	@Override
+	protected void onStop() {
+		setSavedSettings();
+		super.onStop();
+	}
 	
 	@Override
 	protected void onPause() {
-		// TODO Auto-generated method stub
 		super.onPause();
 	}
 	
 	@Override
 	protected void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
 	}
 }

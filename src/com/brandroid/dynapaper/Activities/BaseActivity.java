@@ -1,5 +1,6 @@
 package com.brandroid.dynapaper.Activities;
 
+import com.brandroid.Logger;
 import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
@@ -12,6 +13,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -25,45 +27,39 @@ public class BaseActivity extends Activity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		Logger.LogVerbose("onCreate :: " + this.toString());
 
         mResources = getResources();
         prefs = Prefs.getPreferences(getApplicationContext());
         
-        if(WallChanger.isPaidMode())
+        if(!WallChanger.isPaidMode())
         	addAds();
+        else if(findViewById(R.id.adLayout)!=null)
+        	findViewById(R.id.adLayout).setVisibility(View.GONE);
+        	
 	}
 	
 	public void addAds()
-    {
-    	/*
-    	Log.i(LOG_KEY, "IAB_LEADERBOARD: " + AdSize.IAB_LEADERBOARD.getWidth() + "x" + AdSize.IAB_LEADERBOARD.getHeight());
-    	Log.i(LOG_KEY, "IAB_MRECT: " + AdSize.IAB_MRECT.getWidth() + "x" + AdSize.IAB_MRECT.getHeight());
-    	Log.i(LOG_KEY, "IAB_BANNER: " + AdSize.IAB_BANNER.getWidth() + "x" + AdSize.IAB_BANNER.getHeight());
-    	Log.i(LOG_KEY, "BANNER: " + AdSize.BANenabledNER.getWidth() + "x" + AdSize.BANNER.getHeight());
-    	*/
-    	//AdSize adsize = new AdSize(getWindowSize()[0], AdSize.BANNER.getHeight());
-    	
+    {	
     	try {
 	    	// Create the adView
 	        AdView adView = new AdView(this, AdSize.BANNER, WallChanger.MY_AD_UNIT_ID);
 	        // Lookup your LinearLayout assuming its been given
 	        // the attribute android:id="@+id/mainLayout"
 	        LinearLayout layout = (LinearLayout)findViewById(R.id.adLayout);
-	        if(layout == null) return;
+	        if(layout == null) {
+	        	Logger.LogWarning("Unable to add Ads.");
+	        	return;
+	        }
 	        // Add the adView to it
 	        layout.addView(adView);
 	        // Initiate a generic request to load it with an ad
 	        AdRequest ad = new AdRequest();
 	        ad.setTesting(WallChanger.isTesting());
 	        adView.loadAd(ad);
-    	} catch(Exception ex) { Log.e(WallChanger.LOG_KEY, "Error adding ads: " + ex.toString()); }    
+    	} catch(Exception ex) { Logger.LogWarning("Error adding ads.", ex); }    
     }
-
-	public void LogError(String msg) { WallChanger.LogError(msg); }
-	public void LogError(String msg, Throwable ex) { WallChanger.LogError(msg, ex); }
-	public void LogWarning(String msg) { WallChanger.LogWarning(msg); }
-	public void LogInfo(String msg) { WallChanger.LogInfo(msg); }
-	public void LogDebug(String msg) { WallChanger.LogDebug(msg); }
 	
     protected String getResourceString(int stringResourceID)
     {
@@ -100,5 +96,35 @@ public class BaseActivity extends Activity
             }
         });
     }
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+		Logger.LogVerbose("onStart :: " + this.toString());
+	}
+	
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Logger.LogVerbose("onStop :: " + this.toString());
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Logger.LogVerbose("onPause :: " + this.toString());
+	}
+	
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+		Logger.LogVerbose("onRestoreInstanceState :: " + this.toString());
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		Logger.LogVerbose("onDestroy :: " + this.toString());
+	}
 
 }

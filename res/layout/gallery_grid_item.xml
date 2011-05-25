@@ -21,7 +21,6 @@
 		style="?android:attr/ratingBarStyleSmall" 
 		android:layout_height="wrap_content" android:id="@+id/grid_item_rating"
 		android:max="5" android:layout_alignBottom="@+id/grid_item_image"
-		android:layout_alignLeft="@+id/grid_item_image"
-		android:visibility="visible"/>
+		android:layout_alignLeft="@+id/grid_item_image" android:visibility="gone"/>
 
 </RelativeLayout>

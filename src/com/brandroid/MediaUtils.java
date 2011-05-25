@@ -1,10 +1,14 @@
-package com.brandroid.dynapaper;
+package com.brandroid;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+
+import com.brandroid.dynapaper.WallChanger;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,17 +16,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.os.Environment;
 
-public class MediaIO {
+public class MediaUtils {
 	public static String MEDIA_DIRECTORY = "brandroid";
 	public static boolean mExternalStorageAvailable = false;
 	public static boolean mExternalStorageWriteable = false;
 	public static String mExternalState = Environment.getExternalStorageState();
 	private static boolean mChecked = false;
 	private static File mCacheDir = Environment.getDownloadCacheDirectory();
-	
-	private static void LogError(String s) { WallChanger.LogError(s); }
-	private static void LogError(String s, Throwable t) { WallChanger.LogError(s, t); }
-	private static void LogInfo(String s) { WallChanger.LogInfo(s); }
 	
 	public static void init(Context c)
 	{
@@ -57,7 +57,7 @@ public class MediaIO {
 			ret = mCacheDir;
 		else
 			ret = new File(Environment.getExternalStorageDirectory(), MEDIA_DIRECTORY);
-		LogInfo("Base directory: " + ret.toString());
+		Logger.LogInfo("Base directory: " + ret.toString());
 		return ret;
 	}
 	public static File getCacheDirectory()
@@ -68,16 +68,16 @@ public class MediaIO {
     public static Boolean writeFile(String filename, Bitmap bmp, Boolean useCache)
     {
     	Boolean success = false;
-    	FileOutputStream s = null;
+    	OutputStream s = null;
     	try {
     		File f = new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename);
-    		//LogInfo("Writing to " + f.toString());
+    		//Logger.LogInfo("Writing to " + f.toString());
         	//if(!f.createNewFile()) return false;
-    		s = new FileOutputStream(f);
+    		s = new BufferedOutputStream(new FileOutputStream(f));
     		bmp.compress(CompressFormat.JPEG, 100, s);
     		success = true;
     	} catch(IOException ex) {
-    		LogError("Exception saving file.");
+    		Logger.LogError("Exception saving file.", ex);
     		mExternalStorageWriteable = false;
     	}
     	finally {
@@ -85,7 +85,7 @@ public class MediaIO {
 				try {
 					s.close();
 				} catch (IOException e) {
-					LogError("Exception closing stream for \"" + filename + "\".", e);
+					Logger.LogError("Exception closing stream for \"" + filename + "\".", e);
 				}
     	}
     	return success;
@@ -97,18 +97,46 @@ public class MediaIO {
     	try {
     		File f = new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename);
     		if(!f.exists()) return null;
-        	//LogInfo("Reading from " + f.toString());
+        	//Logger.LogInfo("Reading from " + f.toString());
     		s = new BufferedInputStream(new FileInputStream(f));
     		ret = BitmapFactory.decodeStream(s);
-    	} catch(IOException ex) { LogError("Exception reading bitmap file.", ex); }
+    	} catch(IOException ex) { Logger.LogError("Exception reading bitmap file.", ex); }
     	finally {
     		if(s != null)
 				try {
 					s.close();
 				} catch (IOException e) {
-					LogError("Exception closing stream.", e);
+					Logger.LogError("Exception closing stream.", e);
 				}
     	}
     	return ret;
     }
+    public static Bitmap getSizedBitmap(Bitmap bmp, int mw, int mh)
+	{
+		int w = bmp.getWidth();
+		int h = bmp.getHeight();
+		Logger.LogDebug("Bitmap Size: " + w + "x" + h + "  Max Size: " + mw + "x" + mh);
+		if(w > mw && h > mh)
+		{
+			if((w - mw) < (h - mh))
+			{
+				double r = (double)h / (double)w;
+				w = mw;
+				h = (int)Math.floor(r * (double)w);
+			} else {
+				double r = (double)w / (double)h;
+				h = mh;
+				w = (int)Math.floor(r * (double)h);
+			}
+			Logger.LogDebug("Resizing to " + w + "x" + h);
+			try {
+				bmp = Bitmap.createScaledBitmap(bmp, w, h, true);
+				//bmp.recycle();
+				//return ret;
+			} catch(Exception ex) {
+				Logger.LogError("Resizing Failed. Using original.", ex);
+			}
+		} else Logger.LogDebug("No resizing needed.");
+		return bmp;
+	}
 }
