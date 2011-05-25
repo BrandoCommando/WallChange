@@ -1,12 +1,14 @@
 package com.brandroid.dynapaper.Activities;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -147,7 +149,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		if(url == "")
 			url = "schema.jpg";
 		if(mBtnWeather.isChecked())
-			url = WallChanger.MY_ROOT_URL + "/images/weather.php?source=google&format=image&type=png&gs=0&" +
+			url = WallChanger.MY_WEATHER_URL + "?source=google&format=image&type=image&gs=0" +
 				"&x=26&w=" + getHomeWidth() + "&h=" + getHomeHeight() +
 				(mTxtZip.getText().length() > 0 ? "&zip=" + mTxtZip.getText() : "") +
 				"&i1=" + URLEncoder.encode(url.replace(WallChanger.MY_ROOT_URL + "/images/", "").replace(WallChanger.MY_ROOT_URL, ""));
@@ -423,8 +425,8 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 					ret.append(sLocation);
 				} else
 				{
-					mMonitor = new MonitorUploadTask();
-					mMonitor.execute(md5);
+					//mMonitor = new MonitorUploadTask();
+					//mMonitor.execute(md5);
 					WallChanger.LogInfo("New upload!");
 					con.disconnect();
 					url = new URL(WallChanger.MY_UPLOAD_IMAGE_URL.replace("%USER%", WallChanger.getUser()).replace("%MD5%", md5));
@@ -435,32 +437,10 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 					con.setDoInput(true);
 					con.setUseCaches(false);
 					//con.setRequestProperty("Connection", "Keep-Alive");
-					con.setRequestProperty("Content-Type", "multipart/form-data; boundary=*****");
-
-					out = new DataOutputStream( con.getOutputStream() );
-
-					out.writeBytes("--*****\n");
-					out.writeBytes("Content-Disposition: form-data; name=\"file\"; filename=\"" + md5 + ".jpg\"\n");
-					out.writeBytes("Content-Type: image/jpeg\n\n");
-
-					// create a buffer of maximum size
-					int bytesAvailable = data.length;
-					int maxBufferSize = WallChanger.DOWNLOAD_CHUNK_SIZE;
-					int bufferSize = Math.min(bytesAvailable, maxBufferSize);
-					for(int i = 0; i < bytesAvailable; i += bufferSize)
-					{
-						publishProgress(i, bytesAvailable);
-						out.write(data, i, Math.min(data.length - i, bufferSize));
-					}
+					//con.setRequestProperty("Content-Type", "multipart/form-data; boundary=*****");
 					
-					// send multipart form data necesssary after file data...
-					out.writeBytes("--*****--");
+					writeDataToStream(data, con.getOutputStream());
 					
-					publishProgress(-1);
-					// close streams
-					out.flush();
-					out.close();
-
 					in = con.getInputStream();
 					sr = new InputStreamReader(in);
 					char[] buf = new char[64];
@@ -470,7 +450,6 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 						if(buf.length < 64)
 							break;
 					}
-					publishProgress(-1);
 				}
 			} catch(Exception ex) {
 				LogError("Uploading error.", ex);
@@ -488,6 +467,51 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 				
 			}
 			return ret.toString();
+		}
+		
+		public void writeDataToStream(byte[] data, OutputStream s) throws IOException
+		{
+			BufferedOutputStream out = new BufferedOutputStream(s);
+			publishProgress(0, data.length);
+			for(int i = 0; i < data.length; i += WallChanger.DOWNLOAD_CHUNK_SIZE)
+			{
+				int writelen = WallChanger.DOWNLOAD_CHUNK_SIZE;
+				if(writelen + i > data.length)
+					writelen = data.length - i;
+				if(writelen <= 0) break;
+				out.write(data, i, writelen);
+				publishProgress(i, data.length);
+			}
+			out.flush();
+			publishProgress(-1);
+		}
+
+		public void writeFormDataToStream(byte[] data, String md5, OutputStream s) throws IOException
+		{
+			DataOutputStream out = new DataOutputStream( s );
+			
+			out.writeBytes("--*****\n");
+			out.writeBytes("Content-Disposition: form-data; name=\"file\"; filename=\"" + md5 + ".jpg\"\n");
+			out.writeBytes("Content-Type: image/jpeg\n\n");
+
+			// create a buffer of maximum size
+			int bytesAvailable = data.length;
+			int maxBufferSize = WallChanger.DOWNLOAD_CHUNK_SIZE;
+			int bufferSize = Math.min(bytesAvailable, maxBufferSize);
+			for(int i = 0; i < bytesAvailable; i += bufferSize)
+			{
+				publishProgress(i, bytesAvailable);
+				out.write(data, i, Math.min(data.length - i, bufferSize));
+			}
+			
+			// send multipart form data necesssary after file data...
+			out.writeBytes("--*****--");
+			
+			publishProgress(-1);
+			// close streams
+			out.flush();
+			out.close();
+
 		}
 		
 		@Override
