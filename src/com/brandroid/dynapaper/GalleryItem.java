@@ -139,6 +139,9 @@ public class GalleryItem
 			mThumbnail = MediaUtils.readFileBitmap(getID() + ".jpg", true);
 		return mThumbnail;
 	}
+	public Boolean hasThumbnail() {
+		return MediaUtils.fileExists(getID() + ".jpg", true);
+	}
 
 	public void setWidth(int mWidth) {
 		this.mWidth = mWidth;

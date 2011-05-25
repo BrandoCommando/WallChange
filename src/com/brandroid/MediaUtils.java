@@ -64,6 +64,13 @@ public class MediaUtils {
 	{
 		return mCacheDir;
 	}
+	
+	public static Boolean fileExists(String filename, Boolean useCache)
+	{
+		File f = new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename);
+		if(f.exists()) return true;
+		return false;
+	}
 
     public static Boolean writeFile(String filename, Bitmap bmp, Boolean useCache)
     {
