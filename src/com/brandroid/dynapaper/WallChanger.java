@@ -1,5 +1,7 @@
 package com.brandroid.dynapaper;
 
+import java.net.URLEncoder;
+
 import com.brandroid.Logger;
 
 import android.util.Log;
@@ -16,7 +18,7 @@ public class WallChanger
 	public static final String MY_WEATHER_URL = MY_APP_ROOT_URL + "widget_weather.php?user=%USER%";
 	public static final String MY_GALLERY_URL = MY_APP_ROOT_URL + "gallery2.php?user=%USER%";
 	public static final String MY_IMAGE_URL = MY_APP_ROOT_URL + "get_image.php?user=%USER%&url=%URL%";
-	public static final String MY_THUMB_URL = MY_APP_ROOT_URL + "get_thumb.php?url=%URL%";
+	public static final String MY_THUMB_URL = MY_APP_ROOT_URL + "get_thumb.php?user=%USER%&url=%URL%";
 	public static final String MY_USER_IMAGE_URL = MY_APP_ROOT_URL + "get_user_image.php?user=%USER%&md5=%MD5%";
 	public static final String MY_UPLOAD_IMAGE_URL = MY_APP_ROOT_URL + "upload_user_image.php?user=%USER%&md5=%MD5%&UPLOAD_IDENTIFIER=%MD5%&APC_UPLOAD_PROGRESS=%MD5%";
 	//public static final String MY_UPLOAD_IMAGE_URL = MY_ROOT_URL + "/images/upload.php?user=%USER%&md5=%MD5%&UPLOAD_IDENTIFIER=%MD5%&APC_UPLOAD_PROGRESS=%MD5%";
@@ -50,16 +52,16 @@ public class WallChanger
 	public final static Boolean isTesting() { return bTesting; }
 	public static int getUploadQuality() { return mUploadQuality; }
     
-	public static String getImageThumbUrl(String sBase)
+	public static String getImageThumbUrl(String sBase, int width, int height)
     {
-    	return MY_THUMB_URL.replace("%URL%", sBase.substring(sBase.lastIndexOf("/") + 1).replace("?", "&"));
+    	return MY_THUMB_URL.replace("%USER%", getUser()).replace("%URL%", URLEncoder.encode(sBase)) + (width > 0 ? "&w=" + width : "") + (height > 0 ? "&h=" + height : "");
     }
     
     public static String getImageFullUrl(String sBase)
     {
     	if(sBase.contains("//") && !sBase.startsWith(MY_ROOT_URL))
     		return sBase;
-    	return MY_IMAGE_URL.replace("%USER%", getUser()).replace("%URL%", sBase.substring(sBase.lastIndexOf("/") + 1));
+    	return MY_IMAGE_URL.replace("%USER%", getUser()).replace("%URL%", URLEncoder.encode(sBase));
     }
     
     

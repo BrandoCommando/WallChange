@@ -299,7 +299,13 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 	    		String url = urls[0]; //item.getURL();
 	    		if(url.startsWith("images/"))
 	    			url = url.substring(7);
-	    		url = WallChanger.getImageThumbUrl(url);
+	    		int width = 0, height = 0;
+	    		if(mView != null)
+	    		{
+	    			width = mView.getWidth();
+	    			height = mView.getHeight();
+	    		}
+	    		url = WallChanger.getImageThumbUrl(url, width, height);
 	    		//Log.i(Preferences.LOG_KEY, url);
 	    		HttpURLConnection uc = (HttpURLConnection)new URL(url).openConnection();
 	    		uc.setReadTimeout(5000);

@@ -277,7 +277,9 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 					mImgPreview.setImageBitmap(mGalleryBitmap);
 				}
 			} else {
-				String sThumbUrl = WallChanger.getImageThumbUrl(mTxtURL.getText().toString() + "?w=" + (getHomeWidth() / 2));
+				int width = 0, height = 0;
+				width = getHomeWidth() / 2;
+				String sThumbUrl = WallChanger.getImageThumbUrl(mTxtURL.getText().toString(), width, height);
 				Logger.LogWarning("Couldn't find image in Intent. Re-downloading " + sThumbUrl, new Exception("Dummy"));
 				new DownloadToWallpaperTask(true).execute(sThumbUrl);
 			}
