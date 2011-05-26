@@ -1,5 +1,6 @@
 package com.brandroid.dynapaper.Database;
 
+import com.brandroid.Logger;
 import com.brandroid.dynapaper.GalleryItem;
 import com.brandroid.dynapaper.Prefs;
 
@@ -180,6 +181,19 @@ public class GalleryDbAdapter
     			item.getWidth(), item.getHeight(), item.getTags(),
     			(Float)item.getRating(), item.getDownloadCount(), true, item.getDays());
     }
+    public int updateItems(GalleryItem[] items)
+    {
+    	int ret = 0;
+    	mDb.beginTransaction();
+    	try {
+    		for(int i = 0; i < items.length; i++)
+    			ret += updateItem(items[i]) ? 1 : 0;
+    	} catch(Exception ex) { Logger.LogError("Exception updating items in DB.", ex); }
+    	finally {
+    		mDb.endTransaction();
+    	}
+    	return ret;
+    }
     public boolean updateItem(long Id, String title, String url, byte[] data,
     		Integer width, Integer height, String tags,
     		Float rating, Integer downloads, Boolean visible, Integer days) {
@@ -194,7 +208,7 @@ public class GalleryDbAdapter
 		args.put(KEY_TAGS, tags);
 		args.put(KEY_VISIBLE, visible);
 		args.put(KEY_DAYS, days);
-
+		
 		return mDb.update(DATABASE_TABLE, args, KEY_ID + "=" + Id, null) > 0;
     }
     

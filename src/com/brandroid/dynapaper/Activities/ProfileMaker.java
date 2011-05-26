@@ -647,19 +647,15 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 					    			publishProgress(Integer.parseInt(zip));
 					    		} catch(Exception ex) { }
 				    		}
-							int adds = 0;
 							try {
 								JSONArray jsonImages = jsonGallery.getJSONArray("images");
-								for(int imgIndex = 0; imgIndex < jsonImages.length(); imgIndex++)
-								{
-									GalleryItem item = new GalleryItem(jsonImages.getJSONObject(imgIndex));
-									if(cIDs.contains(","+item.getID()+","))
-										adds += gdb.updateItem(item) ? 1 : 0;
-									else
-										adds += gdb.createItem(item);
-								}
+								GalleryItem[] items = new GalleryItem[jsonImages.length()];
+								for(int imgIndex = 0; imgIndex < items.length; imgIndex++)
+									items[imgIndex] = new GalleryItem(jsonImages.getJSONObject(imgIndex));
 								
-								Logger.LogInfo("Successfully added " + adds + " records!");
+								int adds = gdb.updateItems(items);
+								
+								Logger.LogInfo("Successfully add/updated " + adds + " records!");
 								success = true;
 								prefs.setSetting("gallery_update", modified.toString());
 							} catch (Exception je) {
@@ -674,6 +670,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 			catch(MalformedURLException mex) { Logger.LogError(mex.toString(), mex); }
 			catch(ProtocolException pex) { Logger.LogError(pex.toString(), pex); }
 			catch(IOException ex) { Logger.LogError(ex.toString(), ex); }
+			catch(Exception ex) { Logger.LogError(ex.toString(), ex); }
 	    	finally {
 				if(uc != null) uc.disconnect();
 				in = null;

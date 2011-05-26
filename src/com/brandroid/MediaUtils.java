@@ -71,6 +71,11 @@ public class MediaUtils {
 		if(f.exists()) return true;
 		return false;
 	}
+	
+	public static String getFullFilename(String filename, Boolean useCache)
+	{
+		return new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename).getAbsolutePath();
+	}
 
     public static Boolean writeFile(String filename, Bitmap bmp, Boolean useCache)
     {

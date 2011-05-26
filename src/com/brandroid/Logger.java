@@ -18,7 +18,8 @@ public class Logger
 	{
 		if(!LoggingEnabled) return true;
 		level -= 2;
-		if(msg.equalsIgnoreCase(sLastMessage[level]))
+		if(level < 0 || level > 4) return false;
+		if(sLastMessage[level] != null && msg != null && msg.equalsIgnoreCase(sLastMessage[level]))
 		{
 			iLastCount[level]++;
 			return true;

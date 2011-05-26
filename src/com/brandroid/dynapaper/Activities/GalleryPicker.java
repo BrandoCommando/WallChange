@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -215,7 +216,7 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 		        	mGalleryCursor.moveToPosition(position);
 		        	GalleryItem item = new GalleryItem(mGalleryCursor);
 		        	int id = item.getID();
-		        	Bitmap data = item.getThumbnail(); //c.getBlob(c.getColumnIndex(GalleryDbAdapter.KEY_DATA));
+		        	//Bitmap data = item.getThumbnail(); //c.getBlob(c.getColumnIndex(GalleryDbAdapter.KEY_DATA));
 		        	String url = item.getURL(); //c.getString(c.getColumnIndex(GalleryDbAdapter.KEY_URL));
 		        	ImageView iv = ((ImageView)view.findViewById(R.id.grid_item_image));
 		        	RatingBar ratingBar = (RatingBar)view.findViewById(R.id.grid_item_rating);
@@ -237,8 +238,9 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 			    		ratingBar.setVisibility(View.GONE);
 			    	}
 		        	//ImageView iv = ;
-			    	if(iv.getTag() == null && data == null)
+			    	if(iv.getTag() == null && !item.hasThumbnail())
 			    	{
+			    		Logger.LogDebug("Thumnail needs to be downloaded!");
 			    		if(mDownloads.containsKey(url))
 			    		{
 			    			DownloadImageTask task = mDownloads.get(url);
@@ -250,10 +252,12 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 			    		//mArrayDownloads.add(task);
 			    		//task.execute(url);
 			    	}
-			    	else if(data != null)
+			    	else if(item.hasThumbnail())
 			        {
+			    		Logger.LogDebug("Thumnail exists!");
 			    		iv.setTag(true);
-			        	iv.setImageBitmap(data);
+			        	iv.setImageBitmap(item.getThumbnail());
+			    		//iv.setImageURI(Uri.parse(item.getThumbnailFilename(true)));
 			        	progressBar.setVisibility(View.GONE);
 			        	//((ImageView)view.findViewById(R.id.grid_item_image)).setImageBitmap(item.getBitmap());
 			        } else Logger.LogWarning("Unknown sitch");
@@ -312,7 +316,7 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 	    		uc.connect();
 	    		s = new BufferedInputStream(uc.getInputStream());
 	    		if(uc.getURL().toString() != url)
-	    			Logger.LogInfo("Redirected to " + uc.getURL() + " from " + url);
+	    			Logger.LogVerbose("Redirected to " + uc.getURL() + " from " + url);
 	    		ret = BitmapFactory.decodeStream(s);
 	    		//item.setIsDownloading(false);
 	    		if(ret != null)
@@ -351,6 +355,8 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 	    	//if(--iDownloads==0);
 	    	//	mDb.close();
 	    	isDone = true;
+	    	if(mItem != null)
+	    		mItem.setThumbnail(bmp);
 	    	mDownloads.remove(mItem.getURL());
 	    	if(mView == null) return;
 	    	//if(result.getBitmap() == null) { mView.setVisibility(View.GONE); return; }
