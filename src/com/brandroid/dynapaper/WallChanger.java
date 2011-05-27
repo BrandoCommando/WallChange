@@ -4,12 +4,16 @@ import java.net.URLEncoder;
 
 import com.brandroid.Logger;
 
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 public class WallChanger
 {
 	public static final String LOG_KEY = "WallChanger";
-	public static final String MY_AD_UNIT_ID = "a14d9c70f03d5b2";
+	public static final String[] MY_AD_UNIT_ID = new String[] {"a14de00854229f0", "a14d9c70f03d5b2"};
 	public static final String MY_ROOT_URL = "http://791.b.hostable.me";
 	public static final String MY_ROOT_URL_GS = "http://commondatastorage.googleapis.com/data.brandonbowles.com";
 	public static final String MY_IMAGE_ROOT_URL = MY_ROOT_URL + "/images/";
@@ -33,7 +37,10 @@ public class WallChanger
 	private static int mUploadQuality = 100;
 	private static Boolean bPaidMode = false;
 	private static Boolean bTesting = true;
-
+	private static String mDeviceId;
+	private static Location mLastLocation;
+	public static Prefs Prefs;
+	
 	public static String getUser() { return getUser("",""); }
 	public static String getUser(String prefix) { return getUser(prefix,""); }
 	public static String getUser(String prefix, String suffix) {
@@ -64,5 +71,62 @@ public class WallChanger
     	return MY_IMAGE_URL.replace("%USER%", getUser()).replace("%URL%", URLEncoder.encode(sBase));
     }
     
+    public static String getDeviceId(Context c)
+    {
+    	String ret = "";
+    	try {
+    		ret = ((TelephonyManager)c.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
+    		Logger.LogVerbose("My Device ID: " + ret);
+    	} catch(SecurityException sex) { Logger.LogError("Couldn't get Device ID", sex); }
+    	return ret;
+    }
+    
+    public static Boolean setLastLocation(Location l)
+    {
+    	if(isBetterLocation(l, mLastLocation))
+    	{
+    		Logger.LogInfo("Location Update: " + l.toString());
+    		if(Prefs != null)
+    			Prefs.setSettings("latitude", l.getLatitude(), "longitude", l.getLongitude(), "accuracy", l.getAccuracy(), "loctime", l.getTime());
+    		return true;
+    	} else return false;
+    }
+    public static Boolean isBetterLocation(Location a, Location b)
+    {
+    	if(a == null) return false;
+    	if(b == null) return true;
+    	Long deltaTime = a.getTime() - b.getTime();
+    	if(deltaTime > 6000000) // 1 hour
+    		return true;
+    	else if (deltaTime < -600000)
+    		return false;
+    	if(a.hasAccuracy())
+    	{
+    		if(!b.hasAccuracy()) return true;
+    		else if(a.getAccuracy() < b.getAccuracy())
+    			return true;
+    		else return false;
+    	} else if(b.hasAccuracy())
+    		return false;
+    	else
+    		return true;
+    }
+    public static Location getLastLocation()
+    {
+    	if(mLastLocation != null) return mLastLocation;
+    	Location ret = new Location(LocationManager.GPS_PROVIDER);
+    	if(Prefs != null)
+    	{
+    		if(Prefs.hasSetting("latitude"))
+    			ret.setLatitude(Prefs.getSetting("latitude", ret.getLatitude()));
+    		if(Prefs.hasSetting("longitude"))
+    			ret.setLongitude(Prefs.getSetting("longitude", ret.getLongitude()));
+    		if(Prefs.hasSetting("accuracy"))
+    			ret.setAccuracy(Prefs.getSetting("accuracy", ret.getAccuracy()));
+    		if(Prefs.hasSetting("loctime"))
+    			ret.setTime(Prefs.getSetting("loctime", ret.getTime()));
+    	}
+    	return ret;
+    }
     
 }

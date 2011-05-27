@@ -50,13 +50,13 @@ public class GalleryDbAdapter
         @Override
         public void onCreate(SQLiteDatabase db)
         {
-        	Log.i(Prefs.LOG_KEY, "Creating database");
+        	Logger.LogVerbose("Creating database");
             db.execSQL(DATABASE_CREATE);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.w(Prefs.LOG_KEY, "Upgrading database from version " + oldVersion + " to "
+            Logger.LogVerbose("Upgrading database from version " + oldVersion + " to "
                     + newVersion + ", which will destroy all old data");
             db.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE);
             onCreate(db);

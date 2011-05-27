@@ -16,6 +16,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
@@ -33,11 +35,19 @@ import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.dynapaper.Database.GalleryDbAdapter;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Criteria;
+import android.location.GpsStatus;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
@@ -68,6 +78,9 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	private UploadTask mUploadTask;
 	private DownloadToWallpaperTask mDownloadTask;
 	private GalleryDbAdapter gdb;
+	private LocationProvider locationProvider;
+	private LocationListener locationListener;
+	private LocationManager locationManager;
 	
 	//private String mGPSLocation = null;
 	
@@ -194,8 +207,14 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	}
 	public void onClickGPS()
 	{
-		// TODO: Add GPS!!
-		mTxtZip.setEnabled(mBtnGPS.isChecked());
+		try {
+			LocationListener ll = getLocationListener();
+			if(mBtnGPS.isChecked())
+				locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);
+			else
+				locationManager.removeUpdates(ll);
+		} catch(Exception ex) { Logger.LogError("Error toggling GPS", ex); }
+		//mTxtZip.setEnabled(mBtnGPS.isChecked());
 	}
 
 	@Override
@@ -232,6 +251,77 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 				mTxtURL.setVisibility(mTxtURL.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
 				break;
 		}
+	}
+	
+	public LocationListener getLocationListener()
+	{
+		if(locationListener != null) return locationListener;
+		locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
+		final Timer cancelTimer = new Timer(false);
+		final TimerTask cancelTask = new TimerTask() {
+			public void run() {
+				locationManager.removeUpdates(getLocationListener());
+			}
+		};
+		locationListener = new LocationListener()
+		{
+			public void onStatusChanged(String provider, int status, Bundle extras)
+			{
+				Logger.LogWarning("LocationListener Status Change: " + status);
+			}
+			public void onProviderEnabled(String provider) { Logger.LogInfo("Location Provider \"" + provider + "\" enabled."); }
+			public void onProviderDisabled(String provider) {
+				Logger.LogInfo("Location Provider \"" + provider + "\" disabled.");
+			}
+			public void onLocationChanged(Location location) {
+				if(WallChanger.setLastLocation(location))
+				{
+					String lat = ((Double)location.getLatitude()).toString();
+					if(lat.length() > 6)
+						lat = lat.substring(0, Math.max(6, lat.indexOf(".") + 3));
+					String lng = ((Double)location.getLongitude()).toString();
+					if(lng.length() > 6)
+						lng = lng.substring(0, Math.max(6, lng.indexOf(".") + 3));
+					mTxtZip.setText(lat+","+lng);
+				}
+			}
+		};
+		locationManager.addGpsStatusListener(new GpsStatus.Listener() {
+			public void onGpsStatusChanged(int event) {
+				switch(event)
+				{
+					case GpsStatus.GPS_EVENT_STARTED:
+						cancelTimer.schedule(cancelTask, 30000);
+						mBtnGPS.setTextColor(Color.DKGRAY);
+						break;
+					case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
+						mBtnGPS.setTextColor(Color.CYAN);
+						break;
+					case GpsStatus.GPS_EVENT_FIRST_FIX:
+						mBtnGPS.setTextColor(Color.GREEN);
+						break;
+					case GpsStatus.GPS_EVENT_STOPPED:
+						mBtnGPS.setTextColor(Color.WHITE);
+						break;
+					default: Logger.LogWarning("GpsListener Status Change: " + event);
+				}
+			}
+		});
+		Criteria c = new Criteria();
+		c.setAccuracy(Criteria.ACCURACY_FINE);
+		String provider = locationManager.getBestProvider(c, true);
+		Logger.LogInfo("Best provider: " + provider);
+		LocationProvider lp = locationManager.getProvider(provider);
+		Logger.LogInfo(lp.getName() + " accuracy: " + lp.getAccuracy()); 
+		Location loc = locationManager.getLastKnownLocation(provider);
+		if(loc == null)
+			if(provider != LocationManager.NETWORK_PROVIDER)
+				loc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			
+		if(loc != null)
+			WallChanger.setLastLocation(loc);
+		
+		return locationListener;
 	}
 	
 	@Override

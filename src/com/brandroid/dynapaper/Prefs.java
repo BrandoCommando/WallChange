@@ -1,45 +1,29 @@
 package com.brandroid.dynapaper;
 
+import java.util.Set;
+
+import com.brandroid.Logger;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.util.Log;
 
 public class Prefs {
-	public static final String LOG_KEY = "WallChanger";
 	public static final String PREFS_NAME = "WallChangerPrefs";
-	public static final String EXTRA_SHORTCUT = "WallChangerShortcut";
-	public static final String MY_AD_UNIT_ID = "a14d9c70f03d5b2";
-	public static final String MY_ROOT_URL = "http://android.brandonbowles.com";
-	public static boolean ExternalStorageAvailable = false;
-	public static boolean ExternalStorageWriteable = false;
 	
 	private static Prefs preferences;
 	private SharedPreferences mStorage; 
 	
 	public Prefs(Context context)
 	{
-		String state = Environment.getExternalStorageState();
-
-		if (Environment.MEDIA_MOUNTED.equals(state)) {
-		    // We can read and write the media
-		    ExternalStorageAvailable = ExternalStorageWriteable = true;
-		} else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-		    // We can only read the media
-		    ExternalStorageAvailable = true;
-		    ExternalStorageWriteable = false;
-		} else {
-		    // Something else is wrong. It may be one of many other states, but all we need
-		    //  to know is we can neither read nor write
-		    ExternalStorageAvailable = ExternalStorageWriteable = false;
-		}
-		
 		mStorage = context.getSharedPreferences(PREFS_NAME, 0);
 	}
 	public static synchronized Prefs getPreferences(Context context)
 	{
 		if(preferences == null)
 			preferences = new Prefs(context);
+		Logger.LogVerbose("Getting instance of SharedPreferences");
 		return preferences;
 	}
 	
@@ -47,29 +31,37 @@ public class Prefs {
 	{
 		try {
 			return mStorage.getString(key, defValue);
-		} catch(ClassCastException cce) { Log.e(LOG_KEY, "Couldn't get string from Prefs.", cce); return defValue; }
+		} catch(ClassCastException cce) { Logger.LogError("Couldn't get string \"" + key + "\" from Prefs.", cce); return defValue; }
 	}
-	public int getSetting(String key, int defValue)
+	public int getSetting(String key, Integer defValue)
 	{
 		//return mStorage.getInt(key, defValue);
 		try {
-			String s = mStorage.getString(key, ""+defValue);
+			String s = mStorage.getString(key, defValue.toString());
 			return Integer.parseInt(s);
 		} catch(Exception e) { return defValue; }
 	}
-	public float getSetting(String key, float defValue)
+	public float getSetting(String key, Float defValue)
 	{
 		//return mStorage.getFloat(key, defValue);
 		try {
-			String s = mStorage.getString(key, ""+defValue);
+			String s = mStorage.getString(key, defValue.toString());
 			return Float.parseFloat(s);
+		} catch(Exception e) { return defValue; }
+	}
+	public Double getSetting(String key, Double defValue)
+	{
+		//return mStorage.getFloat(key, defValue);
+		try {
+			String s = mStorage.getString(key, defValue.toString());
+			return Double.parseDouble(s);
 		} catch(Exception e) { return defValue; }
 	}
 	public Boolean getSetting(String key, Boolean defValue)
 	{
 		//return mStorage.getBoolean(key, defValue);
 		try {
-			String s = mStorage.getString(key, ""+defValue);
+			String s = mStorage.getString(key, defValue.toString());
 			return Boolean.parseBoolean(s);
 		} catch(Exception e) { return defValue; }
 	}
@@ -79,7 +71,7 @@ public class Prefs {
 			//return mStorage.getLong(key, defValue);
 		//} catch(Throwable t) { return defValue; }
 		try {
-			String s = mStorage.getString(key, ""+defValue);
+			String s = mStorage.getString(key, defValue.toString());
 			return Long.parseLong(s);
 		} catch(Exception e) { return defValue; }
 	}
@@ -109,6 +101,28 @@ public class Prefs {
 		editor.putString(key, value.toString());
 		//editor.putInt(key, value);
 		editor.commit();
+	}
+	public void setSettings(Object... vals)
+	{
+		SharedPreferences.Editor editor = getPreferences().edit();
+		for(int i = 0; i < vals.length - 1; i += 2)
+		{
+			String key = vals[i].toString();
+			Object val = vals[i+1];
+			if(val == null) return;
+			if(Integer.class.equals(val.getClass()))
+				editor.putInt(key, (Integer)val);
+			else if(Float.class.equals(val.getClass()))
+				editor.putFloat(key, (Float)val);
+			else if(Long.class.equals(val.getClass()))
+				editor.putLong(key, (Long)val);
+			else if(Boolean.class.equals(val.getClass()))
+				editor.putBoolean(key, (Boolean)val);
+			else
+				editor.putString(key, val.toString());
+		}
+		editor.commit();
+		//pairs.
 	}
 	public Boolean hasSetting(String key)
 	{

@@ -1,5 +1,7 @@
 package com.brandroid.dynapaper.Activities;
 
+import java.sql.Date;
+
 import com.brandroid.Logger;
 import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
@@ -9,8 +11,11 @@ import com.google.ads.AdSize;
 import com.google.ads.AdView;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -31,7 +36,9 @@ public class BaseActivity extends Activity
 		Logger.LogVerbose("onCreate :: " + this.toString());
 
         mResources = getResources();
-        prefs = Prefs.getPreferences(getApplicationContext());
+        if(WallChanger.Prefs == null)
+        	WallChanger.Prefs = Prefs.getPreferences(getApplicationContext());
+        prefs = WallChanger.Prefs;
         
         if(!WallChanger.isPaidMode())
         	addAds();
@@ -44,7 +51,11 @@ public class BaseActivity extends Activity
     {	
     	try {
 	    	// Create the adView
-	        AdView adView = new AdView(this, AdSize.BANNER, WallChanger.MY_AD_UNIT_ID);
+    		Time t = new Time();
+    		int iAdToUse = t.hour % WallChanger.MY_AD_UNIT_ID.length;
+    		String sAdID = WallChanger.MY_AD_UNIT_ID[iAdToUse]; 
+    		Logger.LogInfo("Using Ad ID #" + iAdToUse + " for Admob - " + sAdID);
+    		AdView adView = new AdView(this, AdSize.BANNER, sAdID);
 	        // Lookup your LinearLayout assuming its been given
 	        // the attribute android:id="@+id/mainLayout"
 	        LinearLayout layout = (LinearLayout)findViewById(R.id.adLayout);
@@ -56,7 +67,13 @@ public class BaseActivity extends Activity
 	        layout.addView(adView);
 	        // Initiate a generic request to load it with an ad
 	        AdRequest ad = new AdRequest();
-	        ad.setTesting(WallChanger.isTesting());
+	        if(WallChanger.isTesting())
+	        {
+	        	ad.addTestDevice(AdRequest.TEST_EMULATOR);
+	        	ad.addTestDevice("A0000015CF6B9D");
+	        	//ad.setTesting(WallChanger.isTesting());
+	        } else ad.setTesting(false);
+	        ad.setLocation(WallChanger.getLastLocation());
 	        adView.loadAd(ad);
     	} catch(Exception ex) { Logger.LogWarning("Error adding ads.", ex); }    
     }

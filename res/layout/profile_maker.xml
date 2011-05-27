@@ -44,11 +44,11 @@
 				android:layout_width="wrap_content" android:visibility="gone"
 				android:text="@string/btn_stocks" android:id="@+id/btnStocks"></Button>
 			<EditText android:layout_height="wrap_content"
-				android:layout_width="100dip" android:id="@+id/txtZip"
-				android:enabled="true"></EditText>
+				android:id="@+id/txtZip"
+				android:enabled="true" android:singleLine="true" android:layout_width="140dip"></EditText>
 			<CheckBox android:layout_height="wrap_content"
 				android:layout_width="wrap_content" android:id="@+id/btnGPS"
-				android:visibility="gone" android:checked="true" android:text="@string/btn_gps"></CheckBox>
+				android:text="@string/btn_gps" android:visibility="visible" android:checked="false"></CheckBox>
 		</LinearLayout>
 		<TextView android:layout_height="wrap_content"
 			android:layout_width="fill_parent" android:id="@+id/textView3"
