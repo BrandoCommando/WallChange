@@ -35,9 +35,9 @@ public class WallChanger
 	public final static Boolean OPTION_SHOW_GALLERY_INFO = true;
 	private static String mUser = "";
 	private static int mUploadQuality = 100;
-	private static Boolean bPaidMode = false;
-	private static Boolean bTesting = true;
-	private static String mDeviceId;
+	private static final Boolean bPaidMode = false;
+	private static final Boolean bTesting = false;
+	//private static String mDeviceId;
 	private static Location mLastLocation;
 	public static Prefs Prefs;
 	
@@ -71,6 +71,7 @@ public class WallChanger
     	return MY_IMAGE_URL.replace("%USER%", getUser()).replace("%URL%", URLEncoder.encode(sBase));
     }
     
+    /*
     public static String getDeviceId(Context c)
     {
     	String ret = "";
@@ -80,6 +81,7 @@ public class WallChanger
     	} catch(SecurityException sex) { Logger.LogError("Couldn't get Device ID", sex); }
     	return ret;
     }
+    */
     
     public static Boolean setLastLocation(Location l)
     {

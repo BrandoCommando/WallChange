@@ -69,10 +69,13 @@ public class BaseActivity extends Activity
 	        AdRequest ad = new AdRequest();
 	        if(WallChanger.isTesting())
 	        {
-	        	ad.addTestDevice(AdRequest.TEST_EMULATOR);
-	        	ad.addTestDevice("A0000015CF6B9D");
 	        	//ad.setTesting(WallChanger.isTesting());
 	        } else ad.setTesting(false);
+	        
+	        ad.addTestDevice(AdRequest.TEST_EMULATOR);
+        	//ad.addTestDevice("A0000015CF6B9D");
+        	ad.addTestDevice("383A6E6B957E2A18C8830E6C431B2AAF");
+        	
 	        ad.setLocation(WallChanger.getLastLocation());
 	        adView.loadAd(ad);
     	} catch(Exception ex) { Logger.LogWarning("Error adding ads.", ex); }    
