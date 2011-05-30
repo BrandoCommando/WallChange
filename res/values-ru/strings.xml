@@ -30,4 +30,9 @@
     <string name="btn_zip">Почтовый индекс</string>
     <string name="btn_gps">GPS</string>
     <string name="s_uploading">Загружаю</string>
+    <string name="local_storage_provider_external_label">Внешний носитель (SD)</string>
+    <string name="local_storage_provider_samsunggalaxy_label">% 1 $ S дополнительной внутренней памяти</string>
+    <string name="local_storage_provider_label">Складские помещения</string>
+    <string name="picker_sort_prompt">Параметры сортировки</string>
+    <string name="local_storage_provider_internal_label">Регулярные внутренние хранения</string>
 </resources>

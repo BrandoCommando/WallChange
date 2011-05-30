@@ -30,4 +30,9 @@
     <string name="btn_online">Online</string>
     <string name="menu_about">Over</string>
     <string name="s_uploading">Uploaden</string>
+    <string name="local_storage_provider_external_label">Externe opslag (SD-kaart)</string>
+    <string name="local_storage_provider_samsunggalaxy_label">% 1 $ s extra interne opslag</string>
+    <string name="local_storage_provider_label">Opslaglocatie</string>
+    <string name="picker_sort_prompt">Sorteer Opties</string>
+    <string name="local_storage_provider_internal_label">Regelmatige interne opslag</string>
 </resources>

@@ -30,4 +30,9 @@
     <string name="btn_zip">Código postal</string>
     <string name="btn_gps">GPS</string>
     <string name="s_uploading">Subir</string>
+    <string name="local_storage_provider_external_label">De almacenamiento externo (tarjeta SD)</string>
+    <string name="local_storage_provider_samsunggalaxy_label">% 1 $ s de almacenamiento interno adicional</string>
+    <string name="local_storage_provider_label">Ubicación de almacenamiento</string>
+    <string name="picker_sort_prompt">Opciones de ordenación</string>
+    <string name="local_storage_provider_internal_label">almacenamiento interno regular</string>
 </resources>

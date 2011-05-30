@@ -30,4 +30,9 @@
     <string name="btn_zip">邮政编码</string>
     <string name="btn_gps">全球定位系统</string>
     <string name="s_uploading">上传</string>
+    <string name="local_storage_provider_external_label">外部存储器（SD卡）</string>
+    <string name="local_storage_provider_samsunggalaxy_label">％1 $ s的额外内部存储</string>
+    <string name="local_storage_provider_label">存储位置</string>
+    <string name="picker_sort_prompt">排序选项</string>
+    <string name="local_storage_provider_internal_label">定期的内部存储</string>
 </resources>

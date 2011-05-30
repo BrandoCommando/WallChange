@@ -30,4 +30,9 @@
     <string name="btn_online">Online</string>
     <string name="menu_about">כ</string>
     <string name="s_uploading">העלאת</string>
+    <string name="local_storage_provider_external_label">אחסון חיצוניים (כרטיס SD)</string>
+    <string name="local_storage_provider_samsunggalaxy_label">% 1 $ s אחסון פנימי נוסף</string>
+    <string name="local_storage_provider_label">אחסון מיקום</string>
+    <string name="picker_sort_prompt">אפשרויות מיון</string>
+    <string name="local_storage_provider_internal_label">אחסון פנימי רגיל</string>
 </resources>

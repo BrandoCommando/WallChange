@@ -4,9 +4,9 @@ import com.brandroid.Logger;
 import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
-import com.google.ads.AdRequest;
-import com.google.ads.AdSize;
-import com.google.ads.AdView;
+import com.mobclix.android.sdk.MobclixAdView;
+import com.mobclix.android.sdk.MobclixAdViewListener;
+import com.mobclix.android.sdk.MobclixMMABannerXLAdView;
 
 import android.app.Activity;
 import android.content.res.Resources;
@@ -41,23 +41,71 @@ public class BaseActivity extends Activity
 	}
 	
 	public void addAds()
-    {	
+	{
+		LinearLayout layout = (LinearLayout)findViewById(R.id.adLayout);
+        if(layout == null) {
+        	Logger.LogWarning("Unable to add Ads.");
+        	return;
+        }
     	try {
+    		Logger.LogVerbose("Making request for Mobclix ads");
+    		MobclixAdView adView = new MobclixMMABannerXLAdView(this);
+    		adView.addMobclixAdViewListener(new MobclixAdViewListener() {
+				
+				@Override
+				public void onSuccessfulLoad(MobclixAdView adView) {
+					Logger.LogVerbose("Mobclix successfully added");
+				}
+				
+				@Override
+				public boolean onOpenAllocationLoad(MobclixAdView adView, int arg1) {
+					Logger.LogVerbose("Mobclix open allocation requested");
+					return false;
+				}
+				
+				@Override
+				public void onFailedLoad(MobclixAdView arg0, int arg1) {
+					Logger.LogWarning("Mobclix unable to load!");
+					
+				}
+				
+				@Override
+				public void onCustomAdTouchThrough(MobclixAdView arg0, String arg1) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void onAdClick(MobclixAdView arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public String keywords() {
+					// TODO Auto-generated method stub
+					return null;
+				}
+
+				@Override
+				public String query() {
+					// TODO Auto-generated method stub
+					return null;
+				}
+			});
+    		
 	    	// Create the adView
-	        AdView adView = new AdView(this, AdSize.BANNER, WallChanger.MY_AD_UNIT_ID);
+	        //AdView adView = new AdView(this, AdSize.BANNER, WallChanger.MY_AD_UNIT_ID);
 	        // Lookup your LinearLayout assuming its been given
 	        // the attribute android:id="@+id/mainLayout"
-	        LinearLayout layout = (LinearLayout)findViewById(R.id.adLayout);
-	        if(layout == null) {
-	        	Logger.LogWarning("Unable to add Ads.");
-	        	return;
-	        }
+	        
 	        // Add the adView to it
 	        layout.addView(adView);
+	        adView.getAd();
 	        // Initiate a generic request to load it with an ad
-	        AdRequest ad = new AdRequest();
-	        ad.setTesting(WallChanger.isTesting());
-	        adView.loadAd(ad);
+	        //AdRequest ad = new AdRequest();
+	        //ad.setTesting(WallChanger.isTesting());
+	        //adView.loadAd(ad);
     	} catch(Exception ex) { Logger.LogWarning("Error adding ads.", ex); }    
     }
 	

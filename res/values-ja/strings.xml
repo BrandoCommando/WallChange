@@ -30,4 +30,9 @@
     <string name="btn_zip">郵便番号</string>
     <string name="btn_gps">GPSを</string>
     <string name="s_uploading">アップロード</string>
+    <string name="local_storage_provider_external_label">外部ストレージ（SDカード）</string>
+    <string name="local_storage_provider_samsunggalaxy_label">％1 $追加の内部ストレージをよ</string>
+    <string name="local_storage_provider_label">保管場所</string>
+    <string name="picker_sort_prompt">ソートオプション</string>
+    <string name="local_storage_provider_internal_label">定期的に内部ストレージ</string>
 </resources>

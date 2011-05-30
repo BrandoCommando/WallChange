@@ -30,4 +30,9 @@
     <string name="btn_online">على الانترنت</string>
     <string name="menu_about">حول</string>
     <string name="s_uploading">تحميل</string>
+    <string name="local_storage_provider_external_label">التخزين الخارجية (بطاقة الذاكرة الرقمية المؤمنة)</string>
+    <string name="local_storage_provider_samsunggalaxy_label">٪ 1 $ ق تخزين داخلية إضافية</string>
+    <string name="local_storage_provider_label">موقع التخزين</string>
+    <string name="picker_sort_prompt">فرز الخيارات</string>
+    <string name="local_storage_provider_internal_label">الداخلية التخزين العادية</string>
 </resources>

@@ -30,4 +30,9 @@
     <string name="btn_zip">Zip Code</string>
     <string name="btn_gps">GPS</string>
     <string name="s_uploading">Caricamento</string>
+    <string name="local_storage_provider_external_label">Della memoria esterna (scheda SD)</string>
+    <string name="local_storage_provider_samsunggalaxy_label">% 1 $ s aggiuntivi di memoria interna</string>
+    <string name="local_storage_provider_label">Posizione di memorizzazione</string>
+    <string name="picker_sort_prompt">Opzioni di ordinamento</string>
+    <string name="local_storage_provider_internal_label">Regular storage interno</string>
 </resources>
