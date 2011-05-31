@@ -1,7 +1,5 @@
 package com.brandroid.dynapaper.Activities;
 
-import java.sql.Date;
-
 import com.brandroid.Logger;
 import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
@@ -12,10 +10,8 @@ import com.google.ads.AdSize;
 import com.google.ads.AdView;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.telephony.TelephonyManager;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.Display;
