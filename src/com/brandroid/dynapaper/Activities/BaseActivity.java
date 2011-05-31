@@ -6,6 +6,7 @@ import com.brandroid.Logger;
 import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
+import com.brandroid.dynapaper.Database.LoggerDbAdapter;
 import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
@@ -33,6 +34,9 @@ public class BaseActivity extends Activity
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		if(!Logger.hasDb())
+			Logger.setDb(new LoggerDbAdapter(this));
+		
 		Logger.LogVerbose("onCreate :: " + this.toString());
 
         mResources = getResources();
@@ -52,8 +56,8 @@ public class BaseActivity extends Activity
     	try {
 	    	// Create the adView
     		Time t = new Time();
-    		int iAdToUse = t.hour % WallChanger.MY_AD_UNIT_ID.length;
-    		String sAdID = WallChanger.MY_AD_UNIT_ID[iAdToUse]; 
+    		int iAdToUse = t.hour % (WallChanger.MY_AD_UNIT_ID.length + 1);
+    		String sAdID = WallChanger.MY_AD_UNIT_ID[iAdToUse];
     		Logger.LogInfo("Using Ad ID #" + iAdToUse + " for Admob - " + sAdID);
     		AdView adView = new AdView(this, AdSize.BANNER, sAdID);
 	        // Lookup your LinearLayout assuming its been given

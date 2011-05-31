@@ -19,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 import org.apache.http.util.ByteArrayBuffer;
@@ -35,7 +36,6 @@ import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.dynapaper.Database.GalleryDbAdapter;
 
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -278,10 +278,10 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 				{
 					String lat = ((Double)location.getLatitude()).toString();
 					if(lat.length() > 6)
-						lat = lat.substring(0, Math.max(6, lat.indexOf(".") + 3));
+						lat = lat.substring(0, Math.max(6, lat.indexOf(".") + 4));
 					String lng = ((Double)location.getLongitude()).toString();
 					if(lng.length() > 6)
-						lng = lng.substring(0, Math.max(6, lng.indexOf(".") + 3));
+						lng = lng.substring(0, Math.max(6, lng.indexOf(".") + 4));
 					mTxtZip.setText(lat+","+lng);
 				}
 			}
@@ -687,6 +687,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	    		uc = (HttpURLConnection)new URL(url).openConnection();
 	    		uc.setReadTimeout(20000);
 	    		uc.addRequestProperty("Accept-Encoding", "gzip, deflate");
+	    		
 	    		if(prefs.hasSetting("gallery_update"))
 	    		{
 	    			String sLastMod = prefs.getString("gallery_update", "");
@@ -700,7 +701,22 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		    		if(modified != null)
 		    			uc.setIfModifiedSince(modified);
 	    		}
-	    		uc.connect();
+	    		if(Logger.hasDb())
+	    		{
+	    			String sDbLogData = Logger.getDbLogs();
+	    			if(sDbLogData != "")
+	    			{
+	    				uc.setRequestProperty("LOG_ERRORS", sDbLogData);
+	    				/*
+	    				uc.setDoOutput(true);
+	    				GZIPOutputStream out = new GZIPOutputStream(uc.getOutputStream());
+	    				out.write(sDbLogData.getBytes());
+	    				out.flush();
+	    				out.close();
+	    				*/
+	    				//Logger.LogInfo("Gallery Error Log submitted " + sDbLogData.length() + " bytes");
+	    			}
+	    		}
 	    		if(uc.getResponseCode() == HttpURLConnection.HTTP_OK)
 	    		{
 	    			String encoding = uc.getContentEncoding();
@@ -743,7 +759,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 								for(int imgIndex = 0; imgIndex < items.length; imgIndex++)
 									items[imgIndex] = new GalleryItem(jsonImages.getJSONObject(imgIndex));
 								
-								int adds = gdb.updateItems(items);
+								int adds = gdb.createItems(items);
 								
 								Logger.LogInfo("Successfully add/updated " + adds + " records!");
 								success = true;

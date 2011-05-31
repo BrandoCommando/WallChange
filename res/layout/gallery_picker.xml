@@ -5,6 +5,11 @@
 	android:id="@+id/onlinePickerLayout"
 	android:gravity="center|top"
 	android:orientation="vertical">
+    <LinearLayout
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:id="@+id/adLayout"
+		android:layout_alignParentTop="true" />
     <Spinner
 		android:id="@+id/picker_sort"
 		android:prompt="@string/picker_sort_prompt"
@@ -13,9 +18,8 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content" android:visibility="gone"/>
     <GridView
-		android:layout_below="@+id/picker_sort"
-		android:layout_above="@+id/adLayout"
-		android:layout_alignWithParentIfMissing="true"
+		android:layout_below="@+id/adLayout"
+		android:layout_alignParentBottom="true"
 		android:numColumns="auto_fit"
 		android:layout_height="fill_parent"
 		android:layout_width="fill_parent"
@@ -25,10 +29,4 @@
 		android:columnWidth="90dp"
 		android:horizontalSpacing="2dp"
 		android:id="@+id/picker_grid" />
-    <LinearLayout
-		android:layout_height="wrap_content"
-		android:layout_width="fill_parent"
-		android:id="@+id/adLayout"
-		android:layout_alignParentBottom="true"
-		android:minHeight="50dip" />
 </RelativeLayout>

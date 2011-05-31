@@ -14,13 +14,14 @@ public class WallChanger
 {
 	public static final String LOG_KEY = "WallChanger";
 	public static final String[] MY_AD_UNIT_ID = new String[] {"a14de00854229f0", "a14d9c70f03d5b2"};
+	public static final String MY_MOBCLIX_AD_ID = "851E0632-B1F1-417C-AF71-3850ECF46E00";
 	public static final String MY_ROOT_URL = "http://791.b.hostable.me";
 	public static final String MY_ROOT_URL_GS = "http://commondatastorage.googleapis.com/data.brandonbowles.com";
 	public static final String MY_IMAGE_ROOT_URL = MY_ROOT_URL + "/images/";
 	public static final String MY_IMAGE_ROOT_URL_GS = MY_ROOT_URL_GS + "/images/";
 	public static final String MY_APP_ROOT_URL = MY_ROOT_URL + "/dynapaper/";
-	public static final String MY_WEATHER_URL = MY_APP_ROOT_URL + "widget_weather.php?user=%USER%";
-	public static final String MY_GALLERY_URL = MY_APP_ROOT_URL + "gallery2.php?user=%USER%";
+	public static final String MY_WEATHER_URL = MY_APP_ROOT_URL + "widget_weather2.php?user=%USER%";
+	public static final String MY_GALLERY_URL = MY_APP_ROOT_URL + "gallery3.php?user=%USER%";
 	public static final String MY_IMAGE_URL = MY_APP_ROOT_URL + "get_image.php?user=%USER%&url=%URL%";
 	public static final String MY_THUMB_URL = MY_APP_ROOT_URL + "get_thumb.php?user=%USER%&url=%URL%";
 	public static final String MY_USER_IMAGE_URL = MY_APP_ROOT_URL + "get_user_image.php?user=%USER%&md5=%MD5%";
@@ -36,7 +37,7 @@ public class WallChanger
 	private static String mUser = "";
 	private static int mUploadQuality = 100;
 	private static final Boolean bPaidMode = false;
-	private static final Boolean bTesting = false;
+	private static final Boolean bTesting = true;
 	//private static String mDeviceId;
 	private static Location mLastLocation;
 	public static Prefs Prefs;

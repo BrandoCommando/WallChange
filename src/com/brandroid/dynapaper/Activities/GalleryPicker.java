@@ -1,13 +1,9 @@
 package com.brandroid.dynapaper.Activities;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.Hashtable;
 
 import com.brandroid.Logger;
@@ -21,12 +17,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,6 +82,7 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 				mDb = new GalleryDbAdapter(this);
 			mDb.open();
 			mGalleryCursor = mDb.fetchAllItems();
+			Logger.LogInfo("Gallery cursor has " + mGalleryCursor.getCount() + " items");
 			startManagingCursor(mGalleryCursor);
 			mGalleryCursor.moveToFirst();
 			mGalleryCount = mGalleryCursor.getCount();
@@ -105,7 +99,7 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 				mGalleryCursor.moveToNext();
 			}
 			mGalleryCursor.moveToFirst();
-		}
+		} else Logger.LogInfo("Cursor already created.");
 		//SimpleCursorAdapter items = new SimpleCursorAdapter(this, R.layout.gallery_grid_item, mGalleryCursor, from, to);
 		//mGridView.setAdapter(items);
 		mGridView.setAdapter(new OnlineGalleryAdapter(this));
@@ -316,7 +310,8 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 	    		uc.connect();
 	    		s = new BufferedInputStream(uc.getInputStream());
 	    		if(uc.getURL().toString() != url)
-	    			Logger.LogVerbose("Redirected to " + uc.getURL() + " from " + url);
+	    			Logger.LogInfo("Redirected to " + uc.getURL() + " from " + url);
+	    		else Logger.LogInfo("Downloading " + url);
 	    		ret = BitmapFactory.decodeStream(s);
 	    		//item.setIsDownloading(false);
 	    		if(ret != null)
