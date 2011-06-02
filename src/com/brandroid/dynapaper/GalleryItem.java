@@ -130,7 +130,9 @@ public class GalleryItem
 		return getThumbnailFilename(false);
 	}
 	public String getThumbnailFilename(Boolean fullName) {
-		String ret = getID() + ".jpg";
+		String ret = getURL();
+		if(ret.indexOf("/") > -1)
+			ret = ret.substring(ret.lastIndexOf("/"));
 		if(fullName)
 			ret = MediaUtils.getFullFilename(ret, true);
 		return ret;

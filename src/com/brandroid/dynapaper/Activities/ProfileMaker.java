@@ -22,6 +22,9 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
 import org.apache.http.util.ByteArrayBuffer;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -800,6 +803,9 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 								
 								int adds = gdb.createItems(items);
 								
+								if(adds > 0)
+									new DownloadThumbZipTask().execute(WallChanger.MY_THUMBS_ZIP_URL);
+								
 								Logger.LogInfo("Successfully add/updated " + adds + " records!");
 								success = true;
 								prefs.setSetting("gallery_update", modified.toString());
@@ -847,6 +853,53 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		{
 			if(mBtnOnline != null && success)
 				mBtnOnline.setEnabled(true);
+		}
+		
+	}
+	
+	public class DownloadThumbZipTask extends AsyncTask<String, Void, Void>
+	{
+
+		@Override
+		protected Void doInBackground(String... urls)
+		{
+			ZipInputStream s = null;
+			String url = urls[0];
+			HttpURLConnection uc = null;
+			try {
+				Logger.LogInfo("Downloading " + url);
+				uc = (HttpURLConnection)new URL(url).openConnection();
+				uc.setConnectTimeout(8000);
+				uc.setReadTimeout(10000);
+				uc.connect();
+				if(uc.getResponseCode() < 400)
+				{
+					s = new ZipInputStream(new BufferedInputStream(uc.getInputStream()));
+					ZipEntry ze;
+					while((ze = s.getNextEntry()) != null)
+					{
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						byte[] buffer = new byte[1024];
+						int count;
+						while ((count = s.read(buffer)) != -1)
+							baos.write(buffer, 0, count);
+						String filename = ze.getName();
+						byte[] bytes = baos.toByteArray();
+						Logger.LogInfo(filename + " = " + bytes.length);
+						MediaUtils.writeFile(filename, bytes, true);
+					}
+					Logger.LogInfo("Thumb Zip retrieved.");
+				}
+			} catch(IOException ix) { Logger.LogError("Unable to get thumb zip.", ix); }
+			finally { 
+				if(s != null)
+					try {
+						s.close();
+					} catch (IOException e) {
+						Logger.LogError("Error closing thumb zip stream.", e);
+					}
+			}
+			return null;
 		}
 		
 	}

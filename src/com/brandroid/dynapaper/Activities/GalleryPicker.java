@@ -1,12 +1,19 @@
 package com.brandroid.dynapaper.Activities;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import com.brandroid.Logger;
+import com.brandroid.MediaUtils;
 import com.brandroid.dynapaper.GalleryItem;
 import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
@@ -295,43 +302,44 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 	    	Bitmap ret = null;
 	    	String url = urls[0]; //item.getURL();
     		if(url.startsWith("images/"))
-    			url = url.substring(7);
-    		try {
-	    		int width = 0, height = 0;
-	    		if(mView != null)
-	    		{
-	    			width = mView.getWidth();
-	    			height = mView.getHeight();
-	    		}
-	    		url = WallChanger.getImageThumbUrl(url, width, height);
-	    		//Log.i(Preferences.LOG_KEY, url);
-	    		HttpURLConnection uc = (HttpURLConnection)new URL(url).openConnection();
-	    		uc.setReadTimeout(5000);
-	    		uc.connect();
-	    		s = new BufferedInputStream(uc.getInputStream());
-	    		if(uc.getURL().toString() != url)
-	    			Logger.LogInfo("Redirected to " + uc.getURL() + " from " + url);
-	    		else Logger.LogInfo("Downloading " + url);
-	    		ret = BitmapFactory.decodeStream(s);
-	    		//item.setIsDownloading(false);
-	    		if(ret != null)
-	    		{
-	    			mItem.setThumbnail(ret);
-	    			//ByteArrayOutputStream stream = new ByteArrayOutputStream();
-	    			//b.compress(CompressFormat.JPEG, 90, stream);
-	    			//data = stream.toByteArray();
-	    			//mDb.updateData(item.getID(), data);
-	    			//mDb.updateItem(Id, title, url, data, width, height, tags, rating, downloads, visible)
-		    		//item.setBitmap(b);
-		    		//item.setIsDownloaded();
-	    		} //else mDb.hideItem(item.getID());
-	    	} catch(IOException ex) { Logger.LogError("Unable to download " + url, ex); cancel(false); }
-	    	finally {
-	    		try {
-	    			if(s != null)
-	    				s.close();
-	    		} catch(IOException ex) { Logger.LogError("Error closing stream for " + url, ex); }
-	    	}
+			url = url.substring(7);
+			int width = 0, height = 0;
+    		if(mView != null)
+    		{
+    			width = mView.getWidth();
+    			height = mView.getHeight();
+    		}
+    		String[] urls2try = new String[2];
+    		urls2try[0] = WallChanger.getImageThumbUrl(url, width, height, false);
+    		urls2try[1] = WallChanger.getImageThumbUrl(url, width, height, true); // try google storage if hostable is down
+    		for(int iTry = 0; iTry < urls2try.length; iTry++)
+    		{
+    			url = urls2try[iTry];
+    			//url = WallChanger.getImageThumbUrl(url, width, height);
+		    	try {
+		    		//Log.i(Preferences.LOG_KEY, url);
+		    		HttpURLConnection uc = (HttpURLConnection)new URL(url).openConnection();
+		    		uc.setConnectTimeout(5000);
+		    		uc.setReadTimeout(5000);
+		    		uc.connect();
+		    		if(uc.getResponseCode() < 400) {
+			    		if(uc.getURL().toString() != url)
+			    			Logger.LogInfo("Redirected to " + uc.getURL() + " from " + url);
+			    		else Logger.LogInfo("Downloading " + url);
+			    		s = new BufferedInputStream(uc.getInputStream());
+			    		ret = BitmapFactory.decodeStream(s);
+			    		//item.setIsDownloading(false);
+			    		if(ret != null)
+			    			mItem.setThumbnail(ret);
+		    		}
+		    	} catch(IOException ex) { Logger.LogError("Unable to download " + url, ex); }
+		    	finally {
+		    		try {
+		    			if(s != null)
+		    				s.close();
+		    		} catch(IOException ex) { Logger.LogError("Error closing stream for " + url, ex); }
+		    	}
+    		}
 	    	return ret;
 	    }
 	    
@@ -355,7 +363,7 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 	    	//if(--iDownloads==0);
 	    	//	mDb.close();
 	    	isDone = true;
-	    	if(mItem != null)
+	    	if(mItem != null && bmp != null)
 	    		mItem.setThumbnail(bmp);
 	    	mDownloads.remove(mItem.getURL());
 	    	if(mView == null) return;
@@ -369,7 +377,7 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 		    	//if(bmp != null)
 		    	imageView.setImageBitmap(bmp);
 		    	imageView.setVisibility(View.VISIBLE);
-	    	}
+	    	} else mView.setVisibility(View.GONE);
 	    	progressBar.setVisibility(View.GONE);
 	    }
 	}

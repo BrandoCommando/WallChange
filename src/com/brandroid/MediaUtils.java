@@ -77,6 +77,34 @@ public class MediaUtils {
 		return new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename).getAbsolutePath();
 	}
 
+    public static Boolean writeFile(String filename, byte[] data, Boolean useCache)
+    {
+    	if(data == null) return false;
+    	Boolean success = false;
+    	OutputStream s = null;
+    	try {
+    		File f = new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename);
+    		//Logger.LogInfo("Writing to " + f.toString());
+        	//if(!f.createNewFile()) return false;
+    		if(f.exists())
+    			f.delete();
+    		s = new BufferedOutputStream(new FileOutputStream(f));
+    		s.write(data);
+    		success = true;
+    	} catch(IOException ex) {
+    		Logger.LogError("Exception saving file.", ex);
+    		mExternalStorageWriteable = false;
+    	}
+    	finally {
+    		if(s != null)
+				try {
+					s.close();
+				} catch (IOException e) {
+					Logger.LogError("Exception closing stream for \"" + filename + "\".", e);
+				}
+    	}
+    	return success;
+    }
     public static Boolean writeFile(String filename, Bitmap bmp, Boolean useCache)
     {
     	if(bmp == null) return false;

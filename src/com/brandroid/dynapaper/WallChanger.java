@@ -25,6 +25,7 @@ public class WallChanger
 	public static final String MY_GALLERY_URL = MY_APP_ROOT_URL + "gallery3.php?user=%USER%";
 	public static final String MY_IMAGE_URL = MY_APP_ROOT_URL + "get_image.php?user=%USER%&url=%URL%";
 	public static final String MY_THUMB_URL = MY_APP_ROOT_URL + "get_thumb.php?user=%USER%&url=%URL%";
+	public static final String MY_THUMBS_ZIP_URL = MY_APP_ROOT_URL + "get_thumbs.php";
 	public static final String MY_USER_IMAGE_URL = MY_APP_ROOT_URL + "get_user_image.php?user=%USER%&md5=%MD5%";
 	public static final String MY_UPLOAD_IMAGE_URL = MY_APP_ROOT_URL + "upload_user_image.php?user=%USER%&md5=%MD5%&UPLOAD_IDENTIFIER=%MD5%&APC_UPLOAD_PROGRESS=%MD5%";
 	//public static final String MY_UPLOAD_IMAGE_URL = MY_ROOT_URL + "/images/upload.php?user=%USER%&md5=%MD5%&UPLOAD_IDENTIFIER=%MD5%&APC_UPLOAD_PROGRESS=%MD5%";
@@ -67,9 +68,14 @@ public class WallChanger
 		else return mUploadQualityNoWifi;
 	}
     
-	public static String getImageThumbUrl(String sBase, int width, int height)
+	public static String getImageThumbUrl(String sBase, int width, int height) { return getImageThumbUrl(sBase, width, height, false); }
+	public static String getImageThumbUrl(String sBase, int width, int height, Boolean bUseGoogleStorage)
     {
-    	return MY_THUMB_URL.replace("%USER%", getUser()).replace("%URL%", URLEncoder.encode(sBase)) + (width > 0 ? "&w=" + width : "") + (height > 0 ? "&h=" + height : "");
+		if(bUseGoogleStorage)
+			return MY_IMAGE_ROOT_URL + "thumbs/" + sBase + width + "x" + height + ".jpg";
+			//return MY_IMAGE_ROOT_URL_GS + "thumbs/" + sBase + width + "x" + height + ".jpg";
+		else
+			return MY_THUMB_URL.replace("%USER%", getUser()).replace("%URL%", URLEncoder.encode(sBase)) + (width > 0 ? "&w=" + width : "") + (height > 0 ? "&h=" + height : "");
     }
     
     public static String getImageFullUrl(String sBase)
