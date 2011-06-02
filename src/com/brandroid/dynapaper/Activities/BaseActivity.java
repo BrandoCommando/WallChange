@@ -2,6 +2,7 @@ package com.brandroid.dynapaper.Activities;
 
 import java.sql.Date;
 
+import com.brandroid.CustomExceptionHandler;
 import com.brandroid.Logger;
 import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
@@ -36,6 +37,8 @@ public class BaseActivity extends Activity
 		
 		if(!Logger.hasDb())
 			Logger.setDb(new LoggerDbAdapter(this));
+		
+		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());
 		
 		Logger.LogVerbose("onCreate :: " + this.toString());
 

@@ -1,4 +1,3 @@
-/*
 package com.brandroid;
 
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -8,4 +7,3 @@ public class CustomExceptionHandler implements UncaughtExceptionHandler {
 		Logger.LogError("Uncaught Exception in Thread " + t.getName(), new Exception(e));
 	}
 }
-*/

@@ -79,12 +79,15 @@ public class MediaUtils {
 
     public static Boolean writeFile(String filename, Bitmap bmp, Boolean useCache)
     {
+    	if(bmp == null) return false;
     	Boolean success = false;
     	OutputStream s = null;
     	try {
     		File f = new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename);
     		//Logger.LogInfo("Writing to " + f.toString());
         	//if(!f.createNewFile()) return false;
+    		if(f.exists())
+    			f.delete();
     		s = new BufferedOutputStream(new FileOutputStream(f));
     		bmp.compress(CompressFormat.JPEG, 100, s);
     		success = true;
