@@ -21,7 +21,7 @@
     <string name="btn_gallery">Pictures</string>
     <string name="btn_online">Online</string>
     <string name="btn_url">URL</string>
-    <string name="lbl_overlay">Select Overlay</string>
+    <string name="lbl_overlay">Select Widget</string>
     <string name="btn_weather">Weather</string>
     <string name="lbl_command">Select Command</string>
     <string name="btn_stocks">Stocks</string>

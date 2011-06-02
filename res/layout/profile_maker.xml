@@ -48,7 +48,7 @@
 			android:text="@string/btn_stocks" android:id="@+id/btnStocks"></Button>
 		<EditText android:layout_height="wrap_content" android:id="@+id/txtZip"
 			android:enabled="true" android:singleLine="true"
-			android:maxWidth="150dip"
+			android:maxWidth="140dip"
 			android:layout_width="wrap_content" android:minWidth="100dip"/>
 		<CheckBox android:layout_height="wrap_content"
 			android:layout_width="wrap_content" android:id="@+id/btnGPS"
