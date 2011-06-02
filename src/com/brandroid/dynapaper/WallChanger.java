@@ -7,6 +7,7 @@ import com.brandroid.Logger;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.wifi.WifiManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -36,6 +37,7 @@ public class WallChanger
 	public final static Boolean OPTION_SHOW_GALLERY_INFO = true;
 	private static String mUser = "";
 	private static int mUploadQuality = 100;
+	private static int mUploadQualityNoWifi = 60;
 	private static final Boolean bPaidMode = false;
 	private static final Boolean bTesting = true;
 	//private static String mDeviceId;
@@ -58,7 +60,12 @@ public class WallChanger
 	
 	public final static Boolean isPaidMode() { return bPaidMode; }
 	public final static Boolean isTesting() { return bTesting; }
-	public static int getUploadQuality() { return mUploadQuality; }
+	public static int getUploadQuality() { return getUploadQuality(false); }
+	public static int getUploadQuality(Boolean bWifi) {
+		if(bWifi)
+			return mUploadQuality;
+		else return mUploadQualityNoWifi;
+	}
     
 	public static String getImageThumbUrl(String sBase, int width, int height)
     {

@@ -49,6 +49,9 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.net.Uri;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
 import android.os.Bundle;
@@ -81,6 +84,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	private LocationProvider locationProvider;
 	private LocationListener locationListener;
 	private LocationManager locationManager;
+	private Boolean mWifiEnabled = true;
 	
 	//private String mGPSLocation = null;
 	
@@ -175,6 +179,25 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		return url;
 	}
 	
+	public Boolean checkWifi()
+	{
+		mWifiEnabled = true;
+		try {
+			WifiManager wm = (WifiManager)getSystemService(WIFI_SERVICE);
+			if(wm != null)
+			{
+				WifiInfo wi = wm.getConnectionInfo();
+				if(wi != null)
+				{
+					Logger.LogInfo("WIFI Info: " + wi.toString());
+					if(wi.getSupplicantState() == SupplicantState.COMPLETED)
+						mWifiEnabled = true;
+				}
+			}
+		} catch(Exception ex) { Logger.LogError("Error checking Wifi", ex); }
+		return mWifiEnabled;
+	}
+	
 	public void onClickCurrent()
 	{
 		Bitmap mCurrent = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
@@ -220,6 +243,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	@Override
 	public void onClick(View v)
 	{
+		checkWifi();
 		switch(v.getId())
 		{
 			case R.id.btnCurrent:
@@ -291,7 +315,9 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 				switch(event)
 				{
 					case GpsStatus.GPS_EVENT_STARTED:
-						cancelTimer.schedule(cancelTask, 30000);
+						try {
+							cancelTimer.schedule(cancelTask, 30000);
+						} catch(IllegalStateException ise) { Logger.LogError("Couldn't schedule GPS cancel Timer", ise); }
 						mBtnGPS.setTextColor(Color.DKGRAY);
 						break;
 					case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
@@ -512,7 +538,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 			publishProgress(-1);
 			try {
 				ByteArrayOutputStream stream = new ByteArrayOutputStream();
-				pics[0].compress(CompressFormat.JPEG, WallChanger.getUploadQuality(), stream);
+				pics[0].compress(CompressFormat.JPEG, WallChanger.getUploadQuality(mWifiEnabled), stream);
 				byte[] data = stream.toByteArray(); 
 				//int length = data.length;
 				String md5 = getMD5(data);
@@ -706,14 +732,12 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	    			String sDbLogData = Logger.getDbLogs();
 	    			if(sDbLogData != "")
 	    			{
-	    				uc.setRequestProperty("LOG_ERRORS", sDbLogData);
-	    				/*
+	    				//uc.setRequestProperty("LOG_ERRORS", sDbLogData);
 	    				uc.setDoOutput(true);
 	    				GZIPOutputStream out = new GZIPOutputStream(uc.getOutputStream());
 	    				out.write(sDbLogData.getBytes());
 	    				out.flush();
 	    				out.close();
-	    				*/
 	    				//Logger.LogInfo("Gallery Error Log submitted " + sDbLogData.length() + " bytes");
 	    			}
 	    		}
@@ -795,8 +819,11 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 			super.onProgressUpdate(values);
 			if(values.length == 1)
 			{
-				prefs.setSetting("zip", values[0]);
-				mTxtZip.setText(values[0].toString());
+				if(mTxtZip.getText().equals(""))
+				{
+					prefs.setSetting("zip", values[0]);
+					mTxtZip.setText(values[0].toString());
+				}
 			}
 		}
 
