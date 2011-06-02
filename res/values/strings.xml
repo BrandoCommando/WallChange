@@ -8,6 +8,7 @@
     <string name="s_create">Create</string>
     <string name="s_shortcut">Shortcut</string>
     <string name="s_downloading">Downloading</string>
+    <string name="s_disabled">disabled</string>
     <string name="s_wallpaper">Wallpaper</string>
     <string name="s_updated">Wallpaper Updated!</string>
     <string name="s_invalid">Invalid Image!</string>
@@ -30,6 +31,7 @@
     <string name="btn_zip">Zip Code</string>
     <string name="btn_gps">GPS</string>
     <string name="s_uploading">Uploading</string>
+    <string name="s_low_quality">WIFI disabled. Using low quality.</string>
 
     <string name="local_storage_provider_external_label">External storage (SD card)</string>
     <string name="local_storage_provider_internal_label">Regular internal storage</string>

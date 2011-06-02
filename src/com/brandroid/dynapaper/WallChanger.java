@@ -36,7 +36,7 @@ public class WallChanger
 	public final static int DOWNLOAD_CHUNK_SIZE = 512;
 	public final static Boolean OPTION_SHOW_GALLERY_INFO = true;
 	private static String mUser = "";
-	private static int mUploadQuality = 100;
+	private static int mUploadQuality = 90;
 	private static int mUploadQualityNoWifi = 60;
 	private static final Boolean bPaidMode = false;
 	private static final Boolean bTesting = true;

@@ -113,7 +113,7 @@ public class LoggerDbAdapter
     }
 
     public Cursor fetchAllItems() {
-    	if(!mDb.isOpen()) open();
+    	open();
     	return mDb.query(DATABASE_TABLE,
     			new String[] {KEY_ID, KEY_MESSAGE, KEY_LEVEL, KEY_STACK, KEY_STAMP},
     			"sent = 0", null, null, null, null);

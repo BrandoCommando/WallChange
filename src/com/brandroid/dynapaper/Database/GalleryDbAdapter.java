@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -101,6 +102,7 @@ public class GalleryDbAdapter
         	ret = mDb.insertOrThrow(DATABASE_TABLE, null, initialValues);
         	//if(mDb.replace(DATABASE_TABLE, null, initialValues) > 0)
         		//ret = 1;
+        } catch(SQLiteConstraintException scex) { // ignore this one
         } catch(Exception ex) { Logger.LogError("Error adding item to gallery.", ex); }
         if(ret == -1)
         	ret = mDb.update(DATABASE_TABLE, initialValues, KEY_ID + "=" + id, null);

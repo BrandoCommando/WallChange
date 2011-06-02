@@ -99,7 +99,9 @@ public class BaseActivity extends Activity
 	{
 		if(mHomeWidth > 0) return mHomeWidth;
 		Display display = getWindow().getWindowManager().getDefaultDisplay();
+		Logger.LogInfo("Orientation: " + display.getOrientation());
 		mHomeWidth = display.getWidth() * 2;
+		mHomeWidth = Math.min(mHomeWidth, getWallpaperDesiredMinimumWidth());
 		return mHomeWidth;
 	}
 	
@@ -108,6 +110,7 @@ public class BaseActivity extends Activity
 		if(mHomeHeight > 0) return mHomeHeight;
 		Display display = getWindow().getWindowManager().getDefaultDisplay();
 		mHomeHeight = display.getHeight();
+		mHomeHeight = Math.min(mHomeHeight, getWallpaperDesiredMinimumHeight());
 		return mHomeHeight;
 	}
 
@@ -116,6 +119,7 @@ public class BaseActivity extends Activity
 		Log.i(WallChanger.LOG_KEY, "Made Toast: " + message);
         showToast(message, Toast.LENGTH_SHORT);
     }
+	protected void showToast(final int iStringResource) { showToast(getResourceString(iStringResource)); }
 	protected void showToast(final String message, final int toastLength)  {
         runOnUiThread(new Runnable() {
             public void run() {
@@ -123,6 +127,30 @@ public class BaseActivity extends Activity
             }
         });
     }
+	
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		Logger.LogVerbose("onRestart :: " + this.toString());
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Logger.LogVerbose("onResume :: " + this.toString());
+	}
+	
+	@Override
+	public void onLowMemory() {
+		super.onLowMemory();
+		Logger.LogWarning("Low memory!");
+	}
+	
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		Logger.LogVerbose("onRetainNonConfigurationInstance :: " + this.toString());
+		return super.onRetainNonConfigurationInstance();
+	}
 	
 	@Override
 	protected void onStart() {

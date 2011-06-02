@@ -181,11 +181,12 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	
 	public Boolean checkWifi()
 	{
-		mWifiEnabled = true;
+		mWifiEnabled = false;
 		try {
 			WifiManager wm = (WifiManager)getSystemService(WIFI_SERVICE);
 			if(wm != null)
 			{
+				Logger.LogInfo("WIFI Manager: " + wm.toString());
 				WifiInfo wi = wm.getConnectionInfo();
 				if(wi != null)
 				{
@@ -232,10 +233,16 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	{
 		try {
 			LocationListener ll = getLocationListener();
-			if(mBtnGPS.isChecked())
+			if(mBtnGPS.isChecked() && ll != null)
 				locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);
-			else
+			else if(ll != null)
 				locationManager.removeUpdates(ll);
+			else if(ll == null)
+			{
+				mBtnGPS.setEnabled(false);
+				mBtnGPS.setChecked(false);
+				showToast(getResourceString(R.string.btn_gps) + " " + getResourceString(R.string.s_disabled));
+			}
 		} catch(Exception ex) { Logger.LogError("Error toggling GPS", ex); }
 		//mTxtZip.setEnabled(mBtnGPS.isChecked());
 	}
@@ -295,7 +302,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 			}
 			public void onProviderEnabled(String provider) { Logger.LogInfo("Location Provider \"" + provider + "\" enabled."); }
 			public void onProviderDisabled(String provider) {
-				Logger.LogInfo("Location Provider \"" + provider + "\" disabled.");
+				Logger.LogWarning("Location Provider \"" + provider + "\" disabled.");
 			}
 			public void onLocationChanged(Location location) {
 				if(WallChanger.setLastLocation(location))
@@ -328,6 +335,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 						break;
 					case GpsStatus.GPS_EVENT_STOPPED:
 						mBtnGPS.setTextColor(Color.WHITE);
+						mBtnGPS.setChecked(false);
 						break;
 					default: Logger.LogWarning("GpsListener Status Change: " + event);
 				}
@@ -336,6 +344,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		Criteria c = new Criteria();
 		c.setAccuracy(Criteria.ACCURACY_FINE);
 		String provider = locationManager.getBestProvider(c, true);
+		if(provider == null) return null;
 		Logger.LogInfo("Best provider: " + provider);
 		LocationProvider lp = locationManager.getProvider(provider);
 		Logger.LogInfo(lp.getName() + " accuracy: " + lp.getAccuracy()); 
@@ -366,11 +375,11 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 			if(bmp != null)
 			{
 				//mCacheBitmap = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
+				mImgPreview.setImageBitmap(bmp);
 				onCancelUpload();
 				mUploadTask = new UploadTask();
 				mUploadTask.execute(bmp);
 				//mImgPreview.setVisibility(View.GONE);
-				mImgPreview.setImageBitmap(bmp);
 			} else Logger.LogWarning("Unable to create thumbnail?");
 		} else if (requestCode == WallChanger.REQ_SELECT_ONLINE)
 		{
@@ -381,6 +390,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 			Logger.LogInfo("Selected URL: " + url);
 			//OnlineGalleryItem item = (OnlineGalleryItem)data.getSerializableExtra("item");
 			mTxtURL.setText(url);
+			prefs.setSetting("url", url);
 			if(!url.startsWith("http"))
 				url = WallChanger.getImageFullUrl(url);
 			byte[] bmp = data.getByteArrayExtra("data");
@@ -538,13 +548,16 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 			publishProgress(-1);
 			try {
 				ByteArrayOutputStream stream = new ByteArrayOutputStream();
-				pics[0].compress(CompressFormat.JPEG, WallChanger.getUploadQuality(mWifiEnabled), stream);
-				byte[] data = stream.toByteArray(); 
+				int quality = WallChanger.getUploadQuality(checkWifi());
+				if(quality < 100)
+					showToast(getResourceString(R.string.s_low_quality));
+				pics[0].compress(CompressFormat.JPEG, quality, stream);
+				byte[] data = stream.toByteArray();
 				//int length = data.length;
 				String md5 = getMD5(data);
 				//Logger.LogInfo("MD5: " + md5);
 				url = new URL(WallChanger.MY_USER_IMAGE_URL.replace("%USER%", WallChanger.getUser()).replace("%MD5%", md5));
-				Logger.LogInfo("Checking " + url.toString());
+				Logger.LogInfo("Checking " + url.toString() + " (Quality: " + quality + ", Size: " + data.length + ")");
 				con = (HttpURLConnection)url.openConnection();
 				//con.setRequestProperty("If-None-Match", md5);
 				con.setInstanceFollowRedirects(false);
@@ -587,6 +600,8 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 					}
 				}
 			} catch(Exception ex) {
+				showToast("Unable to upload.");
+				cancel(false);
 				Logger.LogError("Uploading error.", ex);
 			}
 			finally {
@@ -727,7 +742,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		    		if(modified != null)
 		    			uc.setIfModifiedSince(modified);
 	    		}
-	    		if(Logger.hasDb())
+	    		if(Logger.hasDb() && checkWifi()) // only upload on WIFI
 	    		{
 	    			String sDbLogData = Logger.getDbLogs();
 	    			if(sDbLogData != "")
@@ -819,7 +834,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 			super.onProgressUpdate(values);
 			if(values.length == 1)
 			{
-				if(mTxtZip.getText().equals(""))
+				if(mTxtZip.getText().toString().equals(""))
 				{
 					prefs.setSetting("zip", values[0]);
 					mTxtZip.setText(values[0].toString());
@@ -945,7 +960,12 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 			mTxtZip.setText(prefs.getSetting("zip", mTxtZip.getText().toString()));
 		if(mBtnWeather != null)
 			mBtnWeather.setChecked(prefs.getBoolean("weather", mBtnWeather.isChecked()));
-		WallChanger.setUser(prefs.getSetting("user", WallChanger.getUser()));
+		String user = WallChanger.getUser();
+		if(prefs.getSetting("user", user) != "")
+			user = prefs.getSetting("user", user);
+		WallChanger.setUser(user);
+		if(mTxtURL != null)
+			mTxtURL.setText(prefs.getSetting("url", mTxtURL.getText().toString()));
 	}
 	
 	public void setSavedSettings()
@@ -956,11 +976,12 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 			prefs.setSetting("weather", mBtnWeather.isChecked());
 		if(WallChanger.getUser() != null && WallChanger.getUser() != "")
 			prefs.setSetting("user", WallChanger.getUser());
+		if(mTxtURL != null)
+			prefs.setSetting("url", mTxtURL.getText().toString());
 	}
 
 	@Override
 	protected void onDestroy() {
-		Logger.LogVerbose("onDestroy");
 		super.onDestroy();
 	}
 

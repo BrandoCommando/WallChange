@@ -293,10 +293,10 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 	    	//GalleryItem item = galleryItems[0];
 	    	BufferedInputStream s = null;
 	    	Bitmap ret = null;
-	    	try {
-	    		String url = urls[0]; //item.getURL();
-	    		if(url.startsWith("images/"))
-	    			url = url.substring(7);
+	    	String url = urls[0]; //item.getURL();
+    		if(url.startsWith("images/"))
+    			url = url.substring(7);
+    		try {
 	    		int width = 0, height = 0;
 	    		if(mView != null)
 	    		{
@@ -325,19 +325,24 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 		    		//item.setBitmap(b);
 		    		//item.setIsDownloaded();
 	    		} //else mDb.hideItem(item.getID());
-	    	} catch(IOException ex) { Logger.LogError(ex.toString()); }
+	    	} catch(IOException ex) { Logger.LogError("Unable to download " + url, ex); cancel(false); }
 	    	finally {
 	    		try {
 	    			if(s != null)
 	    				s.close();
-	    		} catch(IOException ex) { Logger.LogError(ex.toString()); }
+	    		} catch(IOException ex) { Logger.LogError("Error closing stream for " + url, ex); }
 	    	}
 	    	return ret;
 	    }
 	    
 	    @Override
+	    protected void onCancelled() {
+	    	if(mView == null) return;
+	    	mView.setVisibility(View.GONE);
+	    }
+	    
+	    @Override
 	    protected void onPreExecute() {
-	    	// TODO Auto-generated method stub
 	    	super.onPreExecute();
 	    	isStarted = true;
 	    	if(mView == null) return;
