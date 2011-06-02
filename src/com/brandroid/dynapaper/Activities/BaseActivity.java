@@ -14,7 +14,11 @@ import com.google.ads.AdView;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
+import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.text.format.Time;
@@ -37,6 +41,15 @@ public class BaseActivity extends Activity
 		
 		if(!Logger.hasDb())
 			Logger.setDb(new LoggerDbAdapter(this));
+		
+		try {
+			PackageManager pm = getPackageManager();
+			PackageInfo pi = pm.getPackageInfo("com.brandroid.dynapaper", PackageManager.GET_META_DATA);
+			WallChanger.VERSION_CODE = pi.versionCode;
+			Logger.LogInfo("Version Code: " + pi.versionCode);
+		} catch (NameNotFoundException e) {
+			Logger.LogError("Couldn't read build info", e);
+		}
 		
 		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());
 		

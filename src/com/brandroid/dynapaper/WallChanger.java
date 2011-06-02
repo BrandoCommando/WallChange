@@ -30,6 +30,8 @@ public class WallChanger
 	public static final String MY_UPLOAD_IMAGE_URL = MY_APP_ROOT_URL + "upload_user_image.php?user=%USER%&md5=%MD5%&UPLOAD_IDENTIFIER=%MD5%&APC_UPLOAD_PROGRESS=%MD5%";
 	//public static final String MY_UPLOAD_IMAGE_URL = MY_ROOT_URL + "/images/upload.php?user=%USER%&md5=%MD5%&UPLOAD_IDENTIFIER=%MD5%&APC_UPLOAD_PROGRESS=%MD5%";
 	public static final String MY_UPLOAD_PROGRESS_URL = MY_APP_ROOT_URL + "upload_progress.php?key=%KEY%";
+	public static int VERSION_CODE = 17; 
+	public static Boolean FEATURE_GPS = true;
 	public static final String EXTERNAL_ROOT = "/mnt/sdcard/wallchanger/";
 	public static final int REQ_SELECT_GALLERY = 1;
 	public static final int REQ_SELECT_ONLINE = 2;
@@ -40,7 +42,7 @@ public class WallChanger
 	private static int mUploadQuality = 90;
 	private static int mUploadQualityNoWifi = 60;
 	private static final Boolean bPaidMode = false;
-	private static final Boolean bTesting = true;
+	private static final Boolean bTesting = false;
 	//private static String mDeviceId;
 	private static Location mLastLocation;
 	public static Prefs Prefs;

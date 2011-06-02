@@ -129,12 +129,12 @@ public class GalleryDbAdapter
     }
     
     public boolean deleteItem(long rowId) {
-    	if(!mDb.isOpen()) open();
+    	open();
     	return mDb.delete(DATABASE_TABLE, KEY_ID + "=" + rowId, null) > 0;
     }
     
     public Cursor fetchAllItems() {
-    	if(!mDb.isOpen()) open();
+    	open();
     	return mDb.query(DATABASE_TABLE,
     			new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS, KEY_DAYS},
     			KEY_VISIBLE + " = 1", null, null, null, "downloads DESC, rating DESC");
@@ -156,7 +156,7 @@ public class GalleryDbAdapter
     
     public int fetchLatestStamp()
     {
-    	if(!mDb.isOpen()) open();
+    	open();
     	Cursor c = mDb.query(DATABASE_TABLE, new String[] {KEY_DAYS}, KEY_VISIBLE + " = 1", null, null, null, "days LIMIT 1");
     	if(c.getCount() == 0) return 0;
     	c.moveToFirst();
@@ -164,7 +164,7 @@ public class GalleryDbAdapter
     }
     
     public Cursor fetchItem(long Id) throws SQLException {
-    	if(!mDb.isOpen()) open();
+    	open();
     	Cursor mCursor =
             mDb.query(true, DATABASE_TABLE,
             		new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS, KEY_DAYS},
@@ -177,7 +177,7 @@ public class GalleryDbAdapter
     }
     public boolean hideItem(long Id)
     {
-    	if(!mDb.isOpen()) open();
+    	open();
     	ContentValues args = new ContentValues();
     	args.put(KEY_VISIBLE, false);
     	return mDb.update(DATABASE_TABLE, args, KEY_ID + "=" + Id, null) > 0;

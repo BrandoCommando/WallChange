@@ -731,6 +731,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	    		uc = (HttpURLConnection)new URL(url).openConnection();
 	    		uc.setReadTimeout(20000);
 	    		uc.addRequestProperty("Accept-Encoding", "gzip, deflate");
+	    		uc.addRequestProperty("Version", ((Integer)WallChanger.VERSION_CODE).toString());
 	    		
 	    		if(prefs.hasSetting("gallery_update"))
 	    		{
@@ -759,6 +760,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	    				//Logger.LogInfo("Gallery Error Log submitted " + sDbLogData.length() + " bytes");
 	    			}
 	    		}
+	    		uc.connect();
 	    		if(uc.getResponseCode() == HttpURLConnection.HTTP_OK)
 	    		{
 	    			String encoding = uc.getContentEncoding();
@@ -804,7 +806,10 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 								int adds = gdb.createItems(items);
 								
 								if(adds > 0)
+								{
+									publishProgress(0);
 									new DownloadThumbZipTask().execute(WallChanger.MY_THUMBS_ZIP_URL);
+								}
 								
 								Logger.LogInfo("Successfully add/updated " + adds + " records!");
 								success = true;
@@ -840,10 +845,15 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 			super.onProgressUpdate(values);
 			if(values.length == 1)
 			{
-				if(mTxtZip.getText().toString().equals(""))
+				if(values[0] > 0)
 				{
-					prefs.setSetting("zip", values[0]);
-					mTxtZip.setText(values[0].toString());
+					if(mTxtZip.getText().toString().equals(""))
+					{
+						prefs.setSetting("zip", values[0]);
+						mTxtZip.setText(values[0].toString());
+					}
+				} else if (values[0] == 0) {
+					mBtnOnline.setTextColor(Color.GRAY);
 				}
 			}
 		}
@@ -885,7 +895,6 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 							baos.write(buffer, 0, count);
 						String filename = ze.getName();
 						byte[] bytes = baos.toByteArray();
-						Logger.LogInfo(filename + " = " + bytes.length);
 						MediaUtils.writeFile(filename, bytes, true);
 					}
 					Logger.LogInfo("Thumb Zip retrieved.");
@@ -902,6 +911,10 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 			return null;
 		}
 		
+		@Override
+		protected void onPostExecute(Void result) {
+			mBtnOnline.setTextColor(Color.BLACK);
+		}
 	}
 
 	private class DownloadToWallpaperTask extends AsyncTask<String, Integer, Bitmap> {

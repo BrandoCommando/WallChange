@@ -61,8 +61,6 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 		setContentView(R.layout.gallery_picker);
 		super.onCreate(savedInstanceState);
 		
-		prefs = Prefs.getPreferences(GalleryPicker.this);
-		
 		mGridView = (GridView)findViewById(R.id.picker_grid);
 		
 		mSorting = (Spinner)findViewById(R.id.picker_sort);
@@ -74,20 +72,15 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 		
 		setTitle(getResourceString(R.string.btn_online));
 		
-		setupCursor();
-		
-		addAds();
-		
 		//new DownloadStringTask().execute(ONLINE_GALLERY_URL);
 	}
 	
 	private void setupCursor()
 	{
-		if(mGalleryCursor == null)
+		//if(mGalleryCursor == null)
 		{
-			if(mDb == null)
-				mDb = new GalleryDbAdapter(this);
-			mDb.open();
+			if(mDb != null) mDb.close();
+			mDb = new GalleryDbAdapter(this);
 			mGalleryCursor = mDb.fetchAllItems();
 			Logger.LogInfo("Gallery cursor has " + mGalleryCursor.getCount() + " items");
 			startManagingCursor(mGalleryCursor);
@@ -106,7 +99,7 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 				mGalleryCursor.moveToNext();
 			}
 			mGalleryCursor.moveToFirst();
-		} else Logger.LogInfo("Cursor already created.");
+		} //else Logger.LogInfo("Cursor already created.");
 		//SimpleCursorAdapter items = new SimpleCursorAdapter(this, R.layout.gallery_grid_item, mGalleryCursor, from, to);
 		//mGridView.setAdapter(items);
 		mGridView.setAdapter(new OnlineGalleryAdapter(this));
@@ -241,7 +234,7 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 		        	//ImageView iv = ;
 			    	if(iv.getTag() == null && !item.hasThumbnail())
 			    	{
-			    		Logger.LogDebug("Thumnail needs to be downloaded!");
+			    		Logger.LogDebug("Thumnail needs to be downloaded! " + item.getThumbnailFilename());
 			    		if(mDownloads.containsKey(url))
 			    		{
 			    			DownloadImageTask task = mDownloads.get(url);
@@ -255,7 +248,7 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 			    	}
 			    	else if(item.hasThumbnail())
 			        {
-			    		Logger.LogDebug("Thumnail exists!");
+			    		//Logger.LogDebug("Thumnail exists! " + item.getThumbnailFilename());
 			    		iv.setTag(true);
 			        	iv.setImageBitmap(item.getThumbnail());
 			    		//iv.setImageURI(Uri.parse(item.getThumbnailFilename(true)));
