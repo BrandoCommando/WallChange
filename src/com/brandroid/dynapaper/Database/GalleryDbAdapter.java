@@ -1,15 +1,14 @@
 package com.brandroid.dynapaper.Database;
 
+import com.brandroid.Logger;
 import com.brandroid.dynapaper.GalleryItem;
-import com.brandroid.dynapaper.Prefs;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 public class GalleryDbAdapter
 {
@@ -29,7 +28,7 @@ public class GalleryDbAdapter
     
     private static final String DATABASE_NAME = "wallchanger.db";
     private static final String DATABASE_TABLE = "gallery";
-    private static final int DATABASE_VERSION = 9;
+    private static final int DATABASE_VERSION = 10;
 
     private static final String DATABASE_CREATE =
         "create table " + DATABASE_TABLE + " (" + KEY_ID + " integer primary key, "
@@ -49,13 +48,13 @@ public class GalleryDbAdapter
         @Override
         public void onCreate(SQLiteDatabase db)
         {
-        	Log.i(Prefs.LOG_KEY, "Creating database");
+        	Logger.LogVerbose("Creating database");
             db.execSQL(DATABASE_CREATE);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.w(Prefs.LOG_KEY, "Upgrading database from version " + oldVersion + " to "
+            Logger.LogVerbose("Upgrading database from version " + oldVersion + " to "
                     + newVersion + ", which will destroy all old data");
             db.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE);
             onCreate(db);
@@ -81,10 +80,10 @@ public class GalleryDbAdapter
     	mDbHelper.close();
     }
     
-    public long createItem(int id, String title, String url, byte[] data,
+    public long createItem(int id, String title, String url, 
     		Integer width, Integer height, String tags,
     		Float rating, Integer downloads, Boolean visible, Integer days) {
-    	if(!mDb.isOpen()) open();
+    	open();
     	ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_ID, id);
         initialValues.put(KEY_TITLE, title);
@@ -100,27 +99,42 @@ public class GalleryDbAdapter
 
         long ret = 0;
         try {
-        	if(mDb.replace(DATABASE_TABLE, null, initialValues) > -1)
-        		ret = 1;
-        } catch(Exception ex) { }
+        	ret = mDb.insertOrThrow(DATABASE_TABLE, null, initialValues);
+        	//if(mDb.replace(DATABASE_TABLE, null, initialValues) > 0)
+        		//ret = 1;
+        } catch(SQLiteConstraintException scex) { // ignore this one
+        } catch(Exception ex) { Logger.LogError("Error adding item to gallery.", ex); }
         if(ret == -1)
-        	ret = mDb.update(DATABASE_TABLE, initialValues, KEY_ID + "=" + id, null) > 0 ? 1 : 0;
+        	ret = mDb.update(DATABASE_TABLE, initialValues, KEY_ID + "=" + id, null);
         return ret;
     }
     public long createItem(GalleryItem item)
     {
-    	return createItem(item.getID(), item.getTitle(), item.getURL(), (byte[])null,
+    	return createItem(item.getID(), item.getTitle(), item.getURL(),
     			item.getWidth(), item.getHeight(), item.getTags(),
     			item.getRating(), item.getDownloadCount(), true, item.getDays()); 
     }
+    public int createItems(GalleryItem[] items)
+    {
+    	int ret = 0;
+    	//mDb.beginTransaction();
+    	try {
+    		for(int i = 0; i < items.length; i++)
+    			ret += createItem(items[i]) > 0 ? 1 : 0;
+    	} catch(Exception ex) { Logger.LogError("Exception updating items in DB.", ex); }
+    	finally {
+    		//mDb.endTransaction();
+    	}
+    	return ret;
+    }
     
     public boolean deleteItem(long rowId) {
-    	if(!mDb.isOpen()) open();
+    	open();
     	return mDb.delete(DATABASE_TABLE, KEY_ID + "=" + rowId, null) > 0;
     }
     
     public Cursor fetchAllItems() {
-    	if(!mDb.isOpen()) open();
+    	open();
     	return mDb.query(DATABASE_TABLE,
     			new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS, KEY_DAYS},
     			KEY_VISIBLE + " = 1", null, null, null, "downloads DESC, rating DESC");
@@ -142,7 +156,7 @@ public class GalleryDbAdapter
     
     public int fetchLatestStamp()
     {
-    	if(!mDb.isOpen()) open();
+    	open();
     	Cursor c = mDb.query(DATABASE_TABLE, new String[] {KEY_DAYS}, KEY_VISIBLE + " = 1", null, null, null, "days LIMIT 1");
     	if(c.getCount() == 0) return 0;
     	c.moveToFirst();
@@ -150,7 +164,7 @@ public class GalleryDbAdapter
     }
     
     public Cursor fetchItem(long Id) throws SQLException {
-    	if(!mDb.isOpen()) open();
+    	open();
     	Cursor mCursor =
             mDb.query(true, DATABASE_TABLE,
             		new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS, KEY_DAYS},
@@ -163,7 +177,7 @@ public class GalleryDbAdapter
     }
     public boolean hideItem(long Id)
     {
-    	if(!mDb.isOpen()) open();
+    	open();
     	ContentValues args = new ContentValues();
     	args.put(KEY_VISIBLE, false);
     	return mDb.update(DATABASE_TABLE, args, KEY_ID + "=" + Id, null) > 0;
@@ -176,14 +190,28 @@ public class GalleryDbAdapter
     }
     public boolean updateItem(GalleryItem item)
     {
-    	return updateItem(item.getID(), item.getTitle(), item.getURL(), (byte[])null,
+    	Logger.LogDebug("Adding GalleryItem \"" + item.getTitle() + "\" to db.");
+    	return updateItem(item.getID(), item.getTitle(), item.getURL(),
     			item.getWidth(), item.getHeight(), item.getTags(),
     			(Float)item.getRating(), item.getDownloadCount(), true, item.getDays());
     }
-    public boolean updateItem(long Id, String title, String url, byte[] data,
+    public int updateItems(GalleryItem[] items)
+    {
+    	int ret = 0;
+    	mDb.beginTransaction();
+    	try {
+    		for(int i = 0; i < items.length; i++)
+    			ret += updateItem(items[i]) ? 1 : 0;
+    	} catch(Exception ex) { Logger.LogError("Exception updating items in DB.", ex); }
+    	finally {
+    		mDb.endTransaction();
+    	}
+    	return ret;
+    }
+    public boolean updateItem(long Id, String title, String url,
     		Integer width, Integer height, String tags,
     		Float rating, Integer downloads, Boolean visible, Integer days) {
-    	if(!mDb.isOpen()) open();
+    	open();
     	ContentValues args = new ContentValues();
         args.put(KEY_TITLE, title);
         args.put(KEY_URL, url);
@@ -194,8 +222,11 @@ public class GalleryDbAdapter
 		args.put(KEY_TAGS, tags);
 		args.put(KEY_VISIBLE, visible);
 		args.put(KEY_DAYS, days);
-
-		return mDb.update(DATABASE_TABLE, args, KEY_ID + "=" + Id, null) > 0;
+		
+		Boolean good = mDb.update(DATABASE_TABLE, args, KEY_ID + "=" + Id, null) > 0;
+		if(!good)
+			good = mDb.replace(DATABASE_TABLE, null, args) > 0;
+		return good;
     }
     
 }

@@ -30,4 +30,15 @@
     <string name="btn_zip">Code postal</string>
     <string name="btn_gps">GPS</string>
     <string name="s_uploading">Téléchargement</string>
+    <string name="s_disabled">handicapés</string>
+    <string name="s_low_quality">WIFI désactivé. Utilisation de faible qualité.</string>
+    <string name="menu_settings">Paramètres</string>
+    <string name="pref_allow">Envoyer des statistiques d\'utilisation</string>
+    <string name="pref_user">Nom d\'utilisateur</string>
+    <string name="pref_pass">Mot de passe</string>
+    <string name="pref_allow_long">Autoriser l\'utilisation de collecte de statistiques</string>
+    <string name="s_help_1">WallChanger est votre base Wallpaper Manager.</string>
+    <string name="s_help_4">Vous êtes maintenant prêt à partir! Vous pouvez tester le résultat de l\'opération, ou l\'envoyer tout droit à votre écran d\'accueil!</string>
+    <string name="s_help_3">Ensuite, choisissez vos options de widget. Actuellement, seules les conditions météorologiques est disponible, mais il ya plus à venir. Si vous avez un GPS-téléphone compatible, vous pouvez sélectionner automatiquement votre position exacte. Sinon, s\'il vous plaît entrer votre code postal.</string>
+    <string name="s_help_2">La première étape consiste à sélectionner une image de base pour votre fond d\'écran. Vous pouvez utiliser votre fond d\'écran actuelle, l\'importation d\'une image de votre galerie, ou sélectionnez une galerie en ligne des meilleurs fonds d\'écran sur internet!</string>
 </resources>

@@ -21,49 +21,24 @@ public class GalleryItem
 	private int mDownloadCount = 0;
 	private int mWidth = 0;
 	private int mHeight = 0;
-	private Bitmap mThumbnail;
+	//private Bitmap mThumbnail;
 	private String mTags;
 	private int mDays = 0;
 	
 	public GalleryItem(JSONObject obj)
 	{
-		try {
-			if(obj.has("id"))
-				ID = Integer.parseInt(obj.getString("id"));
-			if(obj.has("url"))
-				mUrl = obj.getString("url");
-			if(obj.has("title"))
-				mTitle = obj.getString("title");
-			else mTitle = mUrl;
-			if(obj.has("dim"))
-			{
-				String[] dims = obj.getString("dims").split("x");
-				try {
-					mWidth = mHeight = Integer.parseInt(dims[0]);
-					if(dims.length > 1)
-						mHeight = Integer.parseInt(dims[1]);
-				} catch(NumberFormatException nfe) { }
-			}
-			if(obj.has("tags"))
-				mTags = obj.getString("tags");
-			try {
-				mRating = Float.parseFloat(obj.getString("rating"));
-			} catch(NumberFormatException nfe) { mRating = (Float)null; }
-			try {
-				mDownloadCount = Integer.parseInt(obj.getString("dl"));
-				Log.i(Prefs.LOG_KEY, "Downloads: " + mDownloadCount);
-			} catch(NumberFormatException nfe) {
-				Log.w(Prefs.LOG_KEY, "Couldn't parse Downloads");
-				mDownloadCount = 0;
-			}
-			try {
-				mDays = Integer.parseInt(obj.getString("days"));
-			} catch(NumberFormatException nfe) {
-				Log.w(Prefs.LOG_KEY, "Couldn't parse days", nfe);
-				mDays = -1;
-			}
-			mThumbnail = MediaUtils.readFileBitmap(getID() + ".jpg", true);
-		} catch(JSONException je) { }
+		//try {
+			ID = obj.optInt("id");
+			mUrl = obj.optString("url", mUrl);
+			mTitle = obj.optString("title", mTitle);
+			mWidth = obj.optInt("w", mWidth);
+			mHeight = obj.optInt("h", mHeight);
+			mDownloadCount = obj.optInt("dl", mDownloadCount);
+			mDays = obj.optInt("days", mDays);
+			mRating = (float)obj.optDouble("rating", mRating);
+			mTags = obj.optString("tags", mTags);
+			//mThumbnail = MediaUtils.readFileBitmap(getID() + ".jpg", true);
+		//} catch(JSONException je) { }
 	}
 	public GalleryItem(Cursor cursor)
 	{
@@ -73,7 +48,7 @@ public class GalleryItem
 		mRating = (float)TryGet(cursor, GalleryDbAdapter.KEY_RATING, 0.0f);
 		mDownloadCount = TryGet(cursor, GalleryDbAdapter.KEY_DOWNLOADS, 0);
 		mDays = TryGet(cursor, GalleryDbAdapter.KEY_DAYS, 0);
-		mThumbnail = MediaUtils.readFileBitmap(getID() + ".jpg", true);
+		//mThumbnail = MediaUtils.readFileBitmap(getID() + ".jpg", true);
 		/*
 		byte[] data = TryGet(cursor, GalleryDbAdapter.KEY_DATA, (byte[])null);
 		if(data != null)
@@ -83,6 +58,18 @@ public class GalleryItem
 				setIsDownloaded();
 		}
 		*/
+	}
+	
+	public void merge(JSONObject obj)
+	{
+		mUrl = obj.optString("url", mUrl);
+		mTitle = obj.optString("title", mTitle);
+		mWidth = obj.optInt("w", mWidth);
+		mHeight = obj.optInt("h", mHeight);
+		mDownloadCount = obj.optInt("dl", mDownloadCount);
+		mDays = obj.optInt("days", mDays);
+		mRating = (float)obj.optDouble("rating", mRating);
+		mTags = obj.optString("tags", mTags);
 	}
 	
 	public static String TryGet(Cursor c, String sKey, String sDefault)
@@ -131,13 +118,31 @@ public class GalleryItem
 	public Float getRating() { return mRating; }
 	public int getDownloadCount() { return mDownloadCount; }
 	public void setThumbnail(Bitmap bmp) {
-		mThumbnail = bmp;
-		MediaUtils.writeFile(getID() + ".jpg", bmp, true);
+		//mThumbnail = bmp;
+		MediaUtils.writeFile(getThumbnailFilename(), bmp, true);
 	}
 	public Bitmap getThumbnail() {
-		if(mThumbnail == null)
-			mThumbnail = MediaUtils.readFileBitmap(getID() + ".jpg", true);
-		return mThumbnail;
+		//if(mThumbnail == null)
+			//mThumbnail = MediaUtils.readFileBitmap(getID() + ".jpg", true);
+		return MediaUtils.readFileBitmap(getThumbnailFilename(), true);
+	}
+	public String getThumbnailFilename() {
+		return getThumbnailFilename(false);
+	}
+	public String getThumbnailFilename(Boolean fullName) {
+		/*
+		String ret = getURL();
+		if(ret.indexOf("/") > -1)
+			ret = ret.substring(ret.lastIndexOf("/") + 1);
+		ret = ret.replaceAll("[^A-Za-z0-9]", "_").replace("_jpg", ".jpg").replace("_png", ".jpg");
+		*/
+		String ret = getID() + ".jpg";
+		if(fullName)
+			ret = MediaUtils.getFullFilename(ret, true);
+		return ret;
+	}	
+	public Boolean hasThumbnail() {
+		return MediaUtils.fileExists(getThumbnailFilename(), true);
 	}
 
 	public void setWidth(int mWidth) {

@@ -30,4 +30,15 @@
     <string name="btn_zip">郵便番号</string>
     <string name="btn_gps">GPSを</string>
     <string name="s_uploading">アップロード</string>
+    <string name="s_disabled">無効</string>
+    <string name="s_low_quality">無線LANは無効になっています。低品質を使用する。</string>
+    <string name="menu_settings">設定</string>
+    <string name="pref_allow">使用統計情報を送信する</string>
+    <string name="pref_user">ユーザー名</string>
+    <string name="pref_pass">パスワード</string>
+    <string name="pref_allow_long">使用統計情報の収集を許可する</string>
+    <string name="s_help_1">WallChangerは、あなたの基本的な壁紙マネージャです。</string>
+    <string name="s_help_4">これで準備完了です！あなたは、操作の結果をテストしたり、それはあなたのホーム画面にstaight送る！</string>
+    <string name="s_help_3">次に、自分のウィジェットのオプションを選択します。現時点では、天気が使用可能ですが、来てより多くのです。あなたは、GPS対応携帯電話をお持ちの場合は、自動的に正確な位置を選択することができます。それ以外の場合は、郵便番号を入力してください。</string>
+    <string name="s_help_2">最初のステップは、あなたの壁紙のベースイメージを選択することです。あなたは、あなたの現在の壁紙を使用することができますあなたのギャラリーから任意のイメージをインポートするか、またはインターネット上で最高の壁紙のオンラインギャラリーから選択してください！</string>
 </resources>
