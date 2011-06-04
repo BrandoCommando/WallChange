@@ -30,4 +30,15 @@
     <string name="btn_zip">Почтовый индекс</string>
     <string name="btn_gps">GPS</string>
     <string name="s_uploading">Загружаю</string>
+    <string name="s_disabled">инвалидов</string>
+    <string name="s_low_quality">WIFI инвалидов. Использование низкого качества.</string>
+    <string name="menu_settings">Настройки</string>
+    <string name="pref_allow">Отправить статистику использования</string>
+    <string name="pref_user">Имя пользователя</string>
+    <string name="pref_pass">Пароль</string>
+    <string name="pref_allow_long">Разрешить сбор статистики использования</string>
+    <string name="s_help_1">WallChanger является вашей основной стола Manager.</string>
+    <string name="s_help_4">Теперь вы готовы к работе! Вы можете проверить исход операции, или отправить его Staight на главный экран!</string>
+    <string name="s_help_3">Затем выберите ваш виджет вариантов. В настоящее время, только погода доступна, но Есть еще не все. Если у вас есть GPS-телефон, вы можете автоматически выберет ваше точное местоположение. В противном случае, пожалуйста, введите свой почтовый индекс.</string>
+    <string name="s_help_2">Первый шаг заключается в выборе базы изображений для вашего стола. Вы можете использовать ваши текущие обои, импорт любое изображение из Вашей галереи, или выбрать из Интернет галерея лучшие обои на интернет!</string>
 </resources>

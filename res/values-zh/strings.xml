@@ -30,4 +30,15 @@
     <string name="btn_zip">邮政编码</string>
     <string name="btn_gps">全球定位系统</string>
     <string name="s_uploading">上传</string>
+    <string name="s_disabled">残疾人</string>
+    <string name="s_low_quality">无线网络禁用。使用低质量。</string>
+    <string name="menu_settings">设置</string>
+    <string name="pref_allow">传送使用统计</string>
+    <string name="pref_user">用户名</string>
+    <string name="pref_pass">密码</string>
+    <string name="pref_allow_long">允许使用统计资料的收集</string>
+    <string name="s_help_1">WallChanger是你的基本墙纸经理。</string>
+    <string name="s_help_4">您现在已经准备好去！您可以测试操作的结果，或将其发送到您的主画面staight！</string>
+    <string name="s_help_3">接下来选择你的部件选项。目前，只有天气可用，但有更多的惊喜。如果你有GPS功能的手机，可以自动选择你的确切位置。否则，请输入您的邮政编码。</string>
+    <string name="s_help_2">第一步是选择一个你的墙纸基地的形象。你可以使用当前的墙纸，从您的画廊任何图像，或选择从互联网上最好的壁纸在线画廊！</string>
 </resources>

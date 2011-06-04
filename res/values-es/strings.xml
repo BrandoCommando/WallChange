@@ -30,4 +30,15 @@
     <string name="btn_zip">Código postal</string>
     <string name="btn_gps">GPS</string>
     <string name="s_uploading">Subir</string>
+    <string name="s_disabled">con discapacidad</string>
+    <string name="s_low_quality">WIFI con discapacidad. Uso de baja calidad.</string>
+    <string name="menu_settings">Configuración</string>
+    <string name="pref_allow">Enviar estadísticas de uso</string>
+    <string name="pref_user">Nombre de usuario</string>
+    <string name="pref_pass">Contraseña</string>
+    <string name="pref_allow_long">Permitir el uso de la recopilación de estadísticas</string>
+    <string name="s_help_1">WallChanger es su base Administrador de Fondos.</string>
+    <string name="s_help_4">Ahora está listo para ir! Puede probar el resultado de la operación, o enviarlo Staight a su pantalla de inicio!</string>
+    <string name="s_help_3">A continuación, seleccione las opciones de flash. En la actualidad, sólo el tiempo disponible, pero hay más por venir. Si usted tiene un teléfono integrado con GPS, usted puede seleccionar automáticamente su ubicación exacta. De lo contrario, por favor ingrese su código postal.</string>
+    <string name="s_help_2">El primer paso es seleccionar una imagen de base para su fondo de pantalla. Usted puede utilizar su fondo de pantalla actual, importar cualquier imagen de su galería, o elegir entre una galería en línea de los mejores fondos de pantalla en Internet!</string>
 </resources>

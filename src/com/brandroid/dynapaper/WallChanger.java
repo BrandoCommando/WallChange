@@ -35,6 +35,7 @@ public class WallChanger
 	public static final String EXTERNAL_ROOT = "/mnt/sdcard/wallchanger/";
 	public static final int REQ_SELECT_GALLERY = 1;
 	public static final int REQ_SELECT_ONLINE = 2;
+	public static final int REQ_SETTINGS = 3;
 	public final static int REQ_UPDATE_GALLERY = 101;
 	public final static int DOWNLOAD_CHUNK_SIZE = 512;
 	public final static Boolean OPTION_SHOW_GALLERY_INFO = true;
@@ -42,7 +43,7 @@ public class WallChanger
 	private static int mUploadQuality = 90;
 	private static int mUploadQualityNoWifi = 60;
 	private static final Boolean bPaidMode = false;
-	private static final Boolean bTesting = false;
+	private static final Boolean bTesting = true;
 	//private static String mDeviceId;
 	private static Location mLastLocation;
 	public static Prefs Prefs;
@@ -57,6 +58,7 @@ public class WallChanger
 	public static void setUser(String user)
 	{
 		if(user.equalsIgnoreCase(mUser)) return;
+		if(user.equals("")) return;
 		Logger.LogInfo("New User: " + user + " (from " + mUser + ")");
 		mUser = user;
 	}

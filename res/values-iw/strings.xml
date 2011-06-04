@@ -30,4 +30,15 @@
     <string name="btn_online">Online</string>
     <string name="menu_about">כ</string>
     <string name="s_uploading">העלאת</string>
+    <string name="s_disabled">נכה</string>
+    <string name="s_low_quality">WIFI נכים. שימוש באיכות נמוכה.</string>
+    <string name="menu_settings">הגדרות</string>
+    <string name="pref_allow">שלח סטטיסטיקות שימוש</string>
+    <string name="pref_user">שם משתמש</string>
+    <string name="pref_pass">סיסמה</string>
+    <string name="pref_allow_long">אפשר הסטטיסטיקה אוסף הקישורים</string>
+    <string name="s_help_1">WallChanger הוא טפט הבסיסית שלך Manager.</string>
+    <string name="s_help_4">כעת אתה מוכן ללכת! ניתן לבדוק את התוצאה של הפעולה, או לשלוח אותו staight למסך הבית שלך!</string>
+    <string name="s_help_3">הבא לבחור אפשרויות יישומון שלך. נכון לעכשיו, רק מזג האוויר זמין, אבל יש עוד לבוא. אם יש לך GPS-הטלפון מופעלת, אתה יכול לבחור אוטומטית את המיקום המדויק שלך. אחרת, הזן את המיקוד שלך.</string>
+    <string name="s_help_2">הצעד הראשון הוא לבחור תמונה הבסיס טפט ​​שלך. ניתן להשתמש בטפט הנוכחי שלך, לייבא כל תמונה מהגלריה שלך, או לבחור מתוך גלריה מקוונת של טפטים ביותר באינטרנט!</string>
 </resources>
