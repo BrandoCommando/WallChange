@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.text.format.Time;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.MenuItem;
@@ -86,11 +87,16 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
     		String sAdID = WallChanger.MY_AD_UNIT_ID[iAdToUse];
     		Logger.LogInfo("Using Ad ID #" + iAdToUse + " for Admob - " + sAdID);
     		
-    		int density = (int)getResources().getDisplayMetrics().density;
-    		int iShortDimension = Math.min(getHomeWidth(), getHomeHeight());
+    		DisplayMetrics dm = getResources().getDisplayMetrics();
+    		int density = (int)dm.density;
+    		int iShortDimension = Math.min(dm.widthPixels, dm.heightPixels);
+    		int iLongDimension = Math.max(dm.widthPixels, dm.heightPixels);
     		AdSize adsize = AdSize.BANNER;
     		if(iShortDimension > 480)
+    		{
+    			Logger.LogDebug("Using Tablet Ad Size because screen is " + iShortDimension + "x" + iLongDimension);
     			adsize = AdSize.IAB_MRECT;
+    		}
     		
     		AdView adView = new AdView(this, adsize, sAdID);
     		
