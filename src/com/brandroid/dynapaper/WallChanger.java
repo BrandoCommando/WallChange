@@ -4,12 +4,8 @@ import java.net.URLEncoder;
 
 import com.brandroid.Logger;
 
-import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.wifi.WifiManager;
-import android.telephony.TelephonyManager;
-import android.util.Log;
 
 public class WallChanger
 {
@@ -42,7 +38,7 @@ public class WallChanger
 	private static int mUploadQuality = 90;
 	private static int mUploadQualityNoWifi = 60;
 	private static final Boolean bPaidMode = false;
-	private static final Boolean bTesting = false;
+	private static final Boolean bTesting = true;
 	//private static String mDeviceId;
 	private static Location mLastLocation;
 	public static Prefs Prefs;

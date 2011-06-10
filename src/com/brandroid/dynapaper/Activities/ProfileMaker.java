@@ -189,12 +189,12 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 			WifiManager wm = (WifiManager)getSystemService(WIFI_SERVICE);
 			if(wm != null)
 			{
-				Logger.LogInfo("WIFI Manager: " + wm.toString());
+				//Logger.LogInfo("WIFI Manager: " + wm.toString());
 				WifiInfo wi = wm.getConnectionInfo();
 				if(wi != null)
 				{
 					Logger.LogInfo("WIFI Info: " + wi.toString());
-					if(wi.getSupplicantState() == SupplicantState.COMPLETED)
+					if(wi.getSupplicantState().equals(SupplicantState.COMPLETED))
 						mWifiEnabled = true;
 				}
 			}
@@ -253,13 +253,15 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	@Override
 	public void onClick(View v)
 	{
-		checkWifi();
+		//checkWifi();
 		switch(v.getId())
 		{
 			case R.id.btnCurrent:
+				checkWifi();
 				onClickCurrent();
 				break;
 			case R.id.btnGallery:
+				checkWifi();
 				onClickLocalGallery();
 				break;
 			case R.id.btnOnline:
