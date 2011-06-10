@@ -41,4 +41,10 @@
     <string name="s_help_4">您现在已经准备好去！您可以测试操作的结果，或将其发送到您的主画面staight！</string>
     <string name="s_help_3">接下来选择你的部件选项。目前，只有天气可用，但有更多的惊喜。如果你有GPS功能的手机，可以自动选择你的确切位置。否则，请输入您的邮政编码。</string>
     <string name="s_help_2">第一步是选择一个你的墙纸基地的形象。你可以使用当前的墙纸，从您的画廊任何图像，或选择从互联网上最好的壁纸在线画廊！</string>
+    <string name="s_rating">评分</string>
+    <string name="s_feedback">反馈</string>
+    <string name="s_name">你的名字</string>
+    <string name="s_anonymous">无名氏</string>
+    <string name="btn_send">发送</string>
+    <string name="s_thanks">谢谢！</string>
 </resources>

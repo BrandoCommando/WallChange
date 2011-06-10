@@ -41,4 +41,10 @@
     <string name="s_help_4">Ora sei pronto per andare! È possibile verificare l\'esito dell\'operazione, o inviarlo staight alla schermata Home!</string>
     <string name="s_help_3">Avanti selezionare le opzioni di widget. Attualmente, solo il tempo è disponibile, ma ci sono più da venire. Se hai un cellulare abilitato GPS, è possibile selezionare automaticamente la posizione esatta. Altrimenti, inserisci il tuo codice postale.</string>
     <string name="s_help_2">Il primo passo è quello di selezionare un\'immagine di base per la vostra carta da parati. È possibile utilizzare il tuo sfondo corrente, importare qualsiasi immagine dalla tua galleria, o scegliere tra una galleria online dei migliori sfondi su internet!</string>
+    <string name="s_rating">Rating</string>
+    <string name="s_feedback">Feedback</string>
+    <string name="s_name">Il tuo nome</string>
+    <string name="s_anonymous">Anonimo</string>
+    <string name="btn_send">Invia</string>
+    <string name="s_thanks">Grazie!</string>
 </resources>

@@ -41,4 +41,10 @@
     <string name="s_help_4">כעת אתה מוכן ללכת! ניתן לבדוק את התוצאה של הפעולה, או לשלוח אותו staight למסך הבית שלך!</string>
     <string name="s_help_3">הבא לבחור אפשרויות יישומון שלך. נכון לעכשיו, רק מזג האוויר זמין, אבל יש עוד לבוא. אם יש לך GPS-הטלפון מופעלת, אתה יכול לבחור אוטומטית את המיקום המדויק שלך. אחרת, הזן את המיקוד שלך.</string>
     <string name="s_help_2">הצעד הראשון הוא לבחור תמונה הבסיס טפט ​​שלך. ניתן להשתמש בטפט הנוכחי שלך, לייבא כל תמונה מהגלריה שלך, או לבחור מתוך גלריה מקוונת של טפטים ביותר באינטרנט!</string>
+    <string name="s_rating">דירוג</string>
+    <string name="s_feedback">משוב</string>
+    <string name="s_name">השם שלך</string>
+    <string name="s_anonymous">אלמוני</string>
+    <string name="btn_send">שלח</string>
+    <string name="s_thanks">תודה!</string>
 </resources>

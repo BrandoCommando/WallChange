@@ -37,6 +37,7 @@ public class ProfileDbAdapter
     private static final String TABLE_PROFILE_BASE = "profile_base";
     private static final String TABLE_PROFILE_WIDGET = "profile_widget";
     private static final String TABLE_PROFILE_TRIGGER = "profile_trigger";
+    private static final String[] TABLES_ALL = {TABLE_PROFILE, TABLE_BASE, TABLE_WIDGET, TABLE_TRIGGER, TABLE_PROFILE_BASE, TABLE_PROFILE_WIDGET, TABLE_PROFILE_TRIGGER}; 
     
     private static final int DATABASE_VERSION = 1;
 
@@ -81,13 +82,14 @@ public class ProfileDbAdapter
         @Override
         public void onCreate(SQLiteDatabase db)
         {
-        	Logger.LogVerbose("Creating database");
-            db.execSQL(TABLE_CREATE_PROFILE);
+        	Logger.LogVerbose("Creating tables for Profiles");
+        	db.execSQL(TABLE_CREATE_PROFILE);
             db.execSQL(TABLE_CREATE_BASE);
-            db.execSQL(TABLE_CREATE_BASE);
-            db.execSQL(TABLE_CREATE_BASE);
-            db.execSQL(TABLE_CREATE_BASE);
-            db.execSQL(TABLE_CREATE_BASE);
+            db.execSQL(TABLE_CREATE_TRIGGER);
+            db.execSQL(TABLE_CREATE_WIDGET);
+            db.execSQL(TABLE_CREATE_PROFILE_BASE);
+            db.execSQL(TABLE_CREATE_PROFILE_TRIGGER);
+            db.execSQL(TABLE_CREATE_WIDGET_BASE);
         }
 
         @Override

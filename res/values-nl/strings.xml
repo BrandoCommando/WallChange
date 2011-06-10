@@ -41,4 +41,10 @@
     <string name="s_help_4">U bent nu klaar om te gaan! U kunt testen of het resultaat van de operatie, of stuur het staight op je beginscherm!</string>
     <string name="s_help_3">Vervolgens selecteert u de widget opties. Momenteel zijn alleen weer beschikbaar is, maar er zijn meer te komen. Als u een GPS-enabled telefoon, kunt u automatisch uw exacte locatie. Anders, geef uw postcode in.</string>
     <string name="s_help_2">De eerste stap is het selecteren van een basis op de afbeelding voor uw behang. U kunt gebruik maken van uw huidige wallpaper, importeren afbeelding van uw galerij, of kiezen uit een online galerie van de beste wallpapers op het internet!</string>
+    <string name="s_rating">Rating</string>
+    <string name="s_feedback">Feedback</string>
+    <string name="s_name">Je naam</string>
+    <string name="s_anonymous">Anoniem</string>
+    <string name="btn_send">Stuur</string>
+    <string name="s_thanks">Dank je wel!</string>
 </resources>

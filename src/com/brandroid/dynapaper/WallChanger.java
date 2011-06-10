@@ -23,6 +23,7 @@ public class WallChanger
 	public static final String MY_APP_ROOT_URL = MY_ROOT_URL + "/dynapaper/";
 	public static final String MY_WEATHER_URL = MY_APP_ROOT_URL + "widget_weather2.php?user=%USER%";
 	public static final String MY_GALLERY_URL = MY_APP_ROOT_URL + "gallery3.php?user=%USER%";
+	public static final String MY_FEEDBACK_URL = MY_APP_ROOT_URL + "feedback.php?user=%USER%";
 	public static final String MY_IMAGE_URL = MY_APP_ROOT_URL + "get_image.php?user=%USER%&url=%URL%";
 	public static final String MY_THUMB_URL = MY_APP_ROOT_URL + "get_thumb.php?user=%USER%&url=%URL%";
 	public static final String MY_THUMBS_ZIP_URL = MY_APP_ROOT_URL + "get_thumbs.php";
@@ -43,7 +44,7 @@ public class WallChanger
 	private static int mUploadQuality = 90;
 	private static int mUploadQualityNoWifi = 60;
 	private static final Boolean bPaidMode = false;
-	private static final Boolean bTesting = true;
+	private static final Boolean bTesting = false;
 	//private static String mDeviceId;
 	private static Location mLastLocation;
 	public static Prefs Prefs;

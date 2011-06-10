@@ -1079,6 +1079,9 @@ public class ProfileMaker extends BaseActivity
 		case R.id.menu_help:
 			startActivity(new Intent(getApplicationContext(), Help.class));
 			break;
+		case R.id.menu_feedback:
+			startActivity(new Intent(getApplicationContext(), Feedback.class));
+			break;
 		}
 		return super.onOptionsItemSelected(item);
 	}

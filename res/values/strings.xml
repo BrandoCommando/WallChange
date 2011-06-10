@@ -51,4 +51,10 @@
     <string name="s_help_4">You are now ready to go! You can test the outcome of the operation, or send it staight to your Home screen!</string>
     <string name="s_help_3">Next select your widget options. Currently, only weather is available, but there are more to come. If you have a GPS-enabled phone, you can automatically select your exact location. Otherwise, please enter your zip code.</string>
     <string name="s_help_2">The first step is to select a base image for your wallpaper. You can use your current wallpaper, import any image from your gallery, or select from an Online gallery of the best wallpapers on the internet!</string>
+    <string name="s_rating">Rating</string>
+    <string name="s_feedback">Feedback</string>
+    <string name="s_name">Your name</string>
+    <string name="s_anonymous">Anonymous</string>
+    <string name="btn_send">Send</string>
+    <string name="s_thanks">Thank you!</string>
 </resources>

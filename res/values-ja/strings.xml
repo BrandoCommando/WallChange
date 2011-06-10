@@ -41,4 +41,10 @@
     <string name="s_help_4">これで準備完了です！あなたは、操作の結果をテストしたり、それはあなたのホーム画面にstaight送る！</string>
     <string name="s_help_3">次に、自分のウィジェットのオプションを選択します。現時点では、天気が使用可能ですが、来てより多くのです。あなたは、GPS対応携帯電話をお持ちの場合は、自動的に正確な位置を選択することができます。それ以外の場合は、郵便番号を入力してください。</string>
     <string name="s_help_2">最初のステップは、あなたの壁紙のベースイメージを選択することです。あなたは、あなたの現在の壁紙を使用することができますあなたのギャラリーから任意のイメージをインポートするか、またはインターネット上で最高の壁紙のオンラインギャラリーから選択してください！</string>
+    <string name="s_rating">評価</string>
+    <string name="s_feedback">フィードバック</string>
+    <string name="s_name">あなたの名前</string>
+    <string name="s_anonymous">匿名</string>
+    <string name="btn_send">送信</string>
+    <string name="s_thanks">ありがとうございます！</string>
 </resources>

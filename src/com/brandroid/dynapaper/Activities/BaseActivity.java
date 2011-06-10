@@ -17,6 +17,7 @@ import com.google.ads.AdView;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -166,19 +167,25 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 	@Override
 	protected void onRestart() {
 		super.onRestart();
-		Logger.LogVerbose("onRestart :: " + this.toString());
+		//Logger.LogVerbose("onRestart :: " + this.toString());
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Logger.LogVerbose("onResume :: " + this.toString());
+		//Logger.LogVerbose("onResume :: " + this.toString());
 	}
 	
 	@Override
 	public void onLowMemory() {
 		super.onLowMemory();
-		Logger.LogWarning("Low memory!");
+		Logger.LogWarning("Low memory!", new Exception());
+	}
+	
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+		Logger.LogVerbose("onRestoreInstanceState :: " + this.toString());
 	}
 	
 	@Override
@@ -190,36 +197,30 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 	@Override
 	protected void onStart() {
 		super.onStart();
-		Logger.LogVerbose("onStart :: " + this.toString());
+		//Logger.LogVerbose("onStart :: " + this.toString());
 	}
 	
 	@Override
 	protected void onStop() {
 		super.onStop();
-		Logger.LogVerbose("onStop :: " + this.toString());
+		//Logger.LogVerbose("onStop :: " + this.toString());
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
-		Logger.LogVerbose("onPause :: " + this.toString());
-	}
-	
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-		Logger.LogVerbose("onRestoreInstanceState :: " + this.toString());
+		//Logger.LogVerbose("onPause :: " + this.toString());
 	}
 	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		Logger.LogVerbose("onDestroy :: " + this.toString());
+		//Logger.LogVerbose("onDestroy :: " + this.toString());
 	}
 
 	@Override
 	public boolean onMenuItemClick(MenuItem item) {
-		Logger.LogVerbose("onMenuItemClick :: " + item.toString());
+		Logger.LogDebug("onMenuItemClick :: " + item.toString());
 		return true;
 	}
 	
