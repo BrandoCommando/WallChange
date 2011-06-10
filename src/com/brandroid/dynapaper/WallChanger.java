@@ -19,6 +19,7 @@ public class WallChanger
 	public static final String MY_APP_ROOT_URL = MY_ROOT_URL + "/dynapaper/";
 	public static final String MY_WEATHER_URL = MY_APP_ROOT_URL + "widget_weather2.php?user=%USER%";
 	public static final String MY_GALLERY_URL = MY_APP_ROOT_URL + "gallery3.php?user=%USER%";
+	public static final String MY_FEEDBACK_URL = MY_APP_ROOT_URL + "feedback.php?user=%USER%";
 	public static final String MY_IMAGE_URL = MY_APP_ROOT_URL + "get_image.php?user=%USER%&url=%URL%";
 	public static final String MY_THUMB_URL = MY_APP_ROOT_URL + "get_thumb.php?user=%USER%&url=%URL%";
 	public static final String MY_THUMBS_ZIP_URL = MY_APP_ROOT_URL + "get_thumbs.php";
@@ -31,6 +32,7 @@ public class WallChanger
 	public static final String EXTERNAL_ROOT = "/mnt/sdcard/wallchanger/";
 	public static final int REQ_SELECT_GALLERY = 1;
 	public static final int REQ_SELECT_ONLINE = 2;
+	public static final int REQ_SETTINGS = 3;
 	public final static int REQ_UPDATE_GALLERY = 101;
 	public final static int DOWNLOAD_CHUNK_SIZE = 512;
 	public final static Boolean OPTION_SHOW_GALLERY_INFO = true;
@@ -53,6 +55,7 @@ public class WallChanger
 	public static void setUser(String user)
 	{
 		if(user.equalsIgnoreCase(mUser)) return;
+		if(user.equals("")) return;
 		Logger.LogInfo("New User: " + user + " (from " + mUser + ")");
 		mUser = user;
 	}

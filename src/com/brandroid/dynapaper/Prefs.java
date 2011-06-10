@@ -7,17 +7,20 @@ import com.brandroid.Logger;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class Prefs {
-	public static final String PREFS_NAME = "WallChangerPrefs";
+	//public static final String PREFS_NAME = "WallChangerPrefs";
 	
 	private static Prefs preferences;
 	private SharedPreferences mStorage; 
 	
 	public Prefs(Context context)
 	{
-		mStorage = context.getSharedPreferences(PREFS_NAME, 0);
+		PreferenceManager.setDefaultValues(context, R.xml.preferences, false);
+		mStorage = PreferenceManager.getDefaultSharedPreferences(context);
+		//context.getSharedPreferences(PREFS_NAME, 0);
 	}
 	public static synchronized Prefs getPreferences(Context context)
 	{

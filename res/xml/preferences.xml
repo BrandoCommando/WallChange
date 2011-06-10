@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+        android:title="Settings">
+ 
+	<PreferenceCategory android:title="User Settings">
+	      <EditTextPreference android:key="user"
+	      		android:title="@string/pref_user" android:inputType="text"
+	      		android:persistent="true" />
+	      <EditTextPreference android:key="password"
+	      		android:inputType="textPassword" android:title="@string/pref_pass"
+	      		android:persistent="true" android:defaultValue=""  />
+	</PreferenceCategory>
+   
+	<CheckBoxPreference android:title="@string/pref_allow" android:defaultValue="true"
+		android:key="allow" android:summary="@string/pref_allow_long" />
+		
+</PreferenceScreen>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	android:id="@+id/feedbackLayout" android:gravity="center|top">
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="fill_parent" android:orientation="vertical"
+		android:layout_above="@+id/btnSend"
+		android:gravity="center|top">
+		<TextView android:layout_height="wrap_content" android:text="@string/s_rating"
+			android:layout_width="wrap_content" android:id="@+id/textView1"></TextView>
+		<RatingBar android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/rateFeedback"></RatingBar>
+		<TextView android:layout_height="wrap_content" android:text="@string/s_feedback"
+			android:layout_width="wrap_content" android:id="@+id/textView2"></TextView>
+		<EditText android:layout_height="wrap_content"
+			android:layout_width="fill_parent" android:minLines="5"
+			android:maxLines="5" android:gravity="top" android:id="@+id/txtFeedback"></EditText>
+		<TextView android:layout_height="wrap_content" android:text="@string/s_name"
+			android:layout_width="wrap_content" android:id="@+id/textView3"></TextView>
+		<EditText android:layout_height="wrap_content"
+			android:layout_width="fill_parent" android:maxLines="1"
+			android:text="@string/s_anonymous" android:id="@+id/txtFeedbackName"></EditText>
+
+	</LinearLayout>
+	<Button android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_alignParentBottom="true" android:id="@+id/btnSend" android:text="@string/btn_send"></Button>
+
+</RelativeLayout>

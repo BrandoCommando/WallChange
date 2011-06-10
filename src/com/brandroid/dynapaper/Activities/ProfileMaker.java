@@ -61,6 +61,9 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AnimationUtils;
@@ -71,7 +74,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-public class ProfileMaker extends BaseActivity implements OnClickListener
+public class ProfileMaker extends BaseActivity
 { 
 	private EditText mTxtURL, mTxtZip;
 	private ImageView mImgPreview;
@@ -88,6 +91,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	private LocationListener locationListener;
 	private LocationManager locationManager;
 	private Boolean mWifiEnabled = true;
+	private Menu mMenu;
 	
 	//private String mGPSLocation = null;
 	
@@ -160,6 +164,12 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		//mTxtZip.setText(prefs.getString("zip", mTxtZip.getText().toString()));
 		
 		new UpdateOnlineGalleryTask().execute((String[])null);
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.maker, menu);
+		return true;
 	}
 	
 	public String getDynaURL()
@@ -253,7 +263,6 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	@Override
 	public void onClick(View v)
 	{
-		//checkWifi();
 		switch(v.getId())
 		{
 			case R.id.btnCurrent:
@@ -748,7 +757,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		    		if(modified != null)
 		    			uc.setIfModifiedSince(modified);
 	    		}
-	    		if(Logger.hasDb() && checkWifi()) // only upload on WIFI
+	    		if(Logger.hasDb() && prefs.getSetting("allow", true)) // only upload on WIFI
 	    		{
 	    			String sDbLogData = Logger.getDbLogs();
 	    			if(sDbLogData != "")
@@ -1047,12 +1056,7 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 		if(mTxtURL != null)
 			prefs.setSetting("url", mTxtURL.getText().toString());
 	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-	}
-
+	
 	@Override
 	protected void onStart() {
 		super.onStart();
@@ -1066,12 +1070,20 @@ public class ProfileMaker extends BaseActivity implements OnClickListener
 	}
 	
 	@Override
-	protected void onPause() {
-		super.onPause();
-	}
-	
-	@Override
-	protected void onResume() {
-		super.onResume();
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId())
+		{
+		case R.id.menu_settings:
+			Intent intentSettings = new Intent(getApplicationContext(), Settings.class);
+			startActivityForResult(intentSettings, WallChanger.REQ_SETTINGS);
+			break;
+		case R.id.menu_help:
+			startActivity(new Intent(getApplicationContext(), Help.class));
+			break;
+		case R.id.menu_feedback:
+			startActivity(new Intent(getApplicationContext(), Feedback.class));
+			break;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 }

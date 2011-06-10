@@ -32,16 +32,29 @@
     <string name="btn_gps">GPS</string>
     <string name="s_uploading">Uploading</string>
     <string name="s_low_quality">WIFI disabled. Using low quality.</string>
-
     <string name="local_storage_provider_external_label">External storage (SD card)</string>
     <string name="local_storage_provider_internal_label">Regular internal storage</string>
     <string name="local_storage_provider_samsunggalaxy_label">%1$s additional internal storage</string>
     <string name="local_storage_provider_label">Storage location</string>
-
     <string-array name="picker_sort_options">
         <item>Downloads</item>
         <item>Rating</item>
         <item>Date Added</item>
     </string-array>
     <string name="picker_sort_prompt">Sort Options</string>
+    <string name="menu_settings">Settings</string>
+    <string name="pref_allow">Send Usage Stats</string>
+    <string name="pref_user">User name</string>
+    <string name="pref_pass">Password</string>
+    <string name="pref_allow_long">Allow usage statistics collection</string>
+    <string name="s_help_1">WallChanger is your basic Wallpaper Manager.</string>
+    <string name="s_help_4">You are now ready to go! You can test the outcome of the operation, or send it staight to your Home screen!</string>
+    <string name="s_help_3">Next select your widget options. Currently, only weather is available, but there are more to come. If you have a GPS-enabled phone, you can automatically select your exact location. Otherwise, please enter your zip code.</string>
+    <string name="s_help_2">The first step is to select a base image for your wallpaper. You can use your current wallpaper, import any image from your gallery, or select from an Online gallery of the best wallpapers on the internet!</string>
+    <string name="s_rating">Rating</string>
+    <string name="s_feedback">Feedback</string>
+    <string name="s_name">Your name</string>
+    <string name="s_anonymous">Anonymous</string>
+    <string name="btn_send">Send</string>
+    <string name="s_thanks">Thank you!</string>
 </resources>

@@ -8,27 +8,36 @@ import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.dynapaper.Database.LoggerDbAdapter;
+import com.google.ads.Ad;
+import com.google.ads.AdListener;
 import com.google.ads.AdRequest;
+import com.google.ads.AdRequest.ErrorCode;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.os.Build.VERSION;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.text.format.Time;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.MenuItem.OnMenuItemClickListener;
+import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-public class BaseActivity extends Activity
+public class BaseActivity extends Activity implements OnClickListener, OnMenuItemClickListener, AdListener
 {
 	private int mHomeWidth = 0;
 	private int mHomeHeight = 0;
@@ -55,9 +64,12 @@ public class BaseActivity extends Activity
 		
 		Logger.LogVerbose("onCreate :: " + this.toString());
 
-        mResources = getResources();
+		mResources = getResources();
         if(WallChanger.Prefs == null)
+        {
         	WallChanger.Prefs = Prefs.getPreferences(getApplicationContext());
+        	WallChanger.setUser(WallChanger.Prefs.getSetting("user", "user" + ((int)Math.floor(Math.random() * 10000000))));
+        }
         prefs = WallChanger.Prefs;
         
         if(!WallChanger.isPaidMode())
@@ -75,8 +87,21 @@ public class BaseActivity extends Activity
     		int iAdToUse = t.hour % (WallChanger.MY_AD_UNIT_ID.length + 1);
     		String sAdID = WallChanger.MY_AD_UNIT_ID[iAdToUse];
     		Logger.LogInfo("Using Ad ID #" + iAdToUse + " for Admob - " + sAdID);
-    		AdView adView = new AdView(this, AdSize.BANNER, sAdID);
-	        // Lookup your LinearLayout assuming its been given
+    		
+    		DisplayMetrics dm = getResources().getDisplayMetrics();
+    		int density = (int)dm.density;
+    		int iShortDimension = Math.min(dm.widthPixels, dm.heightPixels);
+    		int iLongDimension = Math.max(dm.widthPixels, dm.heightPixels);
+    		AdSize adsize = AdSize.BANNER;
+    		if(iShortDimension > 480)
+    		{
+    			Logger.LogDebug("Using Tablet Ad Size because screen is " + iShortDimension + "x" + iLongDimension);
+    			adsize = AdSize.IAB_MRECT;
+    		}
+    		
+    		AdView adView = new AdView(this, adsize, sAdID);
+    		
+    		// Lookup your LinearLayout assuming its been given
 	        // the attribute android:id="@+id/mainLayout"
 	        LinearLayout layout = (LinearLayout)findViewById(R.id.adLayout);
 	        if(layout == null) {
@@ -87,14 +112,12 @@ public class BaseActivity extends Activity
 	        layout.addView(adView);
 	        // Initiate a generic request to load it with an ad
 	        AdRequest ad = new AdRequest();
+	        
 	        if(WallChanger.isTesting())
 	        {
-	        	//ad.setTesting(WallChanger.isTesting());
+		        ad.addTestDevice(AdRequest.TEST_EMULATOR);
+	        	ad.addTestDevice("383A6E6B957E2A18C8830E6C431B2AAF");
 	        } else ad.setTesting(false);
-	        
-	        ad.addTestDevice(AdRequest.TEST_EMULATOR);
-        	//ad.addTestDevice("A0000015CF6B9D");
-        	ad.addTestDevice("383A6E6B957E2A18C8830E6C431B2AAF");
         	
 	        ad.setLocation(WallChanger.getLastLocation());
 	        adView.loadAd(ad);
@@ -144,19 +167,25 @@ public class BaseActivity extends Activity
 	@Override
 	protected void onRestart() {
 		super.onRestart();
-		Logger.LogVerbose("onRestart :: " + this.toString());
+		//Logger.LogVerbose("onRestart :: " + this.toString());
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Logger.LogVerbose("onResume :: " + this.toString());
+		//Logger.LogVerbose("onResume :: " + this.toString());
 	}
 	
 	@Override
 	public void onLowMemory() {
 		super.onLowMemory();
-		Logger.LogWarning("Low memory!");
+		Logger.LogWarning("Low memory!", new Exception());
+	}
+	
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+		Logger.LogVerbose("onRestoreInstanceState :: " + this.toString());
 	}
 	
 	@Override
@@ -168,31 +197,67 @@ public class BaseActivity extends Activity
 	@Override
 	protected void onStart() {
 		super.onStart();
-		Logger.LogVerbose("onStart :: " + this.toString());
+		//Logger.LogVerbose("onStart :: " + this.toString());
 	}
 	
 	@Override
 	protected void onStop() {
 		super.onStop();
-		Logger.LogVerbose("onStop :: " + this.toString());
+		//Logger.LogVerbose("onStop :: " + this.toString());
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
-		Logger.LogVerbose("onPause :: " + this.toString());
-	}
-	
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-		Logger.LogVerbose("onRestoreInstanceState :: " + this.toString());
+		//Logger.LogVerbose("onPause :: " + this.toString());
 	}
 	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		Logger.LogVerbose("onDestroy :: " + this.toString());
+		//Logger.LogVerbose("onDestroy :: " + this.toString());
+	}
+
+	@Override
+	public boolean onMenuItemClick(MenuItem item) {
+		Logger.LogDebug("onMenuItemClick :: " + item.toString());
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		Logger.LogDebug("onMenuItemClick :: " + item.toString());
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void onClick(View v) {
+		Logger.LogDebug("onClick :: " + v.toString());
+	}
+
+	@Override
+	public void onDismissScreen(Ad ad) {
+		Logger.LogDebug("Admob present screen for " + this.toString() + ". " + ad.toString());
+	}
+
+	@Override
+	public void onFailedToReceiveAd(Ad ad, ErrorCode code) {
+		Logger.LogDebug("Admob failed to receive ad for " + this.toString() + ". Code " + code + ". " + ad.toString());
+	}
+
+	@Override
+	public void onLeaveApplication(Ad ad) {
+		Logger.LogDebug("Admob left application for " + this.toString() + ". " + ad.toString());
+	}
+
+	@Override
+	public void onPresentScreen(Ad ad) {
+		Logger.LogDebug("Admob present screen for " + this.toString() + ". " + ad.toString());
+	}
+
+	@Override
+	public void onReceiveAd(Ad ad) {
+		Logger.LogDebug("Admob received ad for " + this.toString() + ". " + ad.toString());
 	}
 
 }

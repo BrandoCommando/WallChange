@@ -30,4 +30,21 @@
     <string name="btn_online">على الانترنت</string>
     <string name="menu_about">حول</string>
     <string name="s_uploading">تحميل</string>
+    <string name="s_disabled">تعطيل</string>
+    <string name="s_low_quality">واي فاي المعوقين. استخدام نوعية متدنية.</string>
+    <string name="menu_settings">إعدادات</string>
+    <string name="pref_allow">إرسال إحصائيات الاستخدام</string>
+    <string name="pref_user">اسم المستخدم</string>
+    <string name="pref_pass">كلمة السر</string>
+    <string name="pref_allow_long">يسمح استخدام جمع الإحصاءات</string>
+    <string name="s_help_1">WallChanger الخاص بك هو مدير الأساسية للجدران.</string>
+    <string name="s_help_4">أنت الآن على استعداد للذهاب! يمكنك اختبار نتائج هذه العملية ، أو إرساله إلى staight الشاشة الرئيسية الخاصة بك!</string>
+    <string name="s_help_3">المقبل حدد خياراتك القطعة. حاليا ، والطقس الوحيد هو متاح ، ولكن هناك المزيد في المستقبل. إذا كان لديك لتحديد المواقع الهاتف تمكين ، يمكنك تحديد موقعك بالضبط تلقائيا. خلاف ذلك ، من فضلك ادخل الرمز البريدي الخاص بك.</string>
+    <string name="s_help_2">وتتمثل الخطوة الأولى لتحديد صورة لقاعدة خلفية الشاشة. يمكنك استخدام ورق الحائط الخاص بك الحالي ، استيراد أي صورة من معرض الصور الخاص بك ، أو اختر من معرض أون لاين من أفضل خلفيات على الانترنت!</string>
+    <string name="s_rating">التصويت</string>
+    <string name="s_feedback">تعليقات</string>
+    <string name="s_name">اسمك</string>
+    <string name="s_anonymous">مجهول</string>
+    <string name="btn_send">إرسال</string>
+    <string name="s_thanks">شكرا لك!</string>
 </resources>

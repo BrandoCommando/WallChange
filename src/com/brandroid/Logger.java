@@ -13,7 +13,7 @@ public class Logger
 	private static String[] sLastMessage = new String[] {"", "", "", "", ""};
 	private static Integer[] iLastCount = new Integer[] {0,0,0,0,0};
 	public static Boolean LoggingEnabled = true;
-	public static final Integer MIN_DB_LEVEL = Log.WARN;
+	public static final Integer MIN_DB_LEVEL = Log.DEBUG;
 	private static final String LOG_KEY = WallChanger.LOG_KEY;
 	private static LoggerDbAdapter dbLog;
 

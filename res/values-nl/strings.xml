@@ -30,4 +30,21 @@
     <string name="btn_online">Online</string>
     <string name="menu_about">Over</string>
     <string name="s_uploading">Uploaden</string>
+    <string name="s_disabled">met een handicap</string>
+    <string name="s_low_quality">WIFI uitgeschakeld. Met behulp van lage kwaliteit.</string>
+    <string name="menu_settings">Instellingen</string>
+    <string name="pref_allow">Stuur Gebruik Stats</string>
+    <string name="pref_user">Gebruikersnaam</string>
+    <string name="pref_pass">Wachtwoord</string>
+    <string name="pref_allow_long">Laat gebruiksstatistieken verzamelen</string>
+    <string name="s_help_1">WallChanger is je basis Wallpaper Manager.</string>
+    <string name="s_help_4">U bent nu klaar om te gaan! U kunt testen of het resultaat van de operatie, of stuur het staight op je beginscherm!</string>
+    <string name="s_help_3">Vervolgens selecteert u de widget opties. Momenteel zijn alleen weer beschikbaar is, maar er zijn meer te komen. Als u een GPS-enabled telefoon, kunt u automatisch uw exacte locatie. Anders, geef uw postcode in.</string>
+    <string name="s_help_2">De eerste stap is het selecteren van een basis op de afbeelding voor uw behang. U kunt gebruik maken van uw huidige wallpaper, importeren afbeelding van uw galerij, of kiezen uit een online galerie van de beste wallpapers op het internet!</string>
+    <string name="s_rating">Rating</string>
+    <string name="s_feedback">Feedback</string>
+    <string name="s_name">Je naam</string>
+    <string name="s_anonymous">Anoniem</string>
+    <string name="btn_send">Stuur</string>
+    <string name="s_thanks">Dank je wel!</string>
 </resources>
