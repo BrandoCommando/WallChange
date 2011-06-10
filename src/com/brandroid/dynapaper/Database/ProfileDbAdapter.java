@@ -94,7 +94,7 @@ public class ProfileDbAdapter
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Logger.LogVerbose("Upgrading database from version " + oldVersion + " to "
                     + newVersion + ", which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE);
+            //db.execSQL("DROP TABLE IF EXISTS " + TABLE_BASE);
             onCreate(db);
         }
     }
@@ -124,26 +124,16 @@ public class ProfileDbAdapter
     	open();
     	ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_ID, id);
-        initialValues.put(KEY_TITLE, title);
-        initialValues.put(KEY_URL, url);
-        if(rating != null)
-        	initialValues.put(KEY_RATING, rating);
-        initialValues.put(KEY_DOWNLOADS, downloads);
-		initialValues.put(KEY_WIDTH, width);
-		initialValues.put(KEY_HEIGHT, height);
-		initialValues.put(KEY_TAGS, tags);
-		initialValues.put(KEY_VISIBLE, visible);
-		initialValues.put(KEY_DAYS, days);
 
         long ret = 0;
         try {
-        	ret = mDb.insertOrThrow(DATABASE_TABLE, null, initialValues);
-        	//if(mDb.replace(DATABASE_TABLE, null, initialValues) > 0)
+        	ret = mDb.insertOrThrow(TABLE_BASE, null, initialValues);
+        	//if(mDb.replace(TABLE_BASE, null, initialValues) > 0)
         		//ret = 1;
         } catch(SQLiteConstraintException scex) { // ignore this one
         } catch(Exception ex) { Logger.LogError("Error adding item to gallery.", ex); }
         if(ret == -1)
-        	ret = mDb.update(DATABASE_TABLE, initialValues, KEY_ID + "=" + id, null);
+        	ret = mDb.update(TABLE_BASE, initialValues, KEY_ID + "=" + id, null);
         return ret;
     }
     public long createItem(GalleryItem item)
@@ -168,57 +158,26 @@ public class ProfileDbAdapter
     
     public boolean deleteItem(long rowId) {
     	open();
-    	return mDb.delete(DATABASE_TABLE, KEY_ID + "=" + rowId, null) > 0;
+    	return mDb.delete(TABLE_BASE, KEY_ID + "=" + rowId, null) > 0;
     }
     
     public Cursor fetchAllItems() {
     	open();
-    	return mDb.query(DATABASE_TABLE,
-    			new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS, KEY_DAYS},
-    			KEY_VISIBLE + " = 1", null, null, null, "downloads DESC, rating DESC");
-    }
-    
-    public String fetchAllIDs()
-    {
-    	Cursor c = mDb.query(DATABASE_TABLE, new String[] {KEY_ID}, KEY_VISIBLE + " = 1", null, null, null, null);
-    	if(c.getCount() == 0) return "";
-    	StringBuilder sb = new StringBuilder(",");
-    	c.moveToFirst();
-    	for(int i = 0; i < c.getCount(); i++)
-    	{
-    		sb.append(c.getInt(0) + ",");
-    		if(!c.moveToNext()) break;
-    	}
-    	return sb.toString();
-    }
-    
-    public int fetchLatestStamp()
-    {
-    	open();
-    	Cursor c = mDb.query(DATABASE_TABLE, new String[] {KEY_DAYS}, KEY_VISIBLE + " = 1", null, null, null, "days LIMIT 1");
-    	if(c.getCount() == 0) return 0;
-    	c.moveToFirst();
-    	return c.getInt(0);
+    	return mDb.query(TABLE_BASE,
+    			new String[] {KEY_ID, KEY_BASE_PATH}, null, null, null, null, "downloads DESC, rating DESC");
     }
     
     public Cursor fetchItem(long Id) throws SQLException {
     	open();
     	Cursor mCursor =
-            mDb.query(true, DATABASE_TABLE,
-            		new String[] {KEY_ID, KEY_TITLE, KEY_URL, KEY_WIDTH, KEY_HEIGHT, KEY_TAGS, KEY_RATING, KEY_DOWNLOADS, KEY_DAYS},
+            mDb.query(true, TABLE_BASE,
+            		new String[] {KEY_ID, KEY_BASE_PATH},
             		KEY_ID + "=" + Id, null,
                     null, null, null, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
         }
         return mCursor;    	
-    }
-    public boolean hideItem(long Id)
-    {
-    	open();
-    	ContentValues args = new ContentValues();
-    	args.put(KEY_VISIBLE, false);
-    	return mDb.update(DATABASE_TABLE, args, KEY_ID + "=" + Id, null) > 0;
     }
     public boolean exists(long Id)
     {
@@ -251,19 +210,11 @@ public class ProfileDbAdapter
     		Float rating, Integer downloads, Boolean visible, Integer days) {
     	open();
     	ContentValues args = new ContentValues();
-        args.put(KEY_TITLE, title);
-        args.put(KEY_URL, url);
-        args.put(KEY_RATING, rating);
-        args.put(KEY_DOWNLOADS, downloads);
-		args.put(KEY_WIDTH, width);
-		args.put(KEY_HEIGHT, height);
-		args.put(KEY_TAGS, tags);
-		args.put(KEY_VISIBLE, visible);
-		args.put(KEY_DAYS, days);
+        args.put(KEY_BASE_PATH, title);
 		
-		Boolean good = mDb.update(DATABASE_TABLE, args, KEY_ID + "=" + Id, null) > 0;
+		Boolean good = mDb.update(TABLE_BASE, args, KEY_ID + "=" + Id, null) > 0;
 		if(!good)
-			good = mDb.replace(DATABASE_TABLE, null, args) > 0;
+			good = mDb.replace(TABLE_BASE, null, args) > 0;
 		return good;
     }
     
