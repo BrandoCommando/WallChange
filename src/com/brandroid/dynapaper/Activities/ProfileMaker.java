@@ -822,7 +822,13 @@ public class ProfileMaker extends BaseActivity
 									new DownloadThumbZipTask().execute(WallChanger.MY_THUMBS_ZIP_URL);
 								}
 								
-								Logger.LogInfo("Successfully add/updated " + adds + " records!");
+								JSONArray jsonInactive = jsonGallery.optJSONArray("inactive");
+								int removes = 0;
+								if(jsonInactive != null)
+									for(int iInactive = 0; iInactive < jsonInactive.length(); iInactive++)
+										removes += gdb.deleteItem(jsonInactive.optLong(iInactive, -1)) ? 1 : 0;	
+								
+								Logger.LogInfo("Successfully add/updated " + adds + " records" + (removes > 0 ? " & removed " + removes + " records" : "") + "!");
 								success = true;
 								prefs.setSetting("gallery_update", modified.toString());
 							} catch (Exception je) {
@@ -893,12 +899,15 @@ public class ProfileMaker extends BaseActivity
 				uc.setConnectTimeout(8000);
 				uc.setReadTimeout(10000);
 				uc.connect();
+				int iBytes = uc.getContentLength();
 				if(uc.getResponseCode() < 400)
 				{
 					s = new ZipInputStream(new BufferedInputStream(uc.getInputStream()));
 					ZipEntry ze;
+					int iFiles = 0, iTotal = 0;
 					while((ze = s.getNextEntry()) != null)
 					{
+						iTotal++;
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
 						byte[] buffer = new byte[1024];
 						int count;
@@ -906,9 +915,10 @@ public class ProfileMaker extends BaseActivity
 							baos.write(buffer, 0, count);
 						String filename = ze.getName();
 						byte[] bytes = baos.toByteArray();
-						MediaUtils.writeFile(filename, bytes, true);
+						if(MediaUtils.writeFile(filename, bytes, true))
+							iFiles++;
 					}
-					Logger.LogInfo("Thumb Zip retrieved.");
+					Logger.LogInfo("Thumb Zip retrieved (" + iBytes + " bytes). " + iFiles + "/" + iTotal + " written.");
 				}
 			} catch(IOException ix) { Logger.LogError("Unable to get thumb zip.", ix); }
 			finally { 
