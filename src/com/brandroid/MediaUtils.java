@@ -76,6 +76,11 @@ public class MediaUtils {
 	{
 		return new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename).getAbsolutePath();
 	}
+	
+	public static File getFile(String filename, Boolean useCache)
+	{
+		return new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename);
+	}
 
     public static Boolean writeFile(String filename, byte[] data, Boolean useCache)
     {

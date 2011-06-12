@@ -5,13 +5,16 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.WriteAbortedException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
@@ -39,6 +42,7 @@ import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.dynapaper.Database.GalleryDbAdapter;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -142,6 +146,14 @@ public class ProfileMaker extends BaseActivity
 		
 		mTxtURL = (EditText)findViewById(R.id.txtURL);
 		mImgPreview = (ImageView)findViewById(R.id.imageSample);
+		try {
+			File fLast = MediaUtils.getFile("last.jpg", true);
+			if(!fLast.exists())
+				MediaUtils.writeFile("last.jpg", ((BitmapDrawable)getWallpaper()).getBitmap(), true);
+			System.gc();
+			mImgPreview.setImageURI(Uri.fromFile(fLast));
+		} catch(Exception e) { Logger.LogError("Couldn't set Preview to last", e); }
+		
 		mTxtURL.addTextChangedListener(new TextWatcher(){
 			@Override
 			public void afterTextChanged(Editable s) {}
@@ -298,6 +310,11 @@ public class ProfileMaker extends BaseActivity
 		}
 	}
 	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+	}
+	
 	public LocationListener getLocationListener()
 	{
 		if(locationListener != null) return locationListener;
@@ -385,6 +402,7 @@ public class ProfileMaker extends BaseActivity
 			String selPath = getMediaPath(selUri);
 			Bitmap blg = BitmapFactory.decodeFile(selPath);
 			Bitmap bmp = MediaUtils.getSizedBitmap(blg, getHomeWidth(), getHomeHeight());
+			MediaUtils.writeFile("last.jpg", bmp, true);
 			blg = null;
 			if(bmp != null)
 			{
@@ -1021,6 +1039,8 @@ public class ProfileMaker extends BaseActivity
 	    	else {
 	    		//mImgPreview.setVisibility(View.VISIBLE);
 	    		mImgPreview.setImageBitmap(result);
+	    		if(Testing)
+	    			MediaUtils.writeFile("last.jpg", result, true);
 	    		if(!Testing)
 	    		{
 		    		setHomeWallpaper(result);
