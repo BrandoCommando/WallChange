@@ -47,4 +47,5 @@
     <string name="s_anonymous">Anónimo</string>
     <string name="btn_send">Enviar</string>
     <string name="s_thanks">¡Gracias!</string>
+    <string name="menu_refresh">Actualizar</string>
 </resources>

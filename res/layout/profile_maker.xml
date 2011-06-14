@@ -48,16 +48,15 @@
 					android:id="@+id/layoutLocation">
 				<TextView android:layout_height="wrap_content" android:id="@+id/lblLocation"
 					android:text="@string/s_zipcode" android:layout_width="wrap_content" />
-				<AutoCompleteTextView android:layout_height="wrap_content" android:id="@+id/txtZip"
-					android:enabled="true" android:singleLine="true"
-					android:layout_below="@+id/lblLocation" android:layout_alignLeft="@+id/lblLocation"
-					android:maxWidth="140dip" android:digits="true"
-					android:layout_width="wrap_content" android:minWidth="40dip" android:visibility="visible" android:paddingRight="10dip"/>
-				<CheckBox android:layout_height="wrap_content"
-					android:layout_width="wrap_content" android:id="@+id/btnGPS"
-					android:layout_toRightOf="@+id/txtZip" android:layout_below="@+id/lblLocation"
-					android:text="@string/btn_gps" android:visibility="visible"
-					android:checked="false"></CheckBox>
+				<LinearLayout android:id="@+id/linearLayout1" android:layout_height="wrap_content" android:paddingRight="10dip" android:layout_below="@+id/lblLocation" android:layout_alignParentRight="true" android:layout_width="fill_parent">
+					<AutoCompleteTextView android:id="@+id/txtZip" android:singleLine="true"
+						android:visibility="visible" android:enabled="true"
+						android:minWidth="40dip" android:layout_height="wrap_content"
+						android:paddingRight="10dip" android:text="" android:layout_weight="3" android:layout_width="fill_parent"/>
+					<CheckBox android:id="@+id/btnGPS"
+						android:text="@string/btn_gps" android:layout_height="wrap_content"
+						android:checked="false" android:singleLine="true" android:layout_width="fill_parent" android:layout_weight="4"/>
+				</LinearLayout>
 			</RelativeLayout>
 			<RelativeLayout android:id="@+id/layoutCommands" android:layout_below="@+id/layoutLocation"
 				android:layout_height="wrap_content" android:layout_width="wrap_content">
@@ -73,7 +72,7 @@
 				android:id="@+id/frameLayout1"
 				android:layout_height="wrap_content" android:foregroundGravity="center|top" android:layout_width="wrap_content">
 				<ImageView android:id="@+id/imageSample"
-					android:layout_height="wrap_content" android:src="@drawable/picture" android:layout_width="wrap_content"/>
+					android:layout_height="wrap_content" android:src="@drawable/picture" android:layout_width="wrap_content" android:visibility="gone"/>
 			</FrameLayout>
 		</RelativeLayout>
 	</ScrollView>

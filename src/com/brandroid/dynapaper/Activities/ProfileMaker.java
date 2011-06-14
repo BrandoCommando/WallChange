@@ -10,11 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.WriteAbortedException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
@@ -40,6 +38,7 @@ import com.brandroid.dynapaper.GalleryItem;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.dynapaper.Database.GalleryDbAdapter;
+import com.mobclix.android.sdk.MobclixMMABannerXLAdView;
 
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -65,23 +64,25 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.view.animation.AnimationUtils;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class ProfileMaker extends BaseActivity
 { 
-	private EditText mTxtURL, mTxtZip;
-	private ImageView mImgPreview;
+	private EditText mTxtURL;
+	private AutoCompleteTextView mTxtZip;
 	private Button mBtnSelect, mBtnTest, mBtnOnline;
 	private CheckBox mBtnWeather, mBtnGPS;
 	private Intent mIntent;
@@ -91,11 +92,10 @@ public class ProfileMaker extends BaseActivity
 	private UploadTask mUploadTask;
 	private DownloadToWallpaperTask mDownloadTask;
 	private GalleryDbAdapter gdb;
-	private LocationProvider locationProvider;
 	private LocationListener locationListener;
 	private LocationManager locationManager;
 	private Boolean mWifiEnabled = true;
-	private Menu mMenu;
+	private ArrayAdapter<String> mPastZips;
 	
 	//private String mGPSLocation = null;
 	
@@ -145,14 +145,9 @@ public class ProfileMaker extends BaseActivity
 		mProgressPanel.setVisibility(View.GONE);
 		
 		mTxtURL = (EditText)findViewById(R.id.txtURL);
-		mImgPreview = (ImageView)findViewById(R.id.imageSample);
-		try {
-			File fLast = MediaUtils.getFile("last.jpg", true);
-			if(!fLast.exists())
-				MediaUtils.writeFile("last.jpg", ((BitmapDrawable)getWallpaper()).getBitmap(), true);
-			System.gc();
-			mImgPreview.setImageURI(Uri.fromFile(fLast));
-		} catch(Exception e) { Logger.LogError("Couldn't set Preview to last", e); }
+		//(ImageView)findViewById(R.id.imageSample);
+		
+		new GrabCurrentWallpaperTask().execute();
 		
 		mTxtURL.addTextChangedListener(new TextWatcher(){
 			@Override
@@ -166,8 +161,17 @@ public class ProfileMaker extends BaseActivity
 			} });
 		mBtnSelect.setEnabled(false);
 		mBtnTest.setEnabled(false);
-		mTxtZip = (EditText)findViewById(R.id.txtZip);
+		mTxtZip = (AutoCompleteTextView)findViewById(R.id.txtZip);
 		findViewById(R.id.txtURL).setVisibility(View.GONE);
+		
+		mPastZips = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line);
+		mTxtZip.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mTxtZip.showDropDown();
+			}
+		});
+		mTxtZip.setAdapter(mPastZips);
 		
 		getSavedSettings();
 		
@@ -175,7 +179,7 @@ public class ProfileMaker extends BaseActivity
 		
 		//mTxtZip.setText(prefs.getString("zip", mTxtZip.getText().toString()));
 		
-		new UpdateOnlineGalleryTask().execute((String[])null);
+		new UpdateOnlineGalleryTask().execute();
 	}
 	
 	@Override
@@ -194,10 +198,14 @@ public class ProfileMaker extends BaseActivity
 		if(url == "")
 			url = "schema.jpg";
 		if(mBtnWeather.isChecked())
+		{
+			if(mTxtZip.getText().length() > 0)
+				mPastZips.add(mTxtZip.getText().toString());
 			url = WallChanger.MY_WEATHER_URL.replace("%USER%", WallChanger.getUser()) + "&source=google&format=image&type=image" +
 				"&x=26&w=" + getHomeWidth() + "&h=" + getHomeHeight() +
 				(mTxtZip.getText().length() > 0 ? "&zip=" + mTxtZip.getText() : "") +
 				"&i1=" + URLEncoder.encode(url.replace(WallChanger.MY_ROOT_URL + "/images/", "").replace(WallChanger.MY_ROOT_URL, ""));
+		}
 		else
 			url = WallChanger.getImageFullUrl(url);
 		Logger.LogInfo("Final DynaURL: " + url);
@@ -228,6 +236,7 @@ public class ProfileMaker extends BaseActivity
 	{
 		Bitmap mCurrent = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
 		//mImgPreview.setImageBitmap(mCacheBitmap);
+		setPreview(mCurrent);
 		onCancelUpload();
 		mUploadTask = new UploadTask();
 		mUploadTask.execute(mCurrent);
@@ -244,6 +253,8 @@ public class ProfileMaker extends BaseActivity
 		Intent intentOnline = new Intent(getApplicationContext(), GalleryPicker.class);
 		intentOnline.setAction(Intent.ACTION_GET_CONTENT);
 		intentOnline.setType("image/*");
+		if(mAdFullScreen != null)
+			mAdFullScreen.displayRequestedAd();
 		startActivityForResult(intentOnline, WallChanger.REQ_SELECT_ONLINE);
 	}
 	public void onClickPreview()
@@ -308,6 +319,30 @@ public class ProfileMaker extends BaseActivity
 				mTxtURL.setVisibility(mTxtURL.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
 				break;
 		}
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId())
+		{
+		case R.id.menu_settings:
+			Intent intentSettings = new Intent(getApplicationContext(), Settings.class);
+			startActivityForResult(intentSettings, WallChanger.REQ_SETTINGS);
+			break;
+		case R.id.menu_help:
+			startActivity(new Intent(getApplicationContext(), Help.class));
+			break;
+		case R.id.menu_feedback:
+			startActivity(new Intent(getApplicationContext(), Feedback.class));
+			break;
+		case R.id.menu_refresh:
+			if(mAdBanner != null)
+				mAdBanner.getAd();
+			else
+				addAds();
+			break;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 	
 	@Override
@@ -407,7 +442,8 @@ public class ProfileMaker extends BaseActivity
 			if(bmp != null)
 			{
 				//mCacheBitmap = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
-				mImgPreview.setImageBitmap(bmp);
+				setPreview(bmp);
+				//mImgPreview.setImageBitmap(bmp);
 				onCancelUpload();
 				mUploadTask = new UploadTask();
 				mUploadTask.execute(bmp);
@@ -432,7 +468,8 @@ public class ProfileMaker extends BaseActivity
 				if(mGalleryBitmap != null)
 				{
 					//new UploadTask().execute(mGalleryBitmap);
-					mImgPreview.setImageBitmap(mGalleryBitmap);
+					//mImgPreview.setImageBitmap(mGalleryBitmap);
+					setPreview(mGalleryBitmap);
 				}
 			} else {
 				int width = 0, height = 0;
@@ -445,6 +482,36 @@ public class ProfileMaker extends BaseActivity
 		}
 	}
 	
+	public Boolean setPreview(Bitmap bmp)
+	{
+		try {
+			Window win = getWindow();
+			Display d = win.getWindowManager().getDefaultDisplay();
+			//LayoutParams lp = win.getAttributes();
+			int mw = d.getWidth();
+			int mh = d.getHeight();
+			int w = bmp.getWidth();
+			int h = bmp.getHeight();
+			if(w > mw)
+			{
+				h *= w / mw;
+				w = mw;
+			}
+			if(h > mh)
+			{
+				w *= h / mh;
+				h = mh;
+			}
+			Logger.LogInfo("Scaled " + bmp.getWidth() + "x" + bmp.getHeight() + " under " + mw + "x" + mh + " to " + w + "x" + h);
+			Bitmap scaled = Bitmap.createScaledBitmap(bmp, w, h, true);
+			//win.setAttributes(lp);
+			win.setBackgroundDrawable(new BitmapDrawable(scaled));
+			return true;
+		} catch(Exception ex) {
+			Logger.LogError("Error setting preview.", ex);
+			return false;
+		}
+	}
     public Boolean setHomeWallpaper(Bitmap bmp)
     {
     	try {
@@ -452,7 +519,7 @@ public class ProfileMaker extends BaseActivity
     		showToast(getResourceString(R.string.s_updated));
             return true;
         } catch (Exception ex) {
-        	Logger.LogError("Wallchanger Exception during update: " + ex.toString(), ex);
+        	Logger.LogError("Error setting Wallpaper", ex);
         	showToast(getResourceString(R.string.s_invalid));
             return false;
         }
@@ -537,6 +604,30 @@ public class ProfileMaker extends BaseActivity
     		} else Logger.LogWarning(uc.getResponseCode() + " returned for " + uc.getURL().toString());
     	} catch(Exception ex) { Logger.LogError("Exception reading JSON from " + url, ex); }
     	return ret;
+    }
+    
+    private class GrabCurrentWallpaperTask extends AsyncTask<String, Void, Bitmap>
+    {
+
+		@Override
+		protected Bitmap doInBackground(String... params) {
+			try {
+				String sFile = "last.jpg";
+				if(params.length > 0)
+					sFile = params[0];
+				File fLast = MediaUtils.getFile(sFile, true);
+				if(!fLast.exists())
+					MediaUtils.writeFile(sFile, ((BitmapDrawable)getWallpaper()).getBitmap(), true);
+				return BitmapFactory.decodeFile(fLast.getAbsolutePath());
+				//mImgPreview.setImageURI(Uri.fromFile(fLast));
+			} catch(Exception e) { Logger.LogError("Couldn't set Preview to last", e); return null; }
+		}
+		
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			setPreview(result);
+		}
+    	
     }
     
     private class MonitorUploadTask extends AsyncTask<String, Integer, String>
@@ -740,7 +831,7 @@ public class ProfileMaker extends BaseActivity
 		@Override
 		protected Boolean doInBackground(String... params)
 		{
-			String cIDs = gdb.fetchAllIDs();
+			gdb.fetchAllIDs();
 			Integer cStampMax = gdb.fetchLatestStamp();
 			Logger.LogInfo("Latest stamp: " + cStampMax);
 			
@@ -1038,7 +1129,8 @@ public class ProfileMaker extends BaseActivity
 	    		showToast("Invalid image.");
 	    	else {
 	    		//mImgPreview.setVisibility(View.VISIBLE);
-	    		mImgPreview.setImageBitmap(result);
+	    		//mImgPreview.setImageBitmap(result);
+	    		setPreview(result);
 	    		if(Testing)
 	    			MediaUtils.writeFile("last.jpg", result, true);
 	    		if(!Testing)
@@ -1073,6 +1165,14 @@ public class ProfileMaker extends BaseActivity
 		WallChanger.setUser(user);
 		if(mTxtURL != null)
 			mTxtURL.setText(prefs.getSetting("url", mTxtURL.getText().toString()));
+		String sPastZips = prefs.getSetting("past_zips", "90210");
+		if(sPastZips != "")
+		{
+			mPastZips.clear();
+			String[] aPast = sPastZips.split("\\|");
+			for(int i = 0; i < aPast.length; i++)
+				mPastZips.add(aPast[i]);
+		}
 	}
 	
 	public void setSavedSettings()
@@ -1085,6 +1185,17 @@ public class ProfileMaker extends BaseActivity
 			prefs.setSetting("user", WallChanger.getUser());
 		if(mTxtURL != null)
 			prefs.setSetting("url", mTxtURL.getText().toString());
+		if(mPastZips.getCount() > 0)
+		{
+			StringBuilder sPastZips = new StringBuilder();
+			for(int i = 0; i < mPastZips.getCount(); i++)
+			{
+				sPastZips.append(mPastZips.getItem(i));
+				if(i < mPastZips.getCount() - 1)
+					sPastZips.append("|");
+			}
+			prefs.setSetting("past_zips", sPastZips.toString());
+		}
 	}
 	
 	@Override
@@ -1097,23 +1208,5 @@ public class ProfileMaker extends BaseActivity
 	protected void onStop() {
 		setSavedSettings();
 		super.onStop();
-	}
-	
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch(item.getItemId())
-		{
-		case R.id.menu_settings:
-			Intent intentSettings = new Intent(getApplicationContext(), Settings.class);
-			startActivityForResult(intentSettings, WallChanger.REQ_SETTINGS);
-			break;
-		case R.id.menu_help:
-			startActivity(new Intent(getApplicationContext(), Help.class));
-			break;
-		case R.id.menu_feedback:
-			startActivity(new Intent(getApplicationContext(), Feedback.class));
-			break;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 }

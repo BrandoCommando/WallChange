@@ -47,4 +47,5 @@
     <string name="s_anonymous">无名氏</string>
     <string name="btn_send">发送</string>
     <string name="s_thanks">谢谢！</string>
+    <string name="menu_refresh">刷新</string>
 </resources>
