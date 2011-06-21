@@ -38,7 +38,6 @@ import com.brandroid.dynapaper.GalleryItem;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.dynapaper.Database.GalleryDbAdapter;
-import com.mobclix.android.sdk.MobclixMMABannerXLAdView;
 
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -89,7 +88,6 @@ public class ProfileMaker extends BaseActivity
 	private View mProgressPanel;
 	private ProgressBar mProgressBar;
 	private TextView mProgressLabel;
-	private UploadTask mUploadTask;
 	private DownloadToWallpaperTask mDownloadTask;
 	private GalleryDbAdapter gdb;
 	private LocationListener locationListener;
@@ -237,9 +235,6 @@ public class ProfileMaker extends BaseActivity
 		Bitmap mCurrent = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
 		//mImgPreview.setImageBitmap(mCacheBitmap);
 		setPreview(mCurrent);
-		onCancelUpload();
-		mUploadTask = new UploadTask();
-		mUploadTask.execute(mCurrent);
 	}
 	public void onClickLocalGallery()
 	{
@@ -253,8 +248,6 @@ public class ProfileMaker extends BaseActivity
 		Intent intentOnline = new Intent(getApplicationContext(), GalleryPicker.class);
 		intentOnline.setAction(Intent.ACTION_GET_CONTENT);
 		intentOnline.setType("image/*");
-		if(mAdFullScreen != null)
-			mAdFullScreen.displayRequestedAd();
 		startActivityForResult(intentOnline, WallChanger.REQ_SELECT_ONLINE);
 	}
 	public void onClickPreview()
@@ -300,7 +293,6 @@ public class ProfileMaker extends BaseActivity
 				onClickOnlineGallery();
 				break;
 			case R.id.progress_cancel:
-				onCancelUpload();
 				onCancelDownload();
 				break;
 			case R.id.btnGPS:
@@ -334,12 +326,6 @@ public class ProfileMaker extends BaseActivity
 			break;
 		case R.id.menu_feedback:
 			startActivity(new Intent(getApplicationContext(), Feedback.class));
-			break;
-		case R.id.menu_refresh:
-			if(mAdBanner != null)
-				mAdBanner.getAd();
-			else
-				addAds();
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -444,9 +430,6 @@ public class ProfileMaker extends BaseActivity
 				//mCacheBitmap = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
 				setPreview(bmp);
 				//mImgPreview.setImageBitmap(bmp);
-				onCancelUpload();
-				mUploadTask = new UploadTask();
-				mUploadTask.execute(bmp);
 				//mImgPreview.setVisibility(View.GONE);
 			} else Logger.LogWarning("Unable to create thumbnail?");
 		} else if (requestCode == WallChanger.REQ_SELECT_ONLINE)
@@ -555,14 +538,6 @@ public class ProfileMaker extends BaseActivity
 		panel.setVisibility(View.GONE);
 	}
     
-    private void onCancelUpload()
-    {
-    	if(mUploadTask != null && mUploadTask.getStatus() == Status.RUNNING)
-    	{
-    		mUploadTask.cancel(true);
-    		mUploadTask = null;
-    	}
-    }
     private void onCancelDownload()
     {
     	if(mDownloadTask != null && mDownloadTask.getStatus() == Status.RUNNING)
@@ -655,6 +630,7 @@ public class ProfileMaker extends BaseActivity
 		}
     }
     
+    /*
 	private class UploadTask extends AsyncTask<Bitmap, Integer, String>
 	{
 		private MonitorUploadTask mMonitor;
@@ -824,6 +800,7 @@ public class ProfileMaker extends BaseActivity
 			//mImgSample.setVisibility(View.VISIBLE);
 		}
 	}
+	*/
 
 	
 	private class UpdateOnlineGalleryTask extends AsyncTask<String, Integer, Boolean> {
