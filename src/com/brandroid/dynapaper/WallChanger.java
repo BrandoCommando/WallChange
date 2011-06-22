@@ -2,7 +2,7 @@ package com.brandroid.dynapaper;
 
 import java.net.URLEncoder;
 
-import com.brandroid.Logger;
+import com.brandroid.util.Logger;
 
 import android.location.Location;
 import android.location.LocationManager;
