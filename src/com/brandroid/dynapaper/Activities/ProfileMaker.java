@@ -17,6 +17,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.zip.GZIPInputStream;
@@ -34,19 +35,25 @@ import org.json.JSONObject;
 import com.brandroid.JSON;
 import com.brandroid.Logger;
 import com.brandroid.MediaUtils;
+import com.brandroid.NetUtils;
 import com.brandroid.dynapaper.GalleryItem;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.dynapaper.Database.GalleryDbAdapter;
-import com.mobclix.android.sdk.MobclixMMABannerXLAdView;
+import com.brandroid.dynapaper.widget.Weather;
+import com.brandroid.dynapaper.widget.Widget;
 
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Criteria;
 import android.location.GpsStatus;
@@ -89,7 +96,6 @@ public class ProfileMaker extends BaseActivity
 	private View mProgressPanel;
 	private ProgressBar mProgressBar;
 	private TextView mProgressLabel;
-	private UploadTask mUploadTask;
 	private DownloadToWallpaperTask mDownloadTask;
 	private GalleryDbAdapter gdb;
 	private LocationListener locationListener;
@@ -188,7 +194,7 @@ public class ProfileMaker extends BaseActivity
 		return true;
 	}
 	
-	public String getDynaURL()
+	public String getBaseImageURL()
 	{
 		String url = "";
 		if(mTxtURL != null)
@@ -197,7 +203,7 @@ public class ProfileMaker extends BaseActivity
 			url = prefs.getSetting("baseUrl", url);
 		if(url == "")
 			url = "schema.jpg";
-		if(mBtnWeather.isChecked())
+		/* if(mBtnWeather.isChecked())
 		{
 			if(mTxtZip.getText().length() > 0)
 				mPastZips.add(mTxtZip.getText().toString());
@@ -206,9 +212,9 @@ public class ProfileMaker extends BaseActivity
 				(mTxtZip.getText().length() > 0 ? "&zip=" + mTxtZip.getText() : "") +
 				"&i1=" + URLEncoder.encode(url.replace(WallChanger.MY_ROOT_URL + "/images/", "").replace(WallChanger.MY_ROOT_URL, ""));
 		}
-		else
+		else */
 			url = WallChanger.getImageFullUrl(url);
-		Logger.LogInfo("Final DynaURL: " + url);
+		Logger.LogInfo("Final Base Image URL: " + url);
 		return url;
 	}
 	
@@ -237,9 +243,6 @@ public class ProfileMaker extends BaseActivity
 		Bitmap mCurrent = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
 		//mImgPreview.setImageBitmap(mCacheBitmap);
 		setPreview(mCurrent);
-		onCancelUpload();
-		mUploadTask = new UploadTask();
-		mUploadTask.execute(mCurrent);
 	}
 	public void onClickLocalGallery()
 	{
@@ -253,17 +256,17 @@ public class ProfileMaker extends BaseActivity
 		Intent intentOnline = new Intent(getApplicationContext(), GalleryPicker.class);
 		intentOnline.setAction(Intent.ACTION_GET_CONTENT);
 		intentOnline.setType("image/*");
-		if(mAdFullScreen != null)
-			mAdFullScreen.displayRequestedAd();
 		startActivityForResult(intentOnline, WallChanger.REQ_SELECT_ONLINE);
 	}
 	public void onClickPreview()
 	{
-		new DownloadToWallpaperTask(true).execute(getDynaURL());
+		new AddWallpaperWidgetsTask(false).execute(getBaseImageURL());
+		//new DownloadToWallpaperTask(true).execute(getDynaURL());
 	}
 	public void onClickSelect()
 	{
-		new DownloadToWallpaperTask().execute(getDynaURL());
+		new AddWallpaperWidgetsTask(true).execute(getBaseImageURL());
+		//new DownloadToWallpaperTask().execute(getDynaURL());
 	}
 	public void onClickGPS()
 	{
@@ -300,7 +303,6 @@ public class ProfileMaker extends BaseActivity
 				onClickOnlineGallery();
 				break;
 			case R.id.progress_cancel:
-				onCancelUpload();
 				onCancelDownload();
 				break;
 			case R.id.btnGPS:
@@ -334,12 +336,6 @@ public class ProfileMaker extends BaseActivity
 			break;
 		case R.id.menu_feedback:
 			startActivity(new Intent(getApplicationContext(), Feedback.class));
-			break;
-		case R.id.menu_refresh:
-			if(mAdBanner != null)
-				mAdBanner.getAd();
-			else
-				addAds();
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -444,9 +440,6 @@ public class ProfileMaker extends BaseActivity
 				//mCacheBitmap = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
 				setPreview(bmp);
 				//mImgPreview.setImageBitmap(bmp);
-				onCancelUpload();
-				mUploadTask = new UploadTask();
-				mUploadTask.execute(bmp);
 				//mImgPreview.setVisibility(View.GONE);
 			} else Logger.LogWarning("Unable to create thumbnail?");
 		} else if (requestCode == WallChanger.REQ_SELECT_ONLINE)
@@ -555,14 +548,6 @@ public class ProfileMaker extends BaseActivity
 		panel.setVisibility(View.GONE);
 	}
     
-    private void onCancelUpload()
-    {
-    	if(mUploadTask != null && mUploadTask.getStatus() == Status.RUNNING)
-    	{
-    		mUploadTask.cancel(true);
-    		mUploadTask = null;
-    	}
-    }
     private void onCancelDownload()
     {
     	if(mDownloadTask != null && mDownloadTask.getStatus() == Status.RUNNING)
@@ -571,41 +556,7 @@ public class ProfileMaker extends BaseActivity
     		mDownloadTask = null;
     	}
     }
-    
-    public JSONObject downloadJSON(String url)
-    {
-    	HttpURLConnection uc = null;
-    	InputStream in;
-    	BufferedReader br;
-    	StringBuilder sb;
-    	JSONObject ret = null;
-    	try {
-    		uc = (HttpURLConnection)new URL(url).openConnection();
-    		uc.setReadTimeout(10000);
-    		uc.addRequestProperty("Accept-Encoding", "gzip, deflate");
-    		uc.connect();
-    		if(uc.getResponseCode() == HttpURLConnection.HTTP_OK)
-    		{
-    			String encoding = uc.getContentEncoding();
-    			if(encoding != null && encoding.equalsIgnoreCase("gzip"))
-    				in = new GZIPInputStream(uc.getInputStream());
-    			else if(encoding != null && encoding.equalsIgnoreCase("deflate"))
-    				in = new InflaterInputStream(uc.getInputStream(), new Inflater(true));
-    			else
-    				in = new BufferedInputStream(uc.getInputStream());
-    			br = new BufferedReader(new InputStreamReader(in));
-	    		sb = new StringBuilder();
-	    		String line = "";
-	    		while((line = br.readLine()) != null)
-	    			sb.append(line + '\n');
-	    		ret = JSON.Parse(sb.toString());
-	    		if(ret == null)
-	    			Logger.LogWarning("Unable to parse JSON: " + sb.toString());
-    		} else Logger.LogWarning(uc.getResponseCode() + " returned for " + uc.getURL().toString());
-    	} catch(Exception ex) { Logger.LogError("Exception reading JSON from " + url, ex); }
-    	return ret;
-    }
-    
+        
     private class GrabCurrentWallpaperTask extends AsyncTask<String, Void, Bitmap>
     {
 
@@ -642,7 +593,7 @@ public class ProfileMaker extends BaseActivity
 			String url = WallChanger.MY_UPLOAD_PROGRESS_URL.replace("%KEY%", sKey);
 			for(int i = 0; i < iUpdateMax; i++)
 			{
-				JSONObject j = downloadJSON(url);
+				JSONObject j = NetUtils.downloadJSON(url);
 				if(j != null)
 					Logger.LogInfo("Upload JSON: " + j.toString());
 				else
@@ -655,6 +606,7 @@ public class ProfileMaker extends BaseActivity
 		}
     }
     
+    /*
 	private class UploadTask extends AsyncTask<Bitmap, Integer, String>
 	{
 		private MonitorUploadTask mMonitor;
@@ -824,6 +776,7 @@ public class ProfileMaker extends BaseActivity
 			//mImgSample.setVisibility(View.VISIBLE);
 		}
 	}
+	*/
 
 	
 	private class UpdateOnlineGalleryTask extends AsyncTask<String, Integer, Boolean> {
@@ -1047,6 +1000,144 @@ public class ProfileMaker extends BaseActivity
 		}
 	}
 
+
+	public class AddWallpaperWidgetsTask extends AsyncTask<String, Integer, Bitmap>
+	{
+		private Boolean mSetWallpaper = true;
+		
+		public AddWallpaperWidgetsTask(Boolean doSetWallpaper)
+		{
+			mSetWallpaper = doSetWallpaper;
+		}
+
+		@Override
+		protected Bitmap doInBackground(String... params)
+		{
+			Bitmap base = null;
+			publishProgress(0, 3);
+			if(MediaUtils.fileExists(params[0], true))
+				base = MediaUtils.readFileBitmap(params[0], true);
+			if(base == null)
+				base = downloadBitmap(params[0]);
+			if(base == null) return null;
+			Bitmap ret = Bitmap.createBitmap(getHomeWidth(), getHomeHeight(), Config.ARGB_8888);
+			Canvas c = new Canvas(ret);
+			c.save();
+			Paint p = new Paint();
+			p.setStyle(Style.FILL);
+			c.drawBitmap(base, 0, 0, p);
+			base = null;
+			c.restore();
+			
+			Widget[] widgets = getSelectedWidgets();
+			publishProgress(1, 2 + widgets.length);
+			for(int i=0; i < widgets.length; i++)
+			{
+				widgets[i].applyTo(ret, c);
+				publishProgress(1 + i, 2 + widgets.length);
+			}
+			return ret;
+		}
+
+	    @Override
+	    protected void onPreExecute() {
+	    	mProgressBar.setProgress(0);
+			mProgressLabel.setText(getText(R.string.s_downloading));
+			showPanel(mProgressPanel, true);
+			
+	    	//showToast("Downloading image.");
+	    	mBtnSelect.setEnabled(false);
+	    	mBtnTest.setEnabled(false);
+	    }
+	    
+	    @Override
+		protected void onCancelled() {
+			hidePanel(mProgressPanel, false);
+	    	mBtnSelect.setEnabled(true);
+	    	mBtnTest.setEnabled(true);
+		}
+		
+		
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			if(values.length > 1)
+			{
+				mProgressBar.setMax(values[1]);
+				mProgressBar.setProgress(values[0]);
+			} else if(values[0] == -1)
+				mProgressBar.setIndeterminate(true);
+			else if(values[0] == 0)
+				mProgressBar.setIndeterminate(false);
+		}
+		
+		protected void onPostExecute(Bitmap result) {
+    		hidePanel(mProgressPanel, true);
+	    	if(result == null)
+	    		showToast("Invalid image.");
+	    	else {
+	    		//mImgPreview.setVisibility(View.VISIBLE);
+	    		//mImgPreview.setImageBitmap(result);
+	    		setPreview(result);
+	    		MediaUtils.writeFile("last.jpg", result, true);
+	    		if(mSetWallpaper)
+	    		{
+		    		setHomeWallpaper(result);
+		    		finish();
+	    		}
+		    	//mCacheBitmap = result;
+		    	mBtnSelect.setEnabled(true);
+		    	mBtnTest.setEnabled(true);
+	    	}
+	    }
+		
+		private Bitmap downloadBitmap(String url)
+		{
+			Bitmap ret = null;
+			InputStream s = null;
+			try {
+	    		HttpURLConnection uc = (HttpURLConnection)new URL(url).openConnection();
+	    		uc.setConnectTimeout(15000);
+	    		uc.connect();
+	    		publishProgress(0);
+	    		if(uc.getResponseCode() >= 400) throw new IOException(uc.getResponseCode() + " on " + url);
+	    		Integer length = uc.getContentLength();
+	    		Logger.LogInfo("Response received. " + length + " bytes.");
+	    		s = new BufferedInputStream(uc.getInputStream(), WallChanger.DOWNLOAD_CHUNK_SIZE);
+	    		ByteArrayBuffer bab = new ByteArrayBuffer(length <= 0 ? 32 : length);
+	    		byte[] b = new byte[WallChanger.DOWNLOAD_CHUNK_SIZE];
+	    		int read = 0;
+	    		int position = 0;
+	    		while((read = s.read(b,0,WallChanger.DOWNLOAD_CHUNK_SIZE)) > 0)
+	    		{
+	    			position += read;
+	    			bab.append(b, 0, read);
+	    			publishProgress(position, length > position ? length : position + s.available());
+	    		}
+	    		b = bab.toByteArray();
+	    		MediaUtils.writeFile(url.substring(url.lastIndexOf("/")+1), b, true);
+	    		ret = BitmapFactory.decodeByteArray(b, 0, b.length);
+	    	} catch(IOException ex) { Logger.LogError("Couldn't download base image.", ex); }
+	    	finally {
+	    		try {
+	    			if(s != null)
+	    				s.close();
+	    		} catch(IOException ex) { Logger.LogError("Error closing stream while downloading base image.", ex); }
+	    	}
+	    	return ret;
+		}
+		
+	}
+	
+	public Widget[] getSelectedWidgets()
+	{
+		ArrayList<Widget> al = new ArrayList<Widget>();
+		if(mBtnWeather.isChecked())
+			al.add(new Weather(getApplicationContext(), mTxtZip.getText().toString()));
+		Widget[] ret = new Widget[al.size()];
+		ret = al.toArray(ret);
+		return ret;
+	}
+	
 	private class DownloadToWallpaperTask extends AsyncTask<String, Integer, Bitmap> {
 		public Boolean Testing = false;
 		public DownloadToWallpaperTask() { Testing = false; }
@@ -1065,7 +1156,7 @@ public class ProfileMaker extends BaseActivity
 	    		uc.connect();
 	    		publishProgress(0);
 	    		if(uc.getResponseCode() >= 400) throw new IOException(uc.getResponseCode() + " on " + url);
-	    		Integer length = uc.getContentLength();
+	    		int length = uc.getContentLength();
 	    		Logger.LogInfo("Response received. " + length + " bytes.");
 	    		s = new BufferedInputStream(uc.getInputStream(), WallChanger.DOWNLOAD_CHUNK_SIZE);
 	    		ByteArrayBuffer bab = new ByteArrayBuffer(length <= 0 ? 32 : length);

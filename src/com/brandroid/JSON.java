@@ -39,6 +39,15 @@ public class JSON
 		} catch(JSONException ex) { last = ex; return null; }
 	}
 	
+	public static String FollowPathToString(JSONObject json, String[] path, int index, String sDefault)
+	{
+		if(json == null) return sDefault;
+		if(index == path.length - 1)
+			return json.optString(path[path.length - 1], sDefault);
+		else return FollowPathToString(json.optJSONObject(path[index]), path, index + 1, sDefault);
+		
+	}
+	
 	public static JSONException getLastException() { return last; }
 	
 	@Override

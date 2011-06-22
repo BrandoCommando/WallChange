@@ -8,11 +8,6 @@ import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.dynapaper.Database.LoggerDbAdapter;
-import com.mobclix.android.sdk.Mobclix;
-import com.mobclix.android.sdk.MobclixAdView;
-import com.mobclix.android.sdk.MobclixFullScreenAdView;
-import com.mobclix.android.sdk.MobclixFullScreenAdViewListener;
-import com.mobclix.android.sdk.MobclixMMABannerXLAdView;
 
 import android.app.Activity;
 import android.content.Context;
@@ -37,15 +32,13 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-public class BaseActivity extends Activity implements OnClickListener, OnMenuItemClickListener, com.mobclix.android.sdk.MobclixAdViewListener, MobclixFullScreenAdViewListener 
+public class BaseActivity extends Activity implements OnClickListener, OnMenuItemClickListener 
 {
 	private int mHomeWidth = 0;
 	private int mHomeHeight = 0;
 	protected Resources mResources;
 	protected Prefs prefs;
 	
-	protected MobclixMMABannerXLAdView mAdBanner = null;
-	protected MobclixFullScreenAdView mAdFullScreen = null;
 	protected Boolean mAdBannerLoaded = false;
 	protected Boolean mAdFullLoaded = false;
 		
@@ -77,13 +70,13 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
         }
         prefs = WallChanger.Prefs;
         
-        if(!WallChanger.isPaidMode())
-        	addAds();
-        else if(findViewById(R.id.adLayout)!=null)
+        //if(!WallChanger.isPaidMode()) addAds();
+        if(findViewById(R.id.adLayout)!=null)
         	findViewById(R.id.adLayout).setVisibility(View.GONE);
         	
 	}
 	
+	/*
 	public void addAds() // Mobclix version
 	{
 		LinearLayout adLayout = (LinearLayout)findViewById(R.id.adLayout);
@@ -109,7 +102,7 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 			mAdFullLoaded = false;
 			mAdFullScreen.requestAd();
 		}
-	}
+	}*/
 	
 	/*
 	public void addAds()
@@ -266,68 +259,6 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 	@Override
 	public void onClick(View v) {
 		Logger.LogDebug("onClick :: " + v.toString());
-	}
-
-	@Override
-	public String keywords() {
-		return null;
-	}
-
-	@Override
-	public void onAdClick(MobclixAdView ad) {
-		Logger.LogDebug("Ad click: " + ad.toString());
-	}
-
-	@Override
-	public void onCustomAdTouchThrough(MobclixAdView ad, String arg1) {
-		Logger.LogDebug("Ad Custom Touch Through: " + ad.toString());
-	}
-
-	@Override
-	public void onFailedLoad(MobclixAdView ad, int code) {
-		Logger.LogDebug("Ad load failure (" + code + "): " + ad.toString());
-		ad.setVisibility(View.GONE);
-	}
-
-	@Override
-	public boolean onOpenAllocationLoad(MobclixAdView ad, int code) {
-		Logger.LogDebug("Ad Open Allocation Load (" + code + "): " + ad.toString());
-		return false;
-	}
-
-	@Override
-	public void onSuccessfulLoad(MobclixAdView ad) {
-		Logger.LogDebug("Ad load: " + ad.toString());
-		ad.setVisibility(View.VISIBLE);
-	}
-
-	@Override
-	public String query() {
-		return null;
-	}
-
-	@Override
-	public void onDismissAd(MobclixFullScreenAdView arg0) {
-		Logger.LogDebug("Ad Full screen dismissed.");
-	}
-
-	@Override
-	public void onFailedLoad(MobclixFullScreenAdView arg0, int arg1) {
-		Logger.LogDebug("Ad Full screen failed (" + arg1 + ").");
-		mAdFullScreen = null;
-		mAdFullLoaded = false;
-	}
-
-	@Override
-	public void onFinishLoad(MobclixFullScreenAdView ad) {
-		Logger.LogDebug("Ad Full screen loaded.");
-		mAdFullLoaded = true;
-		mAdFullScreen = ad;
-	}
-
-	@Override
-	public void onPresentAd(MobclixFullScreenAdView arg0) {
-		Logger.LogDebug("Ad Full screen presented.");
 	}
 
 	/*

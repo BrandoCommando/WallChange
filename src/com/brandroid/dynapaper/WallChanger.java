@@ -18,6 +18,7 @@ public class WallChanger
 	public static final String MY_IMAGE_ROOT_URL_GS = MY_ROOT_URL_GS + "/images/";
 	public static final String MY_APP_ROOT_URL = MY_ROOT_URL + "/dynapaper/";
 	public static final String MY_WEATHER_URL = MY_APP_ROOT_URL + "widget_weather2.php?user=%USER%";
+	public static final String MY_WEATHER_API_URL = MY_APP_ROOT_URL + "widget_weather.php?zip=%ZIP%&format=json";
 	public static final String MY_GALLERY_URL = MY_APP_ROOT_URL + "gallery3.php?user=%USER%";
 	public static final String MY_FEEDBACK_URL = MY_APP_ROOT_URL + "feedback.php?user=%USER%";
 	public static final String MY_IMAGE_URL = MY_APP_ROOT_URL + "get_image.php?user=%USER%&url=%URL%";
