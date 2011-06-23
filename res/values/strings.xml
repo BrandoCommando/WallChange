@@ -58,4 +58,6 @@
     <string name="btn_send">Send</string>
     <string name="s_thanks">Thank you!</string>
     <string name="menu_refresh">Refresh</string>
+    <string name="s_adding">Adding</string>
+    <string name="s_widgets">Widget</string>
 </resources>

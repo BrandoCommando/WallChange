@@ -48,4 +48,6 @@
     <string name="btn_send">送信</string>
     <string name="s_thanks">ありがとうございます！</string>
     <string name="menu_refresh">リフレッシュ</string>
+    <string name="s_adding">追加</string>
+    <string name="s_widgets">オーバーレイ</string>
 </resources>

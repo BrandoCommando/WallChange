@@ -48,4 +48,6 @@
     <string name="btn_send">Отправить</string>
     <string name="s_thanks">Спасибо!</string>
     <string name="menu_refresh">Обновить</string>
+    <string name="s_adding">Добавление</string>
+    <string name="s_widgets">Наложение</string>
 </resources>

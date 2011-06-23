@@ -150,9 +150,16 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
     	} catch(Exception ex) { Logger.LogWarning("Error adding ads.", ex); }    
     }
 	*/
-    protected String getResourceString(int stringResourceID)
+    protected String getResourceString(int... resourceIDs)
     {
-    	return mResources.getString(stringResourceID);
+    	StringBuilder ret = new StringBuilder();
+    	for(int i = 0; i < resourceIDs.length; i++)
+    	{
+    		ret.append(getText(resourceIDs[i]));
+    		ret.append(" ");
+    	}
+    	ret.setLength(ret.length() - 1); // remove last space
+    	return ret.toString();
     }
 	
 

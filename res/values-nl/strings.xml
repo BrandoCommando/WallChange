@@ -48,4 +48,6 @@
     <string name="btn_send">Stuur</string>
     <string name="s_thanks">Dank je wel!</string>
     <string name="menu_refresh">Vernieuwen</string>
+    <string name="s_adding">Het toevoegen van</string>
+    <string name="s_widgets">Bedekking</string>
 </resources>

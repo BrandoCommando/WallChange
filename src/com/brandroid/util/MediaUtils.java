@@ -67,7 +67,9 @@ public class MediaUtils {
 	
 	public static Boolean fileExists(String filename, Boolean useCache)
 	{
-		File f = new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename);
+		File f = new File(filename);
+		if(f.exists()) return true;
+		f = new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename);
 		if(f.exists()) return true;
 		return false;
 	}
@@ -143,11 +145,16 @@ public class MediaUtils {
     	Bitmap ret = null;
     	BufferedInputStream s = null;
     	try {
-    		File f = new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename);
+    		File f;
+    		if(filename.indexOf("/") > -1)
+    			f = new File(filename);
+    		else f = new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename);
     		if(!f.exists()) return null;
         	//Logger.LogInfo("Reading from " + f.toString());
-    		s = new BufferedInputStream(new FileInputStream(f));
-    		ret = BitmapFactory.decodeStream(s);
+    		//s = new BufferedInputStream(new FileInputStream(f));
+    		//ret = BitmapFactory.decodeStream(s);
+    		ret = BitmapFactory.decodeFile(f.getAbsolutePath());
+    		if(ret == null) throw new IOException("Null file");
     	} catch(IOException ex) { Logger.LogError("Exception reading bitmap file.", ex); }
     	finally {
     		if(s != null)

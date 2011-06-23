@@ -48,4 +48,6 @@
     <string name="btn_send">Senden</string>
     <string name="s_thanks">Vielen Dank!</string>
     <string name="menu_refresh">Aktualisieren</string>
+    <string name="s_adding">Hinzufügen</string>
+    <string name="s_widgets">Auflage</string>
 </resources>

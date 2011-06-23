@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.brandroid.util.Logger;
+import com.brandroid.data.WeatherData;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.util.JSON;
@@ -17,9 +18,11 @@ import com.brandroid.util.NetUtils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Point;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils.StringSplitter;
@@ -28,8 +31,8 @@ public class Weather extends Widget
 {
 	private String sLocation;
 	private Context mContext;
-	private Paint mPaint = null;
-	private JSONObject mData = null;
+	private JSONObject mJSON = null;
+	private WeatherData mData = null;
 	
 	// 'mostly cloudy' => 'cloudy4', 'heavy showers' => 'shower3', 'showers' => 'shower2', 'partial' => 'cloudy2', 'some' => 'shower2', 'cloud' => 'cloudy1', 'rain' => 'shower1', 'mist' => 'mist', 'snow' => 'snow2', 'fair' => 'sunny', 'sun' => 'sunny');
 	public static final String[] MAP_STRINGS = new String[] {"mostly cloudy", "heavy showers", "showers", "partial", "some", "cloud", "rain", "mist", "snow", "fair", "sun"};
@@ -42,7 +45,7 @@ public class Weather extends Widget
 		//mConditionMap
 	}
 	
-	public JSONObject getAPIResults()
+	public WeatherData getAPIResults()
 	{
 		if(mData == null)
 		{
@@ -51,52 +54,25 @@ public class Weather extends Widget
 				url = url.replace("%ZIP%", sLocation);
 			else
 				url += (url.indexOf("?") > -1 ? "&" : "?") + "zip=" + sLocation; 
-			mData = NetUtils.downloadJSON(url);
+			mJSON = NetUtils.downloadJSON(url);
+			mData = new WeatherData(mJSON);
 		}
 		return mData;
 	}
 	public String[] getConditions()
 	{
-		JSONObject api = getAPIResults();
-		JSONArray forecast = (JSONArray)JSON.FollowPath(api, new JSONArray(), "output", "forecast");
-		if(forecast == null || forecast.length() == 0) return null;
-		//String sCurrentCond = current.optString("condition", "Dunno");
-		String[] ret = new String[forecast.length()];
+		WeatherData api = getAPIResults();
+		if(api == null) return null;
+		String[] ret = new String[api.getForecast().length];
 		for(int i = 0; i < ret.length; i++)
-			ret[i] = forecast.optJSONObject(i).optString("condition", "Dunno");
+			ret[i] = api.getForecast(i).getCondition();
 		return ret;
 	}
 	public String getCurrentCondition()
 	{
-		return (String)JSON.FollowPath(getAPIResults(), "n/a", "output", "current", "condition") +
-			" - " + (String)JSON.FollowPath(getAPIResults(), "n/a", "output", "current", "temp_f") + "Â°";
+		return mData.getCurrentInformation().getValue("condition") +
+			" - " + mData.getCurrentInformation().getValue("temp_f") + "°";
 		
-	}
-	public String[][] getForecastTable()
-	{
-		JSONObject api = getAPIResults();
-		JSONArray forecast = (JSONArray)JSON.FollowPath(api, new JSONArray(), "output", "forecast");
-		if(forecast == null || forecast.length() == 0) return null;
-		String[][] ret = new String[forecast.length()+1][forecast.optJSONObject(0).length()+1];
-		for(int i = 0; i < forecast.length(); i++)
-		{
-			JSONObject day = forecast.optJSONObject(i);
-			String key = null;
-			int j = 0;
-			while((key = (String)day.keys().next()) != null)
-			{
-				try {
-					if(j >= ret[0].length) { j++; continue; }
-					if(i == 0)
-						ret[0][j] = key;
-					ret[i + 1][j] = day.optString(key, "n/a");
-				} catch(ArrayIndexOutOfBoundsException ao) {
-					Logger.LogError("Index out of array: j=" + j + "/" + ret[0].length + " i=" + i + "/" + ret.length, ao);
-				}
-				j++;
-			}
-		}
-		return ret;
 	}
 
 	@Override
@@ -110,34 +86,58 @@ public class Weather extends Widget
 	public void applyTo(Bitmap bmp, Canvas c)
 	{
 		//Bitmap widget = ((BitmapDrawable)getWidget()).getBitmap();
-		c.save();
 		Point center = new Point(bmp.getWidth() / 2, bmp.getHeight() / 2);
-		Drawable widget;
+		WeatherData api = getAPIResults();
 		String[] conditions = getConditions();
-		String[][] forecast = getForecastTable();
-		ArrayList<String> map = new ArrayList<String>(forecast.length);
-		for(int i = 0; i < forecast[0].length; i++)
-			map.add(forecast[0][i]);
 		Logger.LogDebug("Conditions: " + join(conditions));
-		Paint p = getPaint();
 		for(int i = conditions.length - 1; i >= 0; i--)
 		{
-			widget = getDrawableFromCondition(conditions[i]);
-			int w = widget.getMinimumHeight();
-			int h = widget.getMinimumHeight();
-			int x = (int)Math.floor(center.x - ((float)w / 2));
-			int y = (int)Math.floor(center.y - ((float)h / 2));
-			x += ((i - 4) * 100);
+			Paint p = new Paint();
+			p.setStyle(Style.FILL);
+			p.setColor(Color.BLACK);
+			p.setTextSize(30);
+			p.setTypeface(Typeface.DEFAULT_BOLD);
+			int alpha = 255 - (i * 50);
+			Logger.LogDebug("Alpha: " + alpha);
+			Drawable widget = getDrawableFromCondition(i > 0 ? conditions[i] : getCurrentCondition());
+			int w = widget.getMinimumHeight(),
+				h = widget.getMinimumHeight(),
+				wh = w / 2,
+				hh = h / 2;
+			int x = (int)Math.floor(center.x - (float)wh);
+			int y = (int)Math.floor(center.y - (float)hh);
+			x += i * 100;
+			WeatherData.Forecast f = api.getForecast(i);
+			String low = f.getTempLow(), hi = f.getTempHi();
+			p.setColor(Color.TRANSPARENT);
+			p.setAlpha(alpha);
+			//c.save();
 			c.drawBitmap(((BitmapDrawable)widget).getBitmap(), x, y, p);
-			c.drawText(forecast[map.indexOf("low")][i], x + (w / 2), y + h - p.getTextSize(), p);
-			c.drawText(forecast[map.indexOf("high")][i], x + (w / 2), y, p);
+			if(low != null)
+			{
+				p.setShadowLayer(0, 0, 0, 0);
+				p.setColor(Color.WHITE);
+				p.setAlpha(alpha - 50);
+				c.drawText(hi, x + wh - 12, y + h - p.getTextSize() - 2, p);
+				p.setColor(Color.BLUE);
+				p.setAlpha(alpha);
+				p.setShadowLayer(2f, 2, 2, Color.BLACK);
+				c.drawText(low, x + wh - 10, y + h - p.getTextSize(), p);
+			} else Logger.LogWarning("Couldn't find low :(");
+			if(hi != null)
+			{
+				p.setShadowLayer(0, 0, 0, 0);
+				p.setColor(Color.WHITE);
+				p.setAlpha(alpha - 50);
+				c.drawText(hi, x + wh - 12, y + p.getTextSize() - 2, p);
+				p.setColor(Color.RED);
+				p.setAlpha(alpha);
+				p.setShadowLayer(2f, 2, 2, Color.BLACK);
+				c.drawText(hi, x + wh - 10, y + p.getTextSize(), p);
+			}
+			else Logger.LogWarning("Couldn't find high :(");
+			//c.restore();
 		}
-		widget = getDrawableFromCondition(getCurrentCondition());
-		c.drawBitmap(((BitmapDrawable)widget).getBitmap(), center.x - ((float)widget.getMinimumWidth() / 2), center.y - ((float)widget.getMinimumHeight() / 2), getPaint());
-		//for(String cond : getConditions())
-			
-		//c.drawBitmap(widget, (bmp.getWidth() / 2) - (widget.getWidth() / 2), (bmp.getHeight() / 2) - (widget.getHeight() / 2), getPaint());
-		c.restore();
 	}
 	private String join (String[] c) {
 	    StringBuilder sb=new StringBuilder();
@@ -146,14 +146,6 @@ public class Weather extends Widget
 	    return sb.toString();
 	}
 
-
-	private Paint getPaint()
-	{
-		if(mPaint != null) return mPaint;
-		mPaint = new Paint();
-		mPaint.setStyle(Style.FILL);
-		return mPaint;
-	}
 	private Drawable getDrawable(int id)
 	{
 		return mContext.getResources().getDrawable(id);

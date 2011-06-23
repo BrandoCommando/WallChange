@@ -213,6 +213,7 @@ public class ProfileMaker extends BaseActivity
 				"&i1=" + URLEncoder.encode(url.replace(WallChanger.MY_ROOT_URL + "/images/", "").replace(WallChanger.MY_ROOT_URL, ""));
 		}
 		else */
+		if(!MediaUtils.fileExists(url, true))
 			url = WallChanger.getImageFullUrl(url);
 		Logger.LogInfo("Final Base Image URL: " + url);
 		return url;
@@ -265,6 +266,7 @@ public class ProfileMaker extends BaseActivity
 	}
 	public void onClickSelect()
 	{
+		System.gc();
 		new AddWallpaperWidgetsTask(true).execute(getBaseImageURL());
 		//new DownloadToWallpaperTask().execute(getDynaURL());
 	}
@@ -431,6 +433,7 @@ public class ProfileMaker extends BaseActivity
 		{
 			Uri selUri = data.getData();
 			String selPath = getMediaPath(selUri);
+			mTxtURL.setText(selPath);
 			Bitmap blg = BitmapFactory.decodeFile(selPath);
 			Bitmap bmp = MediaUtils.getSizedBitmap(blg, getHomeWidth(), getHomeHeight());
 			MediaUtils.writeFile("last.jpg", bmp, true);
@@ -495,10 +498,9 @@ public class ProfileMaker extends BaseActivity
 				w *= h / mh;
 				h = mh;
 			}
-			Logger.LogInfo("Scaled " + bmp.getWidth() + "x" + bmp.getHeight() + " under " + mw + "x" + mh + " to " + w + "x" + h);
-			Bitmap scaled = Bitmap.createScaledBitmap(bmp, w, h, true);
-			//win.setAttributes(lp);
-			win.setBackgroundDrawable(new BitmapDrawable(scaled));
+			//Logger.LogInfo("Scaled " + bmp.getWidth() + "x" + bmp.getHeight() + " under " + mw + "x" + mh + " to " + w + "x" + h);
+			//Bitmap scaled = Bitmap.createScaledBitmap(bmp, w, h, true);
+			win.setBackgroundDrawable(new BitmapDrawable(bmp));
 			return true;
 		} catch(Exception ex) {
 			Logger.LogError("Error setting preview.", ex);
@@ -581,204 +583,6 @@ public class ProfileMaker extends BaseActivity
     	
     }
     
-    private class MonitorUploadTask extends AsyncTask<String, Integer, String>
-    {
-    	private final static int iUpdateIntervalMS = 1000;
-    	private final static int iUpdateMax = 15;
-    	
-    	@Override
-		protected String doInBackground(String... arg0)
-		{
-    		String sKey = arg0[0];
-			String url = WallChanger.MY_UPLOAD_PROGRESS_URL.replace("%KEY%", sKey);
-			for(int i = 0; i < iUpdateMax; i++)
-			{
-				JSONObject j = NetUtils.downloadJSON(url);
-				if(j != null)
-					Logger.LogInfo("Upload JSON: " + j.toString());
-				else
-					Logger.LogWarning("Upload JSON NULL!");
-				try {
-					Thread.sleep((long)iUpdateIntervalMS);
-				} catch (InterruptedException e) { }
-			}
-			return null;
-		}
-    }
-    
-    /*
-	private class UploadTask extends AsyncTask<Bitmap, Integer, String>
-	{
-		private MonitorUploadTask mMonitor;
-		
-		@Override
-		protected String doInBackground(Bitmap... pics)
-		{
-			URL url = null;
-			HttpURLConnection con = null;
-			DataOutputStream out = null;
-			InputStream in = null;
-			StringBuilder ret = new StringBuilder();
-			InputStreamReader sr = null;
-			publishProgress(-1);
-			try {
-				ByteArrayOutputStream stream = new ByteArrayOutputStream();
-				int quality = WallChanger.getUploadQuality(checkWifi());
-				if(quality < 100)
-					showToast(getResourceString(R.string.s_low_quality));
-				pics[0].compress(CompressFormat.JPEG, quality, stream);
-				byte[] data = stream.toByteArray();
-				//int length = data.length;
-				String md5 = getMD5(data);
-				//Logger.LogInfo("MD5: " + md5);
-				url = new URL(WallChanger.MY_USER_IMAGE_URL.replace("%USER%", WallChanger.getUser()).replace("%MD5%", md5));
-				Logger.LogInfo("Checking " + url.toString() + " (Quality: " + quality + ", Size: " + data.length + ")");
-				con = (HttpURLConnection)url.openConnection();
-				//con.setRequestProperty("If-None-Match", md5);
-				con.setInstanceFollowRedirects(false);
-				con.setConnectTimeout(5000);
-				con.connect();
-				int iResponse = con.getResponseCode();
-				Logger.LogInfo("Response code: " + iResponse);
-				if(con.getResponseCode() == 304) {
-					Logger.LogInfo("Image already uploaded. No need to re-upload.");
-					String sLocation = con.getHeaderField("Location");
-					sLocation = sLocation.replace(WallChanger.MY_IMAGE_ROOT_URL, "");
-					//ret.append()
-					ret.append(sLocation);
-				} else
-				{
-					//mMonitor = new MonitorUploadTask();
-					//mMonitor.execute(md5);
-					Logger.LogInfo("New upload!");
-					con.disconnect();
-					url = new URL(WallChanger.MY_UPLOAD_IMAGE_URL.replace("%USER%", WallChanger.getUser()).replace("%MD5%", md5));
-					con = (HttpURLConnection)url.openConnection();
-					con.setRequestMethod("POST");
-					con.setConnectTimeout(15000);
-					con.setDoOutput(true);
-					con.setDoInput(true);
-					con.setUseCaches(false);
-					//con.setRequestProperty("Connection", "Keep-Alive");
-					//con.setRequestProperty("Content-Type", "multipart/form-data; boundary=*****");
-					
-					writeDataToStream(data, con.getOutputStream());
-					
-					in = con.getInputStream();
-					sr = new InputStreamReader(in);
-					char[] buf = new char[64];
-					while(sr.read(buf) > 0)
-					{
-						ret.append(buf);
-						if(buf.length < 64)
-							break;
-					}
-				}
-			} catch(Exception ex) {
-				showToast("Unable to upload.");
-				cancel(false);
-				Logger.LogError("Uploading error.", ex);
-			}
-			finally {
-				try {
-					if(out!=null) out.close();
-				} catch(IOException ex) { Logger.LogError("Trying to close output.", ex); }
-				try {
-					if(sr!=null) sr.close();
-				}catch(IOException ex) { Logger.LogError("Trying to close Stream Reader.", ex); }
-				try {
-					if(in!=null) in.close();
-				}catch(IOException ex) { Logger.LogError("Trying to close input.", ex); }
-				
-			}
-			return ret.toString();
-		}
-		
-		public void writeDataToStream(byte[] data, OutputStream s) throws IOException
-		{
-			BufferedOutputStream out = new BufferedOutputStream(s, 1);
-			publishProgress(0, data.length);
-			for(int i = 0; i < data.length; i += WallChanger.DOWNLOAD_CHUNK_SIZE)
-			{
-				int writelen = WallChanger.DOWNLOAD_CHUNK_SIZE;
-				if(writelen + i > data.length)
-					writelen = data.length - i;
-				if(writelen <= 0) break;
-				out.write(data, i, writelen);
-				publishProgress(i, data.length);
-			}
-			out.flush();
-			publishProgress(data.length, data.length);
-			out.close();
-			publishProgress(-1);
-		}
-
-		@Override
-		protected void onPreExecute() {
-			mProgressBar.setProgress(0);
-			mProgressLabel.setText(getText(R.string.s_uploading));
-			showPanel(mProgressPanel, true);
-			
-			Logger.LogInfo("Uploading image");
-			mBtnSelect.setEnabled(false);
-			mBtnTest.setEnabled(false);
-			findViewById(R.id.btnCurrent).setEnabled(false);
-		}
-		
-		@Override
-		protected void onCancelled() {
-			if(mMonitor != null && mMonitor.getStatus() == Status.RUNNING)
-				mMonitor.cancel(true);
-			hidePanel(mProgressPanel, false);
-			mBtnSelect.setEnabled(true);
-			mBtnTest.setEnabled(true);
-			findViewById(R.id.btnCurrent).setEnabled(true);
-		}
-		
-		@Override
-		protected void onProgressUpdate(Integer... values)
-		{
-			if(values.length > 1)
-			{
-				mProgressBar.setIndeterminate(false);
-				mProgressBar.setMax(values[1]);
-				mProgressBar.setProgress(values[0]);
-			} else if(values[0] == -1)
-				mProgressBar.setIndeterminate(true);
-			else if(values[0] == 0)
-				mProgressBar.setIndeterminate(false);
-		}
-		
-		@Override
-		protected void onPostExecute(String result) {
-			if(mMonitor != null && mMonitor.getStatus() == Status.RUNNING)
-				mMonitor.cancel(true);
-			if(result == null || result == "")
-				showToast("Invalid response");
-			else {
-				hidePanel(mProgressPanel, true);
-				Logger.LogInfo("Response received from upload.");
-				String mBaseUrl = result.replaceAll("[^A-Za-z0-9\\.\\/]", "");
-				mTxtURL.setText(mBaseUrl);
-				prefs.setSetting("baseUrl", mBaseUrl);
-				//if(mDynaUrl.indexOf("&i1=") > -1)
-				//	mDynaUrl = mDynaUrl.substring(0, mDynaUrl.indexOf("&i1="));
-				//mDynaUrl += "&i1=" + mBaseUrl;
-				//mTextUrl.setText(mDynaUrl);
-				//mTextUrl.setEnabled(true);
-				mBtnSelect.setEnabled(true);
-				mBtnTest.setEnabled(true);
-				findViewById(R.id.btnCurrent).setEnabled(true);
-			}
-			//mProgressBar.setVisibility(View.GONE);
-			//mImgPreview.setVisibility(View.GONE);
-			//mImgSample.setImageDrawable(getWallpaper());
-			//mImgSample.setVisibility(View.VISIBLE);
-		}
-	}
-	*/
-
-	
 	private class UpdateOnlineGalleryTask extends AsyncTask<String, Integer, Boolean> {
 
 		@Override
@@ -1015,19 +819,20 @@ public class ProfileMaker extends BaseActivity
 		{
 			Bitmap base = null;
 			publishProgress(0, 3);
-			if(MediaUtils.fileExists(params[0], true))
-				base = MediaUtils.readFileBitmap(params[0], true);
+			base = MediaUtils.readFileBitmap(params[0], true);
 			if(base == null)
 				base = downloadBitmap(params[0]);
 			if(base == null) return null;
-			Bitmap ret = Bitmap.createBitmap(getHomeWidth(), getHomeHeight(), Config.ARGB_8888);
+			int w = getHomeWidth();
+			int h = getHomeHeight();
+			base = Bitmap.createScaledBitmap(base, w, h, true);
+			Bitmap ret = Bitmap.createBitmap(w, h, Config.ARGB_8888);
 			Canvas c = new Canvas(ret);
 			c.save();
 			Paint p = new Paint();
 			p.setStyle(Style.FILL);
 			c.drawBitmap(base, 0, 0, p);
 			base = null;
-			c.restore();
 			
 			Widget[] widgets = getSelectedWidgets();
 			publishProgress(1, 2 + widgets.length);
@@ -1036,13 +841,14 @@ public class ProfileMaker extends BaseActivity
 				widgets[i].applyTo(ret, c);
 				publishProgress(1 + i, 2 + widgets.length);
 			}
+			c.restore();
 			return ret;
 		}
 
 	    @Override
 	    protected void onPreExecute() {
 	    	mProgressBar.setProgress(0);
-			mProgressLabel.setText(getText(R.string.s_downloading));
+			mProgressLabel.setText(getResourceString(R.string.s_adding, R.string.btn_weather, R.string.s_widgets));
 			showPanel(mProgressPanel, true);
 			
 	    	//showToast("Downloading image.");
@@ -1078,7 +884,7 @@ public class ProfileMaker extends BaseActivity
 	    		//mImgPreview.setVisibility(View.VISIBLE);
 	    		//mImgPreview.setImageBitmap(result);
 	    		setPreview(result);
-	    		MediaUtils.writeFile("last.jpg", result, true);
+	    		//MediaUtils.writeFile("last.jpg", result, true);
 	    		if(mSetWallpaper)
 	    		{
 		    		setHomeWallpaper(result);
@@ -1095,6 +901,8 @@ public class ProfileMaker extends BaseActivity
 			Bitmap ret = null;
 			InputStream s = null;
 			try {
+				if(url.startsWith("/"))
+					return MediaUtils.readFileBitmap(url, true);
 	    		HttpURLConnection uc = (HttpURLConnection)new URL(url).openConnection();
 	    		uc.setConnectTimeout(15000);
 	    		uc.connect();
@@ -1116,7 +924,7 @@ public class ProfileMaker extends BaseActivity
 	    		b = bab.toByteArray();
 	    		MediaUtils.writeFile(url.substring(url.lastIndexOf("/")+1), b, true);
 	    		ret = BitmapFactory.decodeByteArray(b, 0, b.length);
-	    	} catch(IOException ex) { Logger.LogError("Couldn't download base image.", ex); }
+	    	} catch(IOException ex) { Logger.LogError("Couldn't download base image. " + url, ex); }
 	    	finally {
 	    		try {
 	    			if(s != null)

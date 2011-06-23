@@ -48,4 +48,6 @@
     <string name="btn_send">发送</string>
     <string name="s_thanks">谢谢！</string>
     <string name="menu_refresh">刷新</string>
+    <string name="s_adding">添加</string>
+    <string name="s_widgets">覆盖</string>
 </resources>
