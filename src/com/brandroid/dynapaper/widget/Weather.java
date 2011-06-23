@@ -1,6 +1,7 @@
 package com.brandroid.dynapaper.widget;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -76,7 +77,7 @@ public class Weather extends Widget
 		JSONObject api = getAPIResults();
 		JSONArray forecast = (JSONArray)JSON.FollowPath(api, new JSONArray(), "output", "forecast");
 		if(forecast == null || forecast.length() == 0) return null;
-		String[][] ret = new String[forecast.length()+1][forecast.optJSONObject(0).length()];
+		String[][] ret = new String[forecast.length()+1][forecast.optJSONObject(0).length()+1];
 		for(int i = 0; i < forecast.length(); i++)
 		{
 			JSONObject day = forecast.optJSONObject(i);
@@ -84,9 +85,15 @@ public class Weather extends Widget
 			int j = 0;
 			while((key = (String)day.keys().next()) != null)
 			{
-				if(i == 0)
-					ret[0][j] = key;
-				ret[i + 1][j++] = day.optString(key, "n/a");
+				try {
+					if(j >= ret[0].length) { j++; continue; }
+					if(i == 0)
+						ret[0][j] = key;
+					ret[i + 1][j] = day.optString(key, "n/a");
+				} catch(ArrayIndexOutOfBoundsException ao) {
+					Logger.LogError("Index out of array: j=" + j + "/" + ret[0].length + " i=" + i + "/" + ret.length, ao);
+				}
+				j++;
 			}
 		}
 		return ret;
@@ -107,14 +114,23 @@ public class Weather extends Widget
 		Point center = new Point(bmp.getWidth() / 2, bmp.getHeight() / 2);
 		Drawable widget;
 		String[] conditions = getConditions();
+		String[][] forecast = getForecastTable();
+		ArrayList<String> map = new ArrayList<String>(forecast.length);
+		for(int i = 0; i < forecast[0].length; i++)
+			map.add(forecast[0][i]);
 		Logger.LogDebug("Conditions: " + join(conditions));
+		Paint p = getPaint();
 		for(int i = conditions.length - 1; i >= 0; i--)
 		{
 			widget = getDrawableFromCondition(conditions[i]);
-			int x = (int)Math.floor(center.x - ((float)widget.getMinimumWidth() / 2));
-			int y = (int)Math.floor(center.y - ((float)widget.getMinimumHeight() / 2));
-			x += (i * 100);
-			c.drawBitmap(((BitmapDrawable)widget).getBitmap(), x, y, getPaint());
+			int w = widget.getMinimumHeight();
+			int h = widget.getMinimumHeight();
+			int x = (int)Math.floor(center.x - ((float)w / 2));
+			int y = (int)Math.floor(center.y - ((float)h / 2));
+			x += ((i - 4) * 100);
+			c.drawBitmap(((BitmapDrawable)widget).getBitmap(), x, y, p);
+			c.drawText(forecast[map.indexOf("low")][i], x + (w / 2), y + h - p.getTextSize(), p);
+			c.drawText(forecast[map.indexOf("high")][i], x + (w / 2), y, p);
 		}
 		widget = getDrawableFromCondition(getCurrentCondition());
 		c.drawBitmap(((BitmapDrawable)widget).getBitmap(), center.x - ((float)widget.getMinimumWidth() / 2), center.y - ((float)widget.getMinimumHeight() / 2), getPaint());

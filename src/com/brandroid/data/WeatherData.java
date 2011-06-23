@@ -16,5 +16,6 @@ public class WeatherData extends HashData
 		//public String Condition, Temp_Hi, Temp_Low, Date, Wind, Day of Week;
 		//public 
 		public String getValue(String key) { return values.get(key); }
+		public String getCondition() { return getValue("condition"); }
 	}
 }
