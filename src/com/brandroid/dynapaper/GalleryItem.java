@@ -3,8 +3,8 @@ package com.brandroid.dynapaper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.brandroid.MediaUtils;
 import com.brandroid.dynapaper.Database.GalleryDbAdapter;
+import com.brandroid.util.MediaUtils;
 
 import android.database.Cursor;
 import android.graphics.Bitmap;

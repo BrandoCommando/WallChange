@@ -1,9 +1,9 @@
 package com.brandroid.dynapaper.Activities;
 
-import com.brandroid.Logger;
 import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
+import com.brandroid.util.Logger;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;

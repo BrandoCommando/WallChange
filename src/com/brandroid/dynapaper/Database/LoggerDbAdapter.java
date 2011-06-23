@@ -6,7 +6,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.brandroid.Logger;
+import com.brandroid.util.Logger;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;

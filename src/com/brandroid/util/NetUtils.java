@@ -1,4 +1,4 @@
-package com.brandroid;
+package com.brandroid.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -17,6 +17,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
+
 
 public class NetUtils
 {

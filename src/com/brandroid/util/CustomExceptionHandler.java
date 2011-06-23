@@ -1,6 +1,7 @@
-package com.brandroid;
+package com.brandroid.util;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+
 
 import android.os.Environment;
 

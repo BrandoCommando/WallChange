@@ -1,4 +1,4 @@
-package com.brandroid;
+package com.brandroid.util;
 
 //import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,6 +39,19 @@ public class JSON
 		} catch(JSONException ex) { last = ex; return null; }
 	}
 	
+	public static Object FollowPath(JSONObject json, Object oDefault, String... path)
+	{
+		Object tmp = null;
+		for(int i = 0; i < path.length; i++)
+		{
+			tmp = json.opt(path[i]);
+			if(tmp == null) return oDefault;
+			if(i == path.length - 1) return tmp;
+			if(tmp.getClass().equals(JSONObject.class))
+				json = (JSONObject)tmp;
+		}
+		return tmp;
+	}
 	public static String FollowPathToString(JSONObject json, String[] path, int index, String sDefault)
 	{
 		if(json == null) return sDefault;

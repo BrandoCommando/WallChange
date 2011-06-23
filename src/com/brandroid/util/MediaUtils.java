@@ -1,4 +1,4 @@
-package com.brandroid;
+package com.brandroid.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

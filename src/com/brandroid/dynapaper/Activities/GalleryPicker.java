@@ -12,13 +12,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
-import com.brandroid.Logger;
-import com.brandroid.MediaUtils;
 import com.brandroid.dynapaper.GalleryItem;
 import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.dynapaper.Database.GalleryDbAdapter;
+import com.brandroid.util.Logger;
+import com.brandroid.util.MediaUtils;
 
 import android.content.Context;
 import android.content.Intent;

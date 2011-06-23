@@ -2,8 +2,8 @@ package com.brandroid.dynapaper.Activities;
 
 import java.sql.Date;
 
-import com.brandroid.CustomExceptionHandler;
-import com.brandroid.Logger;
+import com.brandroid.util.CustomExceptionHandler;
+import com.brandroid.util.Logger;
 import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;

@@ -1,7 +1,8 @@
 package com.brandroid.dynapaper.Database;
 
-import com.brandroid.Logger;
 import com.brandroid.dynapaper.GalleryItem;
+import com.brandroid.util.Logger;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;

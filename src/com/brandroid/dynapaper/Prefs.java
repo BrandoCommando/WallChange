@@ -2,7 +2,7 @@ package com.brandroid.dynapaper;
 
 import java.util.Set;
 
-import com.brandroid.Logger;
+import com.brandroid.util.Logger;
 
 import android.content.Context;
 import android.content.SharedPreferences;

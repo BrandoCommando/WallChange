@@ -32,10 +32,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.brandroid.JSON;
-import com.brandroid.Logger;
-import com.brandroid.MediaUtils;
-import com.brandroid.NetUtils;
+import com.brandroid.util.JSON;
+import com.brandroid.util.Logger;
+import com.brandroid.util.MediaUtils;
+import com.brandroid.util.NetUtils;
 import com.brandroid.dynapaper.GalleryItem;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;

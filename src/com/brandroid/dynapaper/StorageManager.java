@@ -12,7 +12,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.brandroid.Logger;
+import com.brandroid.util.Logger;
 
 import android.app.Application;
 import android.content.Context;

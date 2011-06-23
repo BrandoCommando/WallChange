@@ -19,12 +19,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.brandroid.JSON;
-import com.brandroid.Logger;
 import com.brandroid.dynapaper.GalleryItem;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.dynapaper.Activities.ProfileMaker.DownloadThumbZipTask;
+import com.brandroid.util.JSON;
+import com.brandroid.util.Logger;
 
 import android.graphics.Color;
 import android.os.AsyncTask;

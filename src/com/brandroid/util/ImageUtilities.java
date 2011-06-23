@@ -24,6 +24,9 @@ import android.graphics.Shader;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Bitmap.Config;
+import android.graphics.Matrix.ScaleToFit;
+import android.graphics.Paint.Style;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -40,7 +43,6 @@ import java.lang.ref.SoftReference;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
-import com.brandroid.Logger;
 import com.brandroid.drawable.FastBitmapDrawable;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -341,7 +343,7 @@ public class ImageUtilities {
         return null;
     }
 
-    private static Bitmap createScaledBitmap(Bitmap src, int dstWidth, int dstHeight,
+    public static Bitmap createScaledBitmap(Bitmap src, int dstWidth, int dstHeight,
             float offset, boolean clipShadow, Paint paint) {
         
         Matrix m;
@@ -407,5 +409,42 @@ public class ImageUtilities {
         canvas.drawBitmap(source, from, to, SCALE_PAINT);
 
         return bitmap;
+    }
+    
+    public static Bitmap getWallpaperBitmap(Bitmap bmp, int mw, int mh)
+    {
+    	int w = bmp.getWidth();
+		int h = bmp.getHeight();
+		if(w > mw)
+		{
+			h *= w / mw;
+			w = mw;
+		}
+		if(h > mh)
+		{
+			w *= h / mh;
+			h = mh;
+		}
+		//FastBitmapDrawable scaled = ImageUtilities.createScaledBitmap(bmp, w, h, 0, false, paint)
+		Bitmap scaled = Bitmap.createBitmap(mw, mh, Config.ARGB_8888);
+		Canvas c = new Canvas(scaled);
+		Rect src = new Rect(0, 0, bmp.getWidth(), bmp.getHeight());
+		Rect dst = new Rect(0, 0, mw, mh);
+		Matrix m = c.getMatrix();
+		Logger.LogDebug("Matrix(Before): " + m.toShortString());
+		m.setRectToRect(new RectF(src), new RectF(dst), ScaleToFit.CENTER);
+		//m.setScale(, sy, px, py)
+		Logger.LogInfo("Scaled (" + src.toShortString() + ") under " + mw + "x" + mh + " to " + w + "x" + h + " :: (" + dst.toShortString() + ")");
+		Logger.LogDebug("Matrix(After): " + m.toShortString());
+		Paint p = new Paint();
+		c.drawARGB(255, 0, 0, 0);
+		p.setFilterBitmap(true);
+		p.setStyle(Style.FILL);
+		c.drawBitmap(bmp, src, dst, p);
+		c.setMatrix(m);
+		//Bitmap scaled = Bitmap.createScaledBitmap(bmp, w, h, true);
+		//c.scale(w, h);
+		//win.setAttributes(lp);
+		return bmp;
     }
 }

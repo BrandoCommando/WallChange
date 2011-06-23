@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.Closeable;
 import java.io.File;
 
-import com.brandroid.Logger;
 import com.brandroid.dynapaper.WallChanger;
 
 public final class IOUtilities {

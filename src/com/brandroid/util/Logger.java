@@ -1,4 +1,4 @@
-package com.brandroid;
+package com.brandroid.util;
 
 import java.util.ArrayList;
 import java.util.List;
