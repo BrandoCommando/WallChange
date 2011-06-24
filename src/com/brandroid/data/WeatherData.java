@@ -25,6 +25,11 @@ public class WeatherData
 			json = json.optJSONObject("weather");
 			if(json.has("forecast_information"))
 				mInformation = new Information(json.optJSONObject("forecast_information"));
+			if(json.has("current_conditions"))
+			{
+				mCurrent = new Forecast(json.optJSONObject("current_conditions"));
+				mConditions[0].AddValue("temp_f", json.optJSONObject("current_conditions").optString("temp_f"));
+			}
 			if(json.has("forecast_conditions"))
 			{
 				JSONArray fca = json.optJSONArray("forecast_conditions");
@@ -32,13 +37,14 @@ public class WeatherData
 				for(int i = 0; i < fca.length(); i++)
 					mConditions[i] = new Forecast(fca.optJSONObject(i));
 			}
-			if(json.has("current_conditions"))
-				mConditions[0].AddValue("temp_f", json.optJSONObject("current_conditions").optString("temp_f"));
 		} else if(json.has("output")) // from widget_weather.php
 		{
 			json = json.optJSONObject("output");
 			if(json.has("current"))
+			{
 				mInformation = new Information(json.optJSONObject("current"));
+				mCurrent = new Forecast(json.optJSONObject("current"));
+			}
 			if(json.has("forecast"))
 			{
 				JSONArray fca = json.optJSONArray("forecast");
@@ -89,13 +95,23 @@ public class WeatherData
 			ret.append(mInformation.toString());
 			ret.append(",");
 		}
-		ret.append("current:");
-		ret.append(mCurrent.toString());
-		ret.append(",forecast:[");
-		for(int i = 0; i < mConditions.length; i++)
-			ret.append(mConditions[i].toString()+",");
+		if(mCurrent != null)
+		{
+			ret.append("current:");
+			ret.append(mCurrent.toString());
+			ret.append(",");
+		}
+		if(mConditions != null)
+		{
+			ret.append("forecast:[");
+			for(int i = 0; i < mConditions.length; i++)
+				ret.append(mConditions[i].toString()+",");
+			if(mConditions.length > 0)
+				ret.setLength(ret.length()-1);
+			ret.append("],");
+		}
 		ret.setLength(ret.length()-1);
-		ret.append("]}");
+		ret.append("}");
 		return ret.toString();
 	}
 	

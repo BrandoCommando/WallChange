@@ -64,59 +64,55 @@ public class Weather extends Widget
 	{
 		if(mData == null)
 		{
-			String url = WallChanger.MY_WEATHER_API_URL;
-			if(url.contains("%ZIP%"))
-				url = url.replace("%ZIP%", sLocation);
-			else
-				url += (url.indexOf("?") > -1 ? "&" : "?") + "zip=" + sLocation;
-			/*
-			mJSON = NetUtils.downloadJSON(url);
-			if(mJSON != null)
-				mData = new WeatherData(mJSON);
-			else*/
-			{
-				url = WallChanger.GOOGLE_WEATHER_API_URL.replace("%ZIP%", sLocation);
-				Logger.LogDebug("Getting weather from " + url);
-				HttpURLConnection uc = null;
-				InputStream in = null;
-				XmlPullParser parser;
+			String url = WallChanger.GOOGLE_WEATHER_API_URL.replace("%ZIP%", sLocation);
+			Logger.LogDebug("Getting weather from " + url);
+			HttpURLConnection uc = null;
+			InputStream in = null;
+			XmlPullParser parser;
+			try {
+				uc = (HttpURLConnection)new URL(url).openConnection();
+				uc.setReadTimeout(10000);
+				uc.addRequestProperty("Accept-Encoding", "gzip, deflate");
+				uc.connect();
+				if(uc.getResponseCode() == HttpURLConnection.HTTP_OK)
+				{
+					Logger.LogDebug("Received " + uc.getContentLength() + " bytes.");
+					String encoding = uc.getContentEncoding();
+					if(encoding != null && encoding.equalsIgnoreCase("gzip"))
+						in = new GZIPInputStream(uc.getInputStream());
+					else if(encoding != null && encoding.equalsIgnoreCase("deflate"))
+						in = new InflaterInputStream(uc.getInputStream(), new Inflater(true));
+					else
+						in = new BufferedInputStream(uc.getInputStream());
+					parser = XmlPullParserFactory.newInstance().newPullParser();
+					parser.setInput(in, "UTF-8");
+					mData = new WeatherData(parser);
+					Logger.LogDebug("Weather Data from Google: " + mData.toString());
+				} else throw new FileNotFoundException(url + " returned " + uc.getResponseCode());
+			} catch (XmlPullParserException e) {
+				Logger.LogError("Error parsing Google", e);
+			} catch(IOException e) {
+				Logger.LogError("Error reading Google", e);
+			} catch(Exception e) {
+				Logger.LogError("Exception reading Google", e);
+			} finally {
 				try {
-					uc = (HttpURLConnection)new URL(url).openConnection();
-					uc.setReadTimeout(10000);
-					uc.addRequestProperty("Accept-Encoding", "gzip, deflate");
-					uc.connect();
-					if(uc.getResponseCode() == HttpURLConnection.HTTP_OK)
-					{
-						Logger.LogDebug("Received " + uc.getContentLength() + " bytes.");
-						String encoding = uc.getContentEncoding();
-						if(encoding != null && encoding.equalsIgnoreCase("gzip"))
-							in = new GZIPInputStream(uc.getInputStream());
-						else if(encoding != null && encoding.equalsIgnoreCase("deflate"))
-							in = new InflaterInputStream(uc.getInputStream(), new Inflater(true));
-						else
-							in = new BufferedInputStream(uc.getInputStream());
-						parser = XmlPullParserFactory.newInstance().newPullParser();
-						parser.setInput(in, "UTF-8");
-						mData = new WeatherData(parser);
-						Logger.LogDebug("Weather Data from Google: " + mData.toString());
-					} else throw new FileNotFoundException(url + " returned " + uc.getResponseCode());
-				} catch (XmlPullParserException e) {
-					Logger.LogError("Error parsing Google", e);
-				} catch(IOException e) {
-					Logger.LogError("Error reading Google", e);
-				} catch(Exception e) {
-					Logger.LogError("Exception reading Google", e);
-				} finally {
-					try {
-						if(in != null)
-							in.close();
-					} catch (IOException e) {
-						Logger.LogError("Error closing stream for Google", e);
-					}
-					if(uc != null)
-						uc.disconnect();
+					if(in != null)
+						in.close();
+				} catch (IOException e) {
+					Logger.LogError("Error closing stream for Google", e);
 				}
-				//NetUtils.
+				if(uc != null)
+					uc.disconnect();
+			}
+			if(mData == null || mData.getCurrentConditions() == null)
+			{
+				Logger.LogWarning("Google didn't have anything to say. Trying my weather API.");
+				mJSON = NetUtils.downloadJSON(WallChanger.MY_WEATHER_API_URL.replace("%ZIP%", sLocation));
+				if(mJSON != null)
+					mData = new WeatherData(mJSON);
+				if(mData != null)
+					Logger.LogDebug("Received from my API: " + mData.toString());
 			}
 		}
 		return mData;
@@ -155,13 +151,16 @@ public class Weather extends Widget
 		return getDrawableFromCondition(cond.toLowerCase());
 	}
 	@Override
-	public void applyTo(Bitmap bmp, Canvas c)
+	public Boolean applyTo(Bitmap bmp, Canvas c)
 	{
-		//Bitmap widget = ((BitmapDrawable)getWidget()).getBitmap();
-		Point center = new Point(bmp.getWidth() / 2, bmp.getHeight() / 2);
+		Boolean ret = true;
+		
 		WeatherData api = getAPIResults();
+		if(api == null) return false;
 		String[] conditions = getConditions();
-		Logger.LogDebug("Conditions: " + join(conditions));
+		if(conditions.length == 0) return false;
+		
+		Point center = new Point(bmp.getWidth() / 2, bmp.getHeight() / 2);
 		for(int i = conditions.length - 1; i >= 0; i--)
 		{
 			Paint p = new Paint();
@@ -185,7 +184,7 @@ public class Weather extends Widget
 			p.setColor(Color.TRANSPARENT);
 			p.setAlpha(alpha);
 			//c.save();
-			Logger.LogInfo("Position on day " + (i + 1) + ": " + x + "," + y);
+			//Logger.LogInfo("Position on day " + (i + 1) + ": " + x + "," + y);
 			c.drawBitmap(((BitmapDrawable)widget).getBitmap(), x, y, p);
 			p.setAntiAlias(true);
 			if(low != null)
@@ -219,6 +218,7 @@ public class Weather extends Widget
 			}
 			//c.restore();
 		}
+		return ret;
 	}
 	private String join (String[] c) {
 		if(c == null) return "";

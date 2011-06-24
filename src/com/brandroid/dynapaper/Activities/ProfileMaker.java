@@ -284,13 +284,14 @@ public class ProfileMaker extends BaseActivity
 				locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);
 			else if(ll != null)
 				locationManager.removeUpdates(ll);
-			else if(ll == null)
-			{
-				mBtnGPS.setEnabled(false);
-				mBtnGPS.setChecked(false);
-				showToast(getResourceString(R.string.btn_gps) + " " + getResourceString(R.string.s_disabled));
-			}
-		} catch(Exception ex) { Logger.LogError("Error toggling GPS", ex); }
+			if(ll == null)
+				throw new Exception("Location listener is null");
+		} catch(Exception ex) {
+			mBtnGPS.setEnabled(false);
+			mBtnGPS.setChecked(false);
+			showToast(getResourceString(R.string.s_error, R.string.btn_gps));
+			Logger.LogError("Error toggling GPS", ex);
+		}
 		//mTxtZip.setEnabled(mBtnGPS.isChecked());
 	}
 
@@ -858,11 +859,12 @@ public class ProfileMaker extends BaseActivity
 			base = null;
 			
 			Widget[] widgets = getSelectedWidgets();
-			publishProgress(1, 2 + widgets.length);
+			publishProgress(1, 1 + widgets.length);
 			for(int i=0; i < widgets.length; i++)
 			{
-				widgets[i].applyTo(ret, c);
-				publishProgress(1 + i, 2 + widgets.length);
+				if(!widgets[i].applyTo(ret, c))
+					showToast(getResourceString(R.string.s_error, R.string.s_adding, R.string.s_widgets));
+				publishProgress(1 + i, 1 + widgets.length);
 			}
 			c.restore();
 			Canvas.freeGlCaches();

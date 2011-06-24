@@ -7,5 +7,5 @@ import android.graphics.drawable.Drawable;
 public abstract class Widget
 {
 	public abstract Drawable getWidget();
-	public abstract void applyTo(Bitmap bmp, Canvas c);
+	public abstract Boolean applyTo(Bitmap bmp, Canvas c);
 }

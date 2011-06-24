@@ -30,6 +30,7 @@ public class NetUtils
 		JSONObject ret = null;
 		try {
 			uc = (HttpURLConnection)new URL(url).openConnection();
+			uc.setConnectTimeout(5000);
 			uc.setReadTimeout(10000);
 			uc.addRequestProperty("Accept-Encoding", "gzip, deflate");
 			uc.connect();
@@ -66,6 +67,7 @@ public class NetUtils
 		JSONObject ret = new JSONObject();
 		try {
 			uc = (HttpURLConnection)new URL(url).openConnection();
+			uc.setConnectTimeout(500);
 			uc.setReadTimeout(10000);
 			uc.addRequestProperty("Accept-Encoding", "gzip, deflate");
 			uc.connect();
