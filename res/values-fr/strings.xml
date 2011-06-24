@@ -50,4 +50,5 @@
     <string name="menu_refresh">Actualiser</string>
     <string name="s_adding">Ajout</string>
     <string name="s_widgets">Revêtement</string>
+    <string name="s_error">Erreur avec</string>
 </resources>

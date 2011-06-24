@@ -6,6 +6,7 @@
     <string name="btn_test">Preview</string>
     <string name="btn_cancel">Cancel</string>
     <string name="s_create">Create</string>
+    <string name="s_error">Error</string>
     <string name="s_shortcut">Shortcut</string>
     <string name="s_downloading">Downloading</string>
     <string name="s_disabled">disabled</string>

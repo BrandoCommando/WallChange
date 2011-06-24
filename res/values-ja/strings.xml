@@ -50,4 +50,5 @@
     <string name="menu_refresh">リフレッシュ</string>
     <string name="s_adding">追加</string>
     <string name="s_widgets">オーバーレイ</string>
+    <string name="s_error">とのエラー</string>
 </resources>
