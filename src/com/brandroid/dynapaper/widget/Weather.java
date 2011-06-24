@@ -1,15 +1,28 @@
 package com.brandroid.dynapaper.widget;
 
+import java.io.BufferedInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 import com.brandroid.util.Logger;
 import com.brandroid.data.WeatherData;
+import com.brandroid.data.WeatherData.Forecast;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.util.JSON;
@@ -53,17 +66,66 @@ public class Weather extends Widget
 			if(url.contains("%ZIP%"))
 				url = url.replace("%ZIP%", sLocation);
 			else
-				url += (url.indexOf("?") > -1 ? "&" : "?") + "zip=" + sLocation; 
+				url += (url.indexOf("?") > -1 ? "&" : "?") + "zip=" + sLocation;
+			/*
 			mJSON = NetUtils.downloadJSON(url);
-			mData = new WeatherData(mJSON);
+			if(mJSON != null)
+				mData = new WeatherData(mJSON);
+			else*/
+			{
+				url = WallChanger.GOOGLE_WEATHER_API_URL.replace("%ZIP%", sLocation);
+				Logger.LogDebug("Getting weather from " + url);
+				HttpURLConnection uc = null;
+				InputStream in = null;
+				XmlPullParser parser;
+				try {
+					uc = (HttpURLConnection)new URL(url).openConnection();
+					uc.setReadTimeout(10000);
+					uc.addRequestProperty("Accept-Encoding", "gzip, deflate");
+					uc.connect();
+					if(uc.getResponseCode() == HttpURLConnection.HTTP_OK)
+					{
+						Logger.LogDebug("Received " + uc.getContentLength() + " bytes.");
+						String encoding = uc.getContentEncoding();
+						if(encoding != null && encoding.equalsIgnoreCase("gzip"))
+							in = new GZIPInputStream(uc.getInputStream());
+						else if(encoding != null && encoding.equalsIgnoreCase("deflate"))
+							in = new InflaterInputStream(uc.getInputStream(), new Inflater(true));
+						else
+							in = new BufferedInputStream(uc.getInputStream());
+						parser = XmlPullParserFactory.newInstance().newPullParser();
+						parser.setInput(in, "UTF-8");
+						mData = new WeatherData(parser);
+						Logger.LogDebug("Weather Data from Google: " + mData.toString());
+					} else throw new FileNotFoundException(url + " returned " + uc.getResponseCode());
+				} catch (XmlPullParserException e) {
+					Logger.LogError("Error parsing Google", e);
+				} catch(IOException e) {
+					Logger.LogError("Error reading Google", e);
+				} catch(Exception e) {
+					Logger.LogError("Exception reading Google", e);
+				} finally {
+					try {
+						if(in != null)
+							in.close();
+					} catch (IOException e) {
+						Logger.LogError("Error closing stream for Google", e);
+					}
+					if(uc != null)
+						uc.disconnect();
+				}
+				//NetUtils.
+			}
 		}
 		return mData;
 	}
 	public String[] getConditions()
 	{
 		WeatherData api = getAPIResults();
-		if(api == null) return null;
-		String[] ret = new String[api.getForecast().length];
+		if(api == null) return new String[0];
+		Forecast[] fc = api.getForecast();
+		if(fc == null) return new String[0];
+		String[] ret = new String[fc.length];
 		for(int i = 0; i < ret.length; i++)
 			ret[i] = api.getForecast(i).getCondition();
 		return ret;
@@ -106,6 +168,7 @@ public class Weather extends Widget
 				hh = h / 2;
 			int x = (int)Math.floor(center.x - (float)wh);
 			int y = (int)Math.floor(center.y - (float)hh);
+			float fs = p.getTextSize();
 			x += i * 100;
 			WeatherData.Forecast f = api.getForecast(i);
 			String low = f.getTempLow(), hi = f.getTempHi();
@@ -115,31 +178,42 @@ public class Weather extends Widget
 			c.drawBitmap(((BitmapDrawable)widget).getBitmap(), x, y, p);
 			if(low != null)
 			{
-				p.setShadowLayer(0, 0, 0, 0);
-				p.setColor(Color.WHITE);
-				p.setAlpha(alpha - 50);
-				c.drawText(hi, x + wh - 12, y + h - p.getTextSize() - 2, p);
+				//p.setShadowLayer(0, 0, 0, 0);
+				//p.setColor(Color.GRAY);
+				//p.setAlpha(alpha - 50);
+				//c.drawText(hi, x + wh - 12, y + h - p.getTextSize() - 2, p);
 				p.setColor(Color.BLUE);
+				p.setStyle(Style.FILL_AND_STROKE);
 				p.setAlpha(alpha);
-				p.setShadowLayer(2f, 2, 2, Color.BLACK);
-				c.drawText(low, x + wh - 10, y + h - p.getTextSize(), p);
+				p.setShadowLayer(3f, 2, 2, Color.BLACK);
+				c.drawText(low, x + wh - (fs / 2), y + h - fs, p);
 			} else Logger.LogWarning("Couldn't find low :(");
 			if(hi != null)
 			{
-				p.setShadowLayer(0, 0, 0, 0);
-				p.setColor(Color.WHITE);
-				p.setAlpha(alpha - 50);
-				c.drawText(hi, x + wh - 12, y + p.getTextSize() - 2, p);
+				//p.setShadowLayer(0, 0, 0, 0);
+				//p.setColor(Color.GRAY);
+				//p.setAlpha(alpha - 50);
+				//c.drawText(hi, x + wh - 12, y + p.getTextSize() - 2, p);
 				p.setColor(Color.RED);
-				p.setAlpha(alpha);
-				p.setShadowLayer(2f, 2, 2, Color.BLACK);
-				c.drawText(hi, x + wh - 10, y + p.getTextSize(), p);
+				c.drawText(hi, x + wh - 10, y + fs, p);
+			}
+			if(i == 0)
+			{
+				p.setColor(Color.BLACK);
+				p.setShadowLayer(3f,2,2,Color.WHITE);
+				c.drawText(getCurrentCondition(), x, y + hh, p);
+				if(f.hasValue("temp_f"))
+				{
+					p.setColor(Color.rgb(0, 100, 0));
+					c.drawText(f.getValue("temp_f"), x + wh - (fs / 2), y + hh - fs, p);
+				}
 			}
 			else Logger.LogWarning("Couldn't find high :(");
 			//c.restore();
 		}
 	}
 	private String join (String[] c) {
+		if(c == null) return "";
 	    StringBuilder sb=new StringBuilder();
 	    for(String s : c)
 	        sb.append(s);

@@ -201,6 +201,8 @@ public class ProfileMaker extends BaseActivity
 			url = mTxtURL.getText().toString();
 		if(url == "")
 			url = prefs.getSetting("baseUrl", url);
+		if(url == "" && MediaUtils.fileExists("last.jpg", true))
+			url = MediaUtils.getFullFilename("last.jpg", true);;
 		if(url == "")
 			url = "schema.jpg";
 		/* if(mBtnWeather.isChecked())
@@ -819,9 +821,11 @@ public class ProfileMaker extends BaseActivity
 		{
 			Bitmap base = null;
 			publishProgress(0, 3);
-			base = MediaUtils.readFileBitmap(params[0], true);
+			String url = params[0];
+			if(url.trim().equals("")) url = MediaUtils.getFullFilename("last.jpg", true);
+			base = MediaUtils.readFileBitmap(url, true);
 			if(base == null)
-				base = downloadBitmap(params[0]);
+				base = downloadBitmap(url);
 			if(base == null) return null;
 			int w = getHomeWidth();
 			int h = getHomeHeight();

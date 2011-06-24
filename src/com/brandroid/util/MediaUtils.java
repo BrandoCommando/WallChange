@@ -127,7 +127,7 @@ public class MediaUtils {
     		bmp.compress(CompressFormat.JPEG, 100, s);
     		success = true;
     	} catch(IOException ex) {
-    		Logger.LogError("Exception saving file.", ex);
+    		Logger.LogError("Error saving " + filename, ex);
     		mExternalStorageWriteable = false;
     	}
     	finally {
@@ -155,7 +155,7 @@ public class MediaUtils {
     		//ret = BitmapFactory.decodeStream(s);
     		ret = BitmapFactory.decodeFile(f.getAbsolutePath());
     		if(ret == null) throw new IOException("Null file");
-    	} catch(IOException ex) { Logger.LogError("Exception reading bitmap file.", ex); }
+    	} catch(IOException ex) { Logger.LogError("Error reading bitmap \"" + filename + "\"", ex); }
     	finally {
     		if(s != null)
 				try {
