@@ -52,9 +52,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.GpsStatus;
 import android.location.Location;
@@ -350,6 +354,11 @@ public class ProfileMaker extends BaseActivity
 		super.onConfigurationChanged(newConfig);
 	}
 	
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		return super.onRetainNonConfigurationInstance();
+	}
+	
 	public LocationListener getLocationListener()
 	{
 		if(locationListener != null) return locationListener;
@@ -490,19 +499,27 @@ public class ProfileMaker extends BaseActivity
 			int mh = d.getHeight();
 			int w = bmp.getWidth();
 			int h = bmp.getHeight();
-			if(w > mw)
-			{
-				h *= w / mw;
-				w = mw;
-			}
-			if(h > mh)
-			{
-				w *= h / mh;
-				h = mh;
-			}
+			int nw = (h / mh) * w;
+			int nh = (w / mw) * h; // new height
+			int bh = nh - h; // bar height
+			nw /= 2;
+			nh /= 2;
+			bh /= 2;
+			// Max: 600x1024, Image: 1200x1024 --> 1200x1024
 			//Logger.LogInfo("Scaled " + bmp.getWidth() + "x" + bmp.getHeight() + " under " + mw + "x" + mh + " to " + w + "x" + h);
 			//Bitmap scaled = Bitmap.createScaledBitmap(bmp, w, h, true);
-			win.setBackgroundDrawable(new BitmapDrawable(bmp));
+			Logger.LogInfo("Max: " + mw + "x" + mh + ", Image: " + w + "x" + h + ", New: " + nw + "x" + nh);
+			Bitmap newpic = Bitmap.createBitmap(nw, nh, Config.RGB_565);
+			Canvas c = new Canvas(newpic);
+			Paint p = new Paint();
+			p.setStyle(Style.FILL);
+			c.drawColor(Color.BLACK);
+			Rect src = new Rect(0, 0, bmp.getWidth(), bmp.getHeight());
+			Rect dst = new Rect(0, bh, nw, nh);
+			c.drawBitmap(bmp, src, dst, p);
+			Drawable pic = new BitmapDrawable(newpic);
+			//pic.setBounds(pic.getMinimumWidth() / 2, 0, pic.getMinimumWidth(), pic.getMinimumHeight());
+			win.setBackgroundDrawable(pic);
 			return true;
 		} catch(Exception ex) {
 			Logger.LogError("Error setting preview.", ex);
@@ -829,13 +846,15 @@ public class ProfileMaker extends BaseActivity
 			if(base == null) return null;
 			int w = getHomeWidth();
 			int h = getHomeHeight();
-			base = Bitmap.createScaledBitmap(base, w, h, true);
+			//base = Bitmap.createScaledBitmap(base, w, h, true);
 			Bitmap ret = Bitmap.createBitmap(w, h, Config.ARGB_8888);
 			Canvas c = new Canvas(ret);
 			c.save();
 			Paint p = new Paint();
 			p.setStyle(Style.FILL);
-			c.drawBitmap(base, 0, 0, p);
+			Rect src = new Rect(0, 0, base.getWidth(), base.getHeight());
+			RectF dst = new RectF(new Rect(0, 0, w, h));
+			c.drawBitmap(base, src, dst, p);
 			base = null;
 			
 			Widget[] widgets = getSelectedWidgets();
@@ -846,6 +865,7 @@ public class ProfileMaker extends BaseActivity
 				publishProgress(1 + i, 2 + widgets.length);
 			}
 			c.restore();
+			Canvas.freeGlCaches();
 			return ret;
 		}
 

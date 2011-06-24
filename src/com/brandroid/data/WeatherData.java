@@ -15,6 +15,7 @@ import com.brandroid.util.Logger;
 public class WeatherData
 {
 	private Information mInformation;
+	private Forecast mCurrent;
 	private Forecast[] mConditions;
 	
 	public WeatherData(JSONObject json)
@@ -52,50 +53,44 @@ public class WeatherData
 		int type = xml.getEventType();
 		ArrayList<Forecast> forecast = new ArrayList<WeatherData.Forecast>();
 		Boolean bPast1st = false;
-		int elements = 0;
+		//int elements = 0;
 		while(type != XmlPullParser.END_DOCUMENT)
 		{
 			if(type == XmlPullParser.START_TAG)
 			{
-				elements++;
-				Logger.LogDebug("Element: " + xml.getName());
+				//elements++;
+				//Logger.LogDebug("Element: " + xml.getName());
 				if(xml.getName().equalsIgnoreCase("forecast_information"))
 					mInformation = new Information(xml);
 				if(xml.getName().equalsIgnoreCase("current_conditions"))
-					forecast.add(new Forecast(xml));
+					mCurrent = new Forecast(xml);
 				if(xml.getName().equalsIgnoreCase("forecast_conditions"))
-				{
-					if(!bPast1st)
-					{
-						bPast1st = true;
-						Forecast f = forecast.get(0);
-						Forecast n = new Forecast(xml);
-						if(f != null && n != null)
-						{
-							f.Merge(n);
-							forecast.set(0, f);
-						}
-					} else {
-						forecast.add(new Forecast(xml));
-					}
-				}
+					forecast.add(new Forecast(xml));
 			}
 			type = xml.next();
 		}
 		mConditions = new Forecast[forecast.size()];
 		for(int i = 0; i < mConditions.length; i++)
 			mConditions[i] = forecast.get(i);
-		Logger.LogDebug("WeatherData parsed " + elements + " elements.");
+		//Logger.LogDebug("WeatherData parsed " + elements + " elements.");
 	}
 	
 	public Information getCurrentInformation() { return mInformation; }
+	public Forecast getCurrentConditions() { return mCurrent; }
 	public Forecast[] getForecast() { return mConditions; }
 	public Forecast getForecast(int day) { return mConditions[day]; }
 	
 	public String toString()
 	{
-		StringBuilder ret = new StringBuilder("{current:");
-		ret.append(mInformation.toString());
+		StringBuilder ret = new StringBuilder("{");
+		if(mInformation != null)
+		{
+			ret.append("information:");
+			ret.append(mInformation.toString());
+			ret.append(",");
+		}
+		ret.append("current:");
+		ret.append(mCurrent.toString());
 		ret.append(",forecast:[");
 		for(int i = 0; i < mConditions.length; i++)
 			ret.append(mConditions[i].toString()+",");
@@ -108,6 +103,7 @@ public class WeatherData
 	{
 		public Information(JSONObject json) { super(json); }
 		public Information(XmlPullParser xml) { super(xml); }
+		public String getCity() { return getValue("city"); }
 		public String getZip() { return getValue("postal_code"); }
 		public String getDate() { return getValue("forecast_date"); }
 	}

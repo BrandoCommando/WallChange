@@ -16,6 +16,7 @@ import java.util.zip.InflaterInputStream;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -23,6 +24,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import com.brandroid.util.Logger;
 import com.brandroid.data.WeatherData;
 import com.brandroid.data.WeatherData.Forecast;
+import com.brandroid.data.WeatherData.Information;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.util.JSON;
@@ -130,11 +132,19 @@ public class Weather extends Widget
 			ret[i] = api.getForecast(i).getCondition();
 		return ret;
 	}
+	public String getCurrentInfoLine()
+	{
+		Information info = mData.getCurrentInformation();
+		String ret = "";
+		if(info != null)
+			ret = info.getCity();
+		if(mData.getCurrentConditions().hasValue("temp_f"))
+			ret += (ret != "" ? ": " : "") + mData.getCurrentConditions().getValue("temp_f");
+		return ret;
+	}
 	public String getCurrentCondition()
 	{
-		return mData.getCurrentInformation().getValue("condition") +
-			" - " + mData.getCurrentInformation().getValue("temp_f") + "°";
-		
+		return mData.getCurrentConditions().getCondition();
 	}
 
 	@Override
@@ -160,14 +170,14 @@ public class Weather extends Widget
 			p.setTextSize(30);
 			p.setTypeface(Typeface.DEFAULT_BOLD);
 			int alpha = 255 - (i * 50);
-			Logger.LogDebug("Alpha: " + alpha);
+			//Logger.LogDebug("Alpha: " + alpha);
 			Drawable widget = getDrawableFromCondition(i > 0 ? conditions[i] : getCurrentCondition());
-			int w = widget.getMinimumHeight(),
+			int w = widget.getMinimumWidth(),
 				h = widget.getMinimumHeight(),
 				wh = w / 2,
-				hh = h / 2;
-			int x = (int)Math.floor(center.x - (float)wh);
-			int y = (int)Math.floor(center.y - (float)hh);
+				hh = h / 2,
+				x = (int)Math.floor(center.x / 2),
+				y = (int)Math.floor(center.y - (float)hh);
 			float fs = p.getTextSize();
 			x += i * 100;
 			WeatherData.Forecast f = api.getForecast(i);
@@ -175,7 +185,9 @@ public class Weather extends Widget
 			p.setColor(Color.TRANSPARENT);
 			p.setAlpha(alpha);
 			//c.save();
+			Logger.LogInfo("Position on day " + (i + 1) + ": " + x + "," + y);
 			c.drawBitmap(((BitmapDrawable)widget).getBitmap(), x, y, p);
+			p.setAntiAlias(true);
 			if(low != null)
 			{
 				//p.setShadowLayer(0, 0, 0, 0);
@@ -192,23 +204,19 @@ public class Weather extends Widget
 			{
 				//p.setShadowLayer(0, 0, 0, 0);
 				//p.setColor(Color.GRAY);
-				//p.setAlpha(alpha - 50);
+				p.setAlpha(alpha);
 				//c.drawText(hi, x + wh - 12, y + p.getTextSize() - 2, p);
 				p.setColor(Color.RED);
-				c.drawText(hi, x + wh - 10, y + fs, p);
-			}
+				c.drawText(hi, x + wh - (fs / 2), y + fs, p);
+			} else Logger.LogWarning("Couldn't find high :(");
 			if(i == 0)
 			{
-				p.setColor(Color.BLACK);
 				p.setShadowLayer(3f,2,2,Color.WHITE);
-				c.drawText(getCurrentCondition(), x, y + hh, p);
-				if(f.hasValue("temp_f"))
-				{
-					p.setColor(Color.rgb(0, 100, 0));
-					c.drawText(f.getValue("temp_f"), x + wh - (fs / 2), y + hh - fs, p);
-				}
+				p.setColor(Color.rgb(0, 100, 0));
+				c.drawText(getCurrentCondition(), x + 40, y + hh - fs + 20, p);
+				p.setColor(Color.BLACK);
+				c.drawText(getCurrentInfoLine(), x + 40, y + hh + 20, p);
 			}
-			else Logger.LogWarning("Couldn't find high :(");
 			//c.restore();
 		}
 	}
