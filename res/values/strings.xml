@@ -5,6 +5,7 @@
     <string name="btn_select">Apply</string>
     <string name="btn_test">Preview</string>
     <string name="btn_cancel">Cancel</string>
+    <string name="s_rotate">Rotate</string>
     <string name="s_create">Create</string>
     <string name="s_error">Error</string>
     <string name="s_shortcut">Shortcut</string>

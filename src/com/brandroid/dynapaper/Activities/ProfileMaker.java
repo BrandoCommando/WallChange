@@ -18,6 +18,7 @@ import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.zip.GZIPInputStream;
@@ -82,6 +83,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -151,6 +153,7 @@ public class ProfileMaker extends BaseActivity
 		findViewById(R.id.btnTest).setOnClickListener(this);
 		findViewById(R.id.btnURL).setOnClickListener(this);
 		findViewById(R.id.progress_cancel).setOnClickListener(this);
+		findViewById(R.id.btnRotate).setOnClickListener(this);
 		
 		mProgressPanel.setVisibility(View.GONE);
 		
@@ -175,10 +178,18 @@ public class ProfileMaker extends BaseActivity
 		findViewById(R.id.txtURL).setVisibility(View.GONE);
 		
 		mPastZips = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line);
+		mTxtZip.setTag(false);
 		mTxtZip.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mTxtZip.showDropDown();
+				((EditText)v).setText("");
+				if(v.getTag() != null && v.getTag().getClass().equals(Boolean.class) && ((Boolean)v.getTag()).equals(false))
+				{
+					v.setTag(true);
+					InputMethodManager mgr = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+					mgr.hideSoftInputFromWindow(v.getWindowToken(), 0);
+					((AutoCompleteTextView)v).showDropDown();
+				}
 			}
 		});
 		mTxtZip.setAdapter(mPastZips);
@@ -328,6 +339,9 @@ public class ProfileMaker extends BaseActivity
 				break;
 			case R.id.btnURL:
 				mTxtURL.setVisibility(mTxtURL.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
+				break;
+			case R.id.btnRotate:
+				
 				break;
 		}
 	}
@@ -482,7 +496,9 @@ public class ProfileMaker extends BaseActivity
 			} else {
 				int width = 0, height = 0;
 				width = getHomeWidth() / 2;
-				String sThumbUrl = WallChanger.getImageThumbUrl(mTxtURL.getText().toString(), width, height);
+				String zip = mTxtURL.getText().toString();
+				mPastZips.insert(zip, 0);
+				String sThumbUrl = WallChanger.getImageThumbUrl(zip, width, height);
 				Logger.LogWarning("Couldn't find image in Intent. Re-downloading " + sThumbUrl, new Exception("Dummy"));
 				new DownloadToWallpaperTask(true).execute(sThumbUrl);
 			}
@@ -661,8 +677,24 @@ public class ProfileMaker extends BaseActivity
 	    		if(uc.getResponseCode() == HttpURLConnection.HTTP_OK)
 	    		{
 	    			String encoding = uc.getContentEncoding();
-	    			prefs.setSetting("gallery_update", ((Long)uc.getLastModified()).toString());
-	    			Logger.LogInfo("Encoding: " + encoding + " @ " + uc.getLastModified());
+	    			Iterator<String> keys = uc.getHeaderFields().keySet().iterator();
+	    			StringBuilder sbHeaders = new StringBuilder();	    			
+	    			while(keys.hasNext())
+	    			{
+	    				String key = keys.next();
+	    				sbHeaders.append(key);
+	    				sbHeaders.append(":\"");
+	    				sbHeaders.append(uc.getHeaderField(key));
+	    				sbHeaders.append("\",");
+	    				//Logger.LogInfo()
+	    			}
+	    			if(sbHeaders.length() > 0)
+	    			{
+	    				sbHeaders.setLength(sbHeaders.length() - 1);
+	    				Logger.LogInfo("Gallery Headers: {" + sbHeaders.toString() + "}");
+	    			}
+	    			//prefs.setSetting("gallery_update", ((Long)uc.getDate()).toString());
+	    			//Logger.LogInfo("Encoding: " + encoding + " @ " + uc.getLastModified() + " : " + uc.getLastModified());
 	    			if(encoding != null && encoding.equalsIgnoreCase("gzip"))
 	    				in = new GZIPInputStream(uc.getInputStream());
 	    			else if(encoding != null && encoding.equalsIgnoreCase("deflate"))
@@ -675,7 +707,9 @@ public class ProfileMaker extends BaseActivity
 		    			sb.append(line + '\n');
 		    		ret = sb.toString();
 		    		//Logger.LogInfo("Gallery Response: " + sb.toString());
-		    		modified = uc.getLastModified();
+		    		modified = uc.getDate();
+		    		if(uc.getLastModified() > 0)
+		    			modified = uc.getLastModified();
 		    		jsonGallery = JSON.Parse(ret);
 		    		if(jsonGallery != null)
 		    		{
@@ -716,7 +750,7 @@ public class ProfileMaker extends BaseActivity
 								
 								Logger.LogInfo("Successfully add/updated " + adds + " records" + (removes > 0 ? " & removed " + removes + " records" : "") + "!");
 								success = true;
-								prefs.setSetting("gallery_update", modified.toString());
+								//prefs.setSetting("gallery_update", modified.toString());
 							} catch (Exception je) {
 								Logger.LogError("Exception getting images: " + je.toString(), je);
 							}
@@ -750,11 +784,13 @@ public class ProfileMaker extends BaseActivity
 			{
 				if(values[0] > 0)
 				{
-					if(mTxtZip.getText().toString().equals(""))
-					{
-						prefs.setSetting("zip", values[0]);
-						mTxtZip.setText(values[0].toString());
-					}
+					mPastZips.insert(values[0].toString(), 0);
+					if(mTxtZip.getTag() != null && mTxtZip.getTag().getClass().equals(Boolean.class) && ((Boolean)mTxtZip.getTag()).equals(false))
+						if(mTxtZip.getText().toString().equals(""))
+						{
+							prefs.setSetting("zip", values[0]);
+							mTxtZip.setText(values[0].toString());
+						}
 				} else if (values[0] == 0) {
 					mBtnOnline.setTextColor(Color.GRAY);
 				}
@@ -962,11 +998,20 @@ public class ProfileMaker extends BaseActivity
 		
 	}
 	
+	public String getZip()
+	{
+		String zip = mTxtZip.getText().toString();
+		for(int i = 0; i < mPastZips.getCount(); i++)
+			if(mPastZips.getItem(i).equalsIgnoreCase(zip)) return zip;
+		mPastZips.insert(zip, 0);
+		return zip;
+	}
+	
 	public Widget[] getSelectedWidgets()
 	{
 		ArrayList<Widget> al = new ArrayList<Widget>();
 		if(mBtnWeather.isChecked())
-			al.add(new Weather(getApplicationContext(), mTxtZip.getText().toString()));
+			al.add(new Weather(getApplicationContext(), getZip()));
 		Widget[] ret = new Widget[al.size()];
 		ret = al.toArray(ret);
 		return ret;
@@ -1103,7 +1148,7 @@ public class ProfileMaker extends BaseActivity
 	public void setSavedSettings()
 	{
 		if(mTxtZip != null)
-			prefs.setSetting("zip", mTxtZip.getText().toString());
+			prefs.setSetting("zip", getZip());
 		if(mBtnWeather != null)
 			prefs.setSetting("weather", mBtnWeather.isChecked());
 		if(WallChanger.getUser() != null && WallChanger.getUser() != "")

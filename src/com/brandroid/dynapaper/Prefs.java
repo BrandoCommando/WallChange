@@ -86,6 +86,7 @@ public class Prefs {
 	
 	public void setSetting(String key, String value)
 	{
+		Logger.LogDebug("Setting " + key + " to " + value);
 		SharedPreferences.Editor editor = getPreferences().edit();
 		editor.putString(key, value.toString());
 		//editor.putString(key, value);

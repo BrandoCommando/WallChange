@@ -67,6 +67,7 @@
 				<Button android:text="@string/btn_test" android:id="@+id/btnTest"
 					android:layout_toRightOf="@+id/btnSelect" android:layout_alignTop="@+id/btnSelect"
 					android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+				<Button android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_toRightOf="@+id/btnTest" android:layout_alignTop="@+id/btnTest" android:layout_alignBottom="@+id/btnTest" android:text="@string/s_rotate" android:id="@+id/btnRotate" android:visibility="gone"></Button>
 			</RelativeLayout>
 			<FrameLayout android:layout_below="@+id/layoutCommands"
 				android:id="@+id/frameLayout1"
