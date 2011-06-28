@@ -40,7 +40,9 @@ import com.brandroid.util.NetUtils;
 import com.brandroid.dynapaper.GalleryItem;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
+import com.brandroid.dynapaper.WallProfile;
 import com.brandroid.dynapaper.Database.GalleryDbAdapter;
+import com.brandroid.dynapaper.Database.ProfileDbAdapter;
 import com.brandroid.dynapaper.widget.Weather;
 import com.brandroid.dynapaper.widget.Widget;
 
@@ -108,6 +110,8 @@ public class ProfileMaker extends BaseActivity
 	private LocationManager locationManager;
 	private Boolean mWifiEnabled = true;
 	private ArrayAdapter<String> mPastZips;
+	private WallProfile mProfileCurrent;
+	private ProfileDbAdapter pdb;
 	
 	//private String mGPSLocation = null;
 	
@@ -124,10 +128,26 @@ public class ProfileMaker extends BaseActivity
 		
 		MediaUtils.init(this);
 		
+		pdb = new ProfileDbAdapter(getApplicationContext());
+		pdb.open();
+		//Cursor pc = gdb.fetchAllItems();
+        mProfileCurrent = new WallProfile();
+        if(mIntent.hasExtra("profile"))
+        {
+        	Long pid = mIntent.getLongExtra("profile", -1);
+        	if(pid > -1)
+        	{
+        		mProfileCurrent = pdb.fetchItem(pid);
+        		pdb.close();
+        	}
+        } else {
+        	mProfileCurrent.setBasePath("last.jpg"); // current wallpaper
+        }
+		
 		gdb = new GalleryDbAdapter(getApplicationContext());
 		gdb.open();
-		Cursor c = gdb.fetchAllItems();
-		startManagingCursor(c);
+		Cursor gc = gdb.fetchAllItems();
+		startManagingCursor(gc);
 		
 		mBtnSelect = (Button)findViewById(R.id.btnSelect);
 		mBtnTest = (Button)findViewById(R.id.btnTest);
@@ -158,9 +178,11 @@ public class ProfileMaker extends BaseActivity
 		mProgressPanel.setVisibility(View.GONE);
 		
 		mTxtURL = (EditText)findViewById(R.id.txtURL);
+		mTxtURL.setText(mProfileCurrent.getBasePath());
 		//(ImageView)findViewById(R.id.imageSample);
 		
-		new GrabCurrentWallpaperTask().execute();
+		if(mProfileCurrent.getBasePath().equalsIgnoreCase("last.jpg"))
+			new GrabCurrentWallpaperTask().execute();
 		
 		mTxtURL.addTextChangedListener(new TextWatcher(){
 			@Override
@@ -196,7 +218,7 @@ public class ProfileMaker extends BaseActivity
 		
 		getSavedSettings();
 		
-		mBtnOnline.setEnabled(c.getCount() > 0);
+		mBtnOnline.setEnabled(gc.getCount() > 0);
 		
 		//mTxtZip.setText(prefs.getString("zip", mTxtZip.getText().toString()));
 		
@@ -613,6 +635,12 @@ public class ProfileMaker extends BaseActivity
 		}
 		
 		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+		}
+		
+		@Override
 		protected void onPostExecute(Bitmap result) {
 			setPreview(result);
 		}
@@ -934,6 +962,10 @@ public class ProfileMaker extends BaseActivity
 				mProgressBar.setProgress(values[0]);
 			} else if(values[0] == -1)
 				mProgressBar.setIndeterminate(true);
+			else if(values[0] == -2)
+				mProgressLabel.setText(getResourceString(R.string.s_downloading));
+			else if(values[0] == -3)
+				mProgressLabel.setText(getResourceString(R.string.s_adding, R.string.btn_weather, R.string.s_widgets));
 			else if(values[0] == 0)
 				mProgressBar.setIndeterminate(false);
 		}
@@ -972,6 +1004,7 @@ public class ProfileMaker extends BaseActivity
 	    		if(uc.getResponseCode() >= 400) throw new IOException(uc.getResponseCode() + " on " + url);
 	    		Integer length = uc.getContentLength();
 	    		Logger.LogInfo("Response received. " + length + " bytes.");
+	    		publishProgress(-2);
 	    		s = new BufferedInputStream(uc.getInputStream(), WallChanger.DOWNLOAD_CHUNK_SIZE);
 	    		ByteArrayBuffer bab = new ByteArrayBuffer(length <= 0 ? 32 : length);
 	    		byte[] b = new byte[WallChanger.DOWNLOAD_CHUNK_SIZE];

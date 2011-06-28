@@ -37,6 +37,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -45,6 +46,7 @@ import android.text.TextUtils.StringSplitter;
 public class Weather extends Widget
 {
 	private String sLocation;
+	private Point mPosition;
 	private Context mContext;
 	private JSONObject mJSON = null;
 	private WeatherData mData = null;
@@ -242,6 +244,19 @@ public class Weather extends Widget
 	private Drawable getDrawableFromCondition(String sCondition)
 	{
 		return getDrawable(getDrawableIDFromCondition(sCondition));
+	}
+	
+	@Override
+	public String toString()
+	{
+		return "type:\"weather\",zip:\"" + sLocation + "\"";
+	}
+
+	@Override
+	public void parseString(String s) {
+		JSONObject json = JSON.Parse(s);
+		sLocation = json.optString("zip", sLocation);
+		mPosition = new Point(json.optInt("x", 0), json.optInt("y", 0));
 	}
 	
 }

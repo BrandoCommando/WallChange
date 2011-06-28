@@ -8,4 +8,6 @@ public abstract class Widget
 {
 	public abstract Drawable getWidget();
 	public abstract Boolean applyTo(Bitmap bmp, Canvas c);
+	public abstract String toString();
+	public abstract void parseString(String s);
 }
