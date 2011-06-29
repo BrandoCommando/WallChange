@@ -112,6 +112,7 @@ public class ProfileMaker extends BaseActivity
 	private ArrayAdapter<String> mPastZips;
 	private WallProfile mProfileCurrent;
 	private ProfileDbAdapter pdb;
+	private Bitmap mSample;
 	
 	//private String mGPSLocation = null;
 	
@@ -393,7 +394,15 @@ public class ProfileMaker extends BaseActivity
 	
 	@Override
 	public Object onRetainNonConfigurationInstance() {
-		return super.onRetainNonConfigurationInstance();
+		//Bitmap bmp = getW
+		return mSample;
+		//w.get
+	}
+	
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onRestoreInstanceState(savedInstanceState);
 	}
 	
 	public LocationListener getLocationListener()
