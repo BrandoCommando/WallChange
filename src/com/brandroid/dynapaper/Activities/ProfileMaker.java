@@ -105,6 +105,7 @@ public class ProfileMaker extends BaseActivity
 	private ProgressBar mProgressBar;
 	private TextView mProgressLabel;
 	private DownloadToWallpaperTask mDownloadTask;
+	private AddWallpaperWidgetsTask mAddWidgetTask;
 	private GalleryDbAdapter gdb;
 	private LocationListener locationListener;
 	private LocationManager locationManager;
@@ -301,13 +302,23 @@ public class ProfileMaker extends BaseActivity
 	}
 	public void onClickPreview()
 	{
-		new AddWallpaperWidgetsTask(false).execute(getBaseImageURL());
+		if(mAddWidgetTask != null && mAddWidgetTask.getStatus() == Status.RUNNING)
+		{
+			mAddWidgetTask.cancel(true);
+		}
+		mAddWidgetTask = new AddWallpaperWidgetsTask(false);
+		mAddWidgetTask.execute(getBaseImageURL());
 		//new DownloadToWallpaperTask(true).execute(getDynaURL());
 	}
 	public void onClickSelect()
 	{
 		System.gc();
-		new AddWallpaperWidgetsTask(true).execute(getBaseImageURL());
+		if(mAddWidgetTask != null && mAddWidgetTask.getStatus() == Status.RUNNING)
+		{
+			mAddWidgetTask.cancel(true);
+		}
+		mAddWidgetTask = new AddWallpaperWidgetsTask(true);
+		mAddWidgetTask.execute(getBaseImageURL());
 		//new DownloadToWallpaperTask().execute(getDynaURL());
 	}
 	public void onClickGPS()
@@ -912,6 +923,7 @@ public class ProfileMaker extends BaseActivity
 		protected Bitmap doInBackground(String... params)
 		{
 			Bitmap base = null;
+			publishProgress(-2);
 			publishProgress(0, 3);
 			String url = params[0];
 			if(url.trim().equals("")) url = MediaUtils.getFullFilename("last.jpg", true);
@@ -932,6 +944,7 @@ public class ProfileMaker extends BaseActivity
 			c.drawBitmap(base, src, dst, p);
 			base = null;
 			
+			publishProgress(-3);
 			Widget[] widgets = getSelectedWidgets();
 			publishProgress(1, 1 + widgets.length);
 			for(int i=0; i < widgets.length; i++)
