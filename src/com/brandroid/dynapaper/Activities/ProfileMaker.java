@@ -638,6 +638,7 @@ public class ProfileMaker extends BaseActivity
 				File fLast = MediaUtils.getFile(sFile, true);
 				if(!fLast.exists())
 					MediaUtils.writeFile(sFile, ((BitmapDrawable)getWallpaper()).getBitmap(), true);
+				mTxtURL.setText(sFile);
 				return BitmapFactory.decodeFile(fLast.getAbsolutePath());
 				//mImgPreview.setImageURI(Uri.fromFile(fLast));
 			} catch(Exception e) { Logger.LogError("Couldn't set Preview to last", e); return null; }
