@@ -180,7 +180,7 @@ public class Weather extends Widget
 				x = (int)Math.floor(center.x / 2),
 				y = (int)Math.floor(center.y - (float)hh);
 			float fs = p.getTextSize();
-			x += i * 100;
+			x += i * wh;
 			WeatherData.Forecast f = api.getForecast(i);
 			String low = f.getTempLow(), hi = f.getTempHi();
 			p.setColor(Color.TRANSPARENT);
