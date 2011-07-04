@@ -35,6 +35,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -52,8 +53,8 @@ public class Weather extends Widget
 	private WeatherData mData = null;
 	
 	// 'mostly cloudy' => 'cloudy4', 'heavy showers' => 'shower3', 'showers' => 'shower2', 'partial' => 'cloudy2', 'some' => 'shower2', 'cloud' => 'cloudy1', 'rain' => 'shower1', 'mist' => 'mist', 'snow' => 'snow2', 'fair' => 'sunny', 'sun' => 'sunny');
-	public static final String[] MAP_STRINGS = new String[] {"mostly cloudy", "heavy showers", "showers", "partial", "some", "cloud", "rain", "mist", "snow", "fair", "sun"};
-	public static final int[] MAP_DRAWABLE = new int[] {R.drawable.ww_cloudy4, R.drawable.ww_shower3, R.drawable.ww_shower2, R.drawable.ww_cloudy2, R.drawable.ww_shower2, R.drawable.ww_cloudy1, R.drawable.ww_shower1, R.drawable.ww_mist, R.drawable.ww_snow2, R.drawable.ww_sunny, R.drawable.ww_sunny};
+	public static final String[] MAP_STRINGS = new String[] {"mostly cloudy", "heavy showers", "showers", "partial", "some", "cloud", "rain", "mist", "snow", "fair", "sun", "clear"};
+	public static final int[] MAP_DRAWABLE = new int[] {R.drawable.ww_cloudy4, R.drawable.ww_shower3, R.drawable.ww_shower2, R.drawable.ww_cloudy2, R.drawable.ww_shower2, R.drawable.ww_cloudy1, R.drawable.ww_shower1, R.drawable.ww_mist, R.drawable.ww_snow2, R.drawable.ww_sunny, R.drawable.ww_sunny, R.drawable.ww_sunny};
 	
 	public Weather(Context context, String location)
 	{
@@ -136,13 +137,14 @@ public class Weather extends Widget
 		String ret = "";
 		if(info != null)
 			ret = info.getCity();
-		if(mData.getCurrentConditions().hasValue("temp_f"))
-			ret += (ret != "" ? ": " : "") + mData.getCurrentConditions().getValue("temp_f");
 		return ret;
 	}
 	public String getCurrentCondition()
 	{
-		return mData.getCurrentConditions().getCondition();
+		String ret = mData.getCurrentConditions().getCondition();
+		if(mData.getCurrentConditions().hasValue("temp_f"))
+			ret += (ret != "" ? ": " : "") + mData.getCurrentConditions().getValue("temp_f");
+		return ret;
 	}
 
 	@Override
@@ -168,7 +170,6 @@ public class Weather extends Widget
 			Paint p = new Paint();
 			p.setStyle(Style.FILL);
 			p.setColor(Color.BLACK);
-			p.setTextSize(30);
 			p.setTypeface(Typeface.DEFAULT_BOLD);
 			int alpha = 255 - (i * 50);
 			//Logger.LogDebug("Alpha: " + alpha);
@@ -179,40 +180,57 @@ public class Weather extends Widget
 				hh = h / 2,
 				x = (int)Math.floor(center.x / 2),
 				y = (int)Math.floor(center.y - (float)hh);
+			int size = Math.min(Math.max(h / 6, 20), 30);
+			Logger.LogInfo("Text Size: " + size + "  Height: " + h);
+			p.setTextSize(size);
 			float fs = p.getTextSize();
 			x += i * wh;
 			WeatherData.Forecast f = api.getForecast(i);
-			String low = f.getTempLow(), hi = f.getTempHi();
+			String low = f.getTempLow(), hi = f.getTempHi(), day = f.getDay();
 			p.setColor(Color.TRANSPARENT);
 			p.setAlpha(alpha);
 			//c.save();
 			//Logger.LogInfo("Position on day " + (i + 1) + ": " + x + "," + y);
 			c.drawBitmap(((BitmapDrawable)widget).getBitmap(), x, y, p);
-			p.setAntiAlias(true);
 			if(low != null)
 			{
-				//p.setShadowLayer(0, 0, 0, 0);
-				//p.setColor(Color.GRAY);
-				//p.setAlpha(alpha - 50);
-				//c.drawText(hi, x + wh - 12, y + h - p.getTextSize() - 2, p);
-				p.setColor(Color.BLUE);
-				p.setStyle(Style.FILL_AND_STROKE);
-				p.setAlpha(alpha);
-				p.setShadowLayer(3f, 2, 2, Color.BLACK);
-				c.drawText(low, x + wh - (fs / 2), y + h - fs, p);
+				Paint pl = new Paint(p);
+				pl.setAntiAlias(true);
+				pl.setTextAlign(Align.CENTER);
+				pl.setColor(Color.BLUE);
+				pl.setStyle(Style.FILL_AND_STROKE);
+				pl.setAlpha(alpha);
+				pl.setShadowLayer(3f, 2, 2, Color.WHITE);
+				c.drawText(low, x + wh, y + h - fs, pl);
 			} else Logger.LogWarning("Couldn't find low :(");
 			if(hi != null)
 			{
-				//p.setShadowLayer(0, 0, 0, 0);
-				//p.setColor(Color.GRAY);
-				p.setAlpha(alpha);
+				Paint ph = new Paint(p);
+				ph.setAntiAlias(true);
+				ph.setTextAlign(Align.CENTER);
+				ph.setColor(Color.RED);
+				ph.setStyle(Style.FILL_AND_STROKE);
+				ph.setAlpha(alpha);
+				ph.setShadowLayer(3f, 2, 2, Color.BLACK);
 				//c.drawText(hi, x + wh - 12, y + p.getTextSize() - 2, p);
-				p.setColor(Color.RED);
-				c.drawText(hi, x + wh - (fs / 2), y + fs, p);
+				c.drawText(hi, x + wh, y + fs, ph);
 			} else Logger.LogWarning("Couldn't find high :(");
+			if(day != null)
+			{
+				Paint pd = new Paint(p);
+				pd.setAntiAlias(true);
+				pd.setTextAlign(Align.CENTER);
+				pd.setColor(Color.BLACK);
+				pd.setStyle(Style.FILL_AND_STROKE);
+				pd.setAlpha(alpha);
+				pd.setShadowLayer(3f, 2, 2, Color.WHITE);
+				c.drawText(day, x + wh, (float)(y + h), pd);
+			} else Logger.LogWarning("Couldn't find day :(");
 			if(i == 0)
 			{
 				p.setShadowLayer(3f,2,2,Color.WHITE);
+				p.setTextAlign(Align.LEFT);
+				p.setAntiAlias(true);
 				p.setColor(Color.rgb(0, 100, 0));
 				c.drawText(getCurrentCondition(), x + 40, y + hh - fs + 20, p);
 				p.setColor(Color.BLACK);
