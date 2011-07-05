@@ -265,6 +265,8 @@ public class ProfileMaker extends BaseActivity
 	public void onClickCurrent()
 	{
 		Bitmap mCurrent = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
+		MediaUtils.writeFile("last.jpg", mCurrent, true);
+		mTxtURL.setText("last.jpg");
 		//mImgPreview.setImageBitmap(mCacheBitmap);
 		setPreview(mCurrent);
 	}
@@ -993,7 +995,7 @@ public class ProfileMaker extends BaseActivity
 				pt = new Point(0,-60);
 				break;
 			case 2: // top right
-				pt = new Point(60,-60);
+				pt = new Point(80,-60);
 				break;
 			case 3: // middle left
 				pt = new Point(-90,0);
@@ -1002,7 +1004,7 @@ public class ProfileMaker extends BaseActivity
 				pt = new Point(0,0);
 				break;
 			case 5: // middle right
-				pt = new Point(60,0);
+				pt = new Point(80,0);
 				break;
 			case 6: // bottom left
 				pt = new Point(-90,60);
@@ -1011,7 +1013,7 @@ public class ProfileMaker extends BaseActivity
 				pt = new Point(0,60);
 				break;
 			case 8: // bottom right
-				pt = new Point(60,60);
+				pt = new Point(80,60);
 				break;
 			}
 			w.setPosition(pt);
