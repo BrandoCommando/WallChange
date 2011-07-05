@@ -51,4 +51,20 @@
     <string name="s_adding">Añadiendo</string>
     <string name="s_widgets">Superposición</string>
     <string name="s_error">Error con</string>
+    <string name="widget_position_prompt">Widget Posición</string>
+    <string-array name="widget_position_array">
+        <item>Arriba a la izquierda</item>
+        <item>Centro de alto</item>
+        <item>Arriba a la derecha</item>
+    </string-array>
+    <string name="s_rotate">Girar</string>
+    <string name="pos_tc">Centro de alto</string>
+    <string name="pos_mr">Medio derecho</string>
+    <string name="pos_mc">Central de medios</string>
+    <string name="pos_ml">Medio izquierdo</string>
+    <string name="pos_bc">Parte inferior del Centro</string>
+    <string name="pos_tr">Arriba a la derecha</string>
+    <string name="pos_bl">Abajo a la izquierda</string>
+    <string name="pos_tl">Arriba a la izquierda</string>
+    <string name="pos_br">Abajo a la derecha</string>
 </resources>

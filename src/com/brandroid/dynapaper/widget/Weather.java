@@ -47,7 +47,6 @@ import android.text.TextUtils.StringSplitter;
 public class Weather extends Widget
 {
 	private String sLocation;
-	private Point mPosition;
 	private Context mContext;
 	private JSONObject mJSON = null;
 	private WeatherData mData = null;
@@ -164,7 +163,16 @@ public class Weather extends Widget
 		String[] conditions = getConditions();
 		if(conditions.length == 0) return false;
 		
-		Point center = new Point(bmp.getWidth() / 2, bmp.getHeight() / 2);
+		int fw = bmp.getWidth(), fh = bmp.getHeight();
+		Point center = new Point(fw / 2, fh / 2);
+		if(mPosition != null)
+		{
+			if(mPosition.x != 0)
+				center.x += (mPosition.x / 100f) * (fw / 2);
+			if(mPosition.y != 0)
+				center.y += (mPosition.y / 100f) * (fh / 2);
+		}
+		Logger.LogInfo("Starting Point: " + center.x + "," + center.y);
 		for(int i = conditions.length - 1; i >= 0; i--)
 		{
 			Paint p = new Paint();

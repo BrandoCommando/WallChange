@@ -50,4 +50,20 @@
     <string name="menu_refresh">刷新</string>
     <string name="s_adding">添加</string>
     <string name="s_widgets">覆盖</string>
+    <string name="widget_position_prompt">部件的位置</string>
+    <string-array name="widget_position_array">
+        <item>左上</item>
+        <item>顶部中心</item>
+        <item>右上</item>
+    </string-array>
+    <string name="s_rotate">旋转</string>
+    <string name="pos_tc">顶部中心</string>
+    <string name="pos_mr">中右</string>
+    <string name="pos_mc">中东中心</string>
+    <string name="pos_ml">左中</string>
+    <string name="pos_bc">底部中心</string>
+    <string name="pos_tr">右上</string>
+    <string name="pos_bl">左下</string>
+    <string name="pos_tl">左上</string>
+    <string name="pos_br">右下</string>
 </resources>

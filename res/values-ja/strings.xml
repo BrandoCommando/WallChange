@@ -51,4 +51,20 @@
     <string name="s_adding">追加</string>
     <string name="s_widgets">オーバーレイ</string>
     <string name="s_error">とのエラー</string>
+    <string name="widget_position_prompt">ウィジェットの位置</string>
+    <string-array name="widget_position_array">
+        <item>左上</item>
+        <item>トップセンター</item>
+        <item>右上</item>
+    </string-array>
+    <string name="s_rotate">回転する</string>
+    <string name="pos_tc">トップセンター</string>
+    <string name="pos_mr">右中央</string>
+    <string name="pos_mc">真ん中センター</string>
+    <string name="pos_ml">真ん中は左</string>
+    <string name="pos_bc">ボトムセンター</string>
+    <string name="pos_tr">右上</string>
+    <string name="pos_bl">左下</string>
+    <string name="pos_tl">左上</string>
+    <string name="pos_br">右下</string>
 </resources>
