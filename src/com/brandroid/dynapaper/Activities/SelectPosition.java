@@ -57,7 +57,6 @@ public class SelectPosition extends BaseActivity
 	
 	private Bitmap rotateImage(Bitmap src, int degrees)
 	{
-		Logger.LogDebug("rotateImage " + degrees + " degrees.");
 		Bitmap ret = Bitmap.createBitmap(src.getWidth(), src.getHeight(), Config.ARGB_8888);
 		Canvas c = new Canvas(ret);
 		Matrix m = new Matrix(c.getMatrix());

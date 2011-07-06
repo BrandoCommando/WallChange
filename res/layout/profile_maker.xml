@@ -3,6 +3,10 @@
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:orientation="vertical" android:gravity="center|top" android:id="@+id/layoutMain"
 	android:isScrollContainer="true">
+	<ImageView android:id="@+id/imageSample"
+		android:layout_alignParentBottom="true" android:layout_alignParentLeft="true"
+		android:layout_height="wrap_content" android:layout_width="fill_parent"
+		android:src="@drawable/picture" android:visibility="gone"/>
 	<LinearLayout android:layout_alignParentTop="true"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
 		android:id="@+id/adLayout" />
@@ -58,12 +62,6 @@
 					android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
 				<Button android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_toRightOf="@+id/btnTest" android:layout_alignTop="@+id/btnTest" android:layout_alignBottom="@+id/btnTest" android:text="@string/s_rotate" android:id="@+id/btnRotate" android:visibility="gone"></Button>
 			</RelativeLayout>
-			<FrameLayout android:layout_below="@+id/layoutCommands"
-				android:id="@+id/frameLayout1"
-				android:layout_height="wrap_content" android:foregroundGravity="center|top" android:layout_width="wrap_content">
-				<ImageView android:id="@+id/imageSample"
-					android:layout_height="wrap_content" android:src="@drawable/picture" android:layout_width="wrap_content" android:visibility="gone"/>
-			</FrameLayout>
 		</RelativeLayout>
 	</ScrollView>
 	<RelativeLayout android:id="@+id/progress_layout" android:layout_width="fill_parent"
