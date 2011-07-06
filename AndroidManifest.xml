@@ -23,7 +23,7 @@
         <activity android:name="com.brandroid.dynapaper.Activities.Feedback" android:configChanges="orientation|keyboard|keyboardHidden" />
         <activity android:name="com.brandroid.dynapaper.Activities.SelectPosition" android:configChanges="orientation|keyboard|keyboardHidden" android:theme="@android:style/Theme.Dialog" />
         <activity android:name="com.brandroid.dynapaper.Activities.SelectLocation" android:configChanges="orientation|keyboard|keyboardHidden" android:theme="@android:style/Theme.Dialog" />
-        <activity android:name="com.brandroid.dynapaper.Activities.ProfileMaker" android:configChanges="orientation|keyboard|keyboardHidden">
+        <activity android:name="com.brandroid.dynapaper.Activities.ProfileMaker">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

@@ -17,7 +17,9 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -79,11 +81,13 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.method.DateTimeKeyListener;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
@@ -92,6 +96,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -100,6 +105,7 @@ public class ProfileMaker extends BaseActivity
 { 
 	private EditText mTxtURL;
 	private Button mBtnSelect, mBtnTest, mBtnOnline, mBtnWeatherPosition;
+	private ImageView mImgSample;
 	private CheckBox mBtnWeather;
 	private Intent mIntent;
 	private View mProgressPanel;
@@ -156,6 +162,7 @@ public class ProfileMaker extends BaseActivity
 		mBtnTest = (Button)findViewById(R.id.btnTest);
 		mBtnWeather = (CheckBox)findViewById(R.id.btnWeather);
 		mBtnOnline = (Button)findViewById(R.id.btnOnline);
+		mImgSample = (ImageView)findViewById(R.id.imageSample);
 		
 		mProgressPanel = findViewById(R.id.progress_layout);
 		mProgressBar = (ProgressBar)findViewById(R.id.progress_progress);
@@ -383,19 +390,28 @@ public class ProfileMaker extends BaseActivity
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
+		Logger.LogInfo("onConfigurationChanged: " + newConfig.toString());
+		mSample = (Bitmap)getLastNonConfigurationInstance();
+		if(mSample != null)
+			getWindow().setBackgroundDrawable(new BitmapDrawable(mSample));
 	}
 	
 	@Override
 	public Object onRetainNonConfigurationInstance() {
 		//Bitmap bmp = getW
+		Logger.LogInfo("onRetainNonConfigurationInstance");
 		return mSample;
 		//w.get
 	}
 	
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onRestoreInstanceState(savedInstanceState);
+		Logger.LogInfo("onRestoreInstanceState: " + savedInstanceState.toString());
+		mSample = (Bitmap)getLastNonConfigurationInstance();
+		if(mSample != null)
+			getWindow().setBackgroundDrawable(new BitmapDrawable(mSample));
+		//win.setBackgroundDrawable(new BitmapDrawable(mSample));
 	}
 	
 	
@@ -478,32 +494,43 @@ public class ProfileMaker extends BaseActivity
 		try {
 			Window win = getWindow();
 			Display d = win.getWindowManager().getDefaultDisplay();
-			//LayoutParams lp = win.getAttributes();
-			int mw = d.getWidth();
-			int mh = d.getHeight();
-			int w = bmp.getWidth();
-			int h = bmp.getHeight();
-			int nw = (h / mh) * w;
-			int nh = (w / mw) * h; // new height
-			int bh = nh - h; // bar height
-			nw /= 2;
-			nh /= 2;
-			bh /= 2;
-			// Max: 600x1024, Image: 1200x1024 --> 1200x1024
-			//Logger.LogInfo("Scaled " + bmp.getWidth() + "x" + bmp.getHeight() + " under " + mw + "x" + mh + " to " + w + "x" + h);
-			//Bitmap scaled = Bitmap.createScaledBitmap(bmp, w, h, true);
-			Logger.LogInfo("Max: " + mw + "x" + mh + ", Image: " + w + "x" + h + ", New: " + nw + "x" + nh);
-			Bitmap newpic = Bitmap.createBitmap(nw, nh, Config.RGB_565);
-			Canvas c = new Canvas(newpic);
-			Paint p = new Paint();
-			p.setStyle(Style.FILL);
-			c.drawColor(Color.BLACK);
-			Rect src = new Rect(0, 0, bmp.getWidth(), bmp.getHeight());
-			Rect dst = new Rect(0, bh, nw, nh);
-			c.drawBitmap(bmp, src, dst, p);
-			Drawable pic = new BitmapDrawable(newpic);
-			//pic.setBounds(pic.getMinimumWidth() / 2, 0, pic.getMinimumWidth(), pic.getMinimumHeight());
-			win.setBackgroundDrawable(pic);
+			if(mImgSample == null || mImgSample.getVisibility() == View.GONE)
+			{
+				//LayoutParams lp = win.getAttributes();
+				int mw = d.getWidth();
+				int mh = d.getHeight();
+				int w = bmp.getWidth();
+				int h = bmp.getHeight();
+				int nw = (h / mh) * w;
+				int nh = (w / mw) * h; // new height
+				int bh = nh - h; // bar height
+				nw /= 2;
+				nh /= 2;
+				bh /= 2;
+				// Max: 600x1024, Image: 1200x1024 --> 1200x1024
+				//Logger.LogInfo("Scaled " + bmp.getWidth() + "x" + bmp.getHeight() + " under " + mw + "x" + mh + " to " + w + "x" + h);
+				//Bitmap scaled = Bitmap.createScaledBitmap(bmp, w, h, true);
+				Logger.LogInfo("Max: " + mw + "x" + mh + ", Image: " + w + "x" + h + ", New: " + nw + "x" + nh);
+				mSample = Bitmap.createBitmap(nw, nh, Config.RGB_565);
+				Canvas c = new Canvas(mSample);
+				Paint p = new Paint();
+				p.setStyle(Style.FILL);
+				c.drawColor(Color.BLACK);
+				Rect src = new Rect(0, 0, bmp.getWidth(), bmp.getHeight());
+				Rect dst = new Rect(0, bh, nw, nh);
+				c.drawBitmap(bmp, src, dst, p);
+				//Drawable pic = new BitmapDrawable(mSample);
+				//pic.setBounds(pic.getMinimumWidth() / 2, 0, pic.getMinimumWidth(), pic.getMinimumHeight());
+				win.setBackgroundDrawable(new BitmapDrawable(mSample));
+			} else {
+				Logger.LogInfo("Minimum width: " + bmp.getWidth());
+				mImgSample.setMinimumWidth(bmp.getWidth());
+				mImgSample.setImageBitmap(bmp);
+				LayoutParams lp = mImgSample.getLayoutParams();
+				lp.width = bmp.getWidth();
+				mImgSample.setLayoutParams(lp);
+				Logger.LogInfo("Image Width: " + mImgSample.getWidth());
+			}
 			return true;
 		} catch(Exception ex) {
 			Logger.LogError("Error setting preview.", ex);
@@ -515,6 +542,10 @@ public class ProfileMaker extends BaseActivity
     	try {
    			setWallpaper(bmp);
     		showToast(getResourceString(R.string.s_updated));
+    		Intent startMain = new Intent(Intent.ACTION_MAIN);
+            startMain.addCategory(Intent.CATEGORY_HOME);
+            startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(startMain);
             return true;
         } catch (Exception ex) {
         	Logger.LogError("Error setting Wallpaper", ex);
@@ -598,6 +629,18 @@ public class ProfileMaker extends BaseActivity
 		@Override
 		protected Boolean doInBackground(String... params)
 		{
+			int curCheck = (int)System.currentTimeMillis() / 60000;
+			if(prefs.hasSetting("gallery_check"))
+			{
+				int lastCheck = prefs.getInt("gallery_check", curCheck);
+				if(curCheck < lastCheck + 60)
+				{
+					Logger.LogInfo("Skipping Gallery update (" + curCheck + " m)");
+					return false;
+				}
+			}
+			prefs.setSetting("gallery_check", curCheck);
+			//if(lastCheck / 3)
 			gdb.fetchAllIDs();
 			Integer cStampMax = gdb.fetchLatestStamp();
 			Logger.LogInfo("Latest stamp: " + cStampMax);
@@ -874,7 +917,7 @@ public class ProfileMaker extends BaseActivity
 				publishProgress(1 + i, 1 + widgets.length);
 			}
 			c.restore();
-			Canvas.freeGlCaches();
+			//Canvas.freeGlCaches();
 			return ret;
 		}
 
@@ -939,7 +982,11 @@ public class ProfileMaker extends BaseActivity
 			InputStream s = null;
 			try {
 				if(url.startsWith("/"))
-					return MediaUtils.readFileBitmap(url, true);
+				{
+					ret = MediaUtils.readFileBitmap(url, true);
+					if(ret != null) return ret;
+				}
+				Logger.LogDebug("Trying to download " + url);
 	    		HttpURLConnection uc = (HttpURLConnection)new URL(url).openConnection();
 	    		uc.setConnectTimeout(15000);
 	    		uc.connect();
@@ -1153,14 +1200,7 @@ public class ProfileMaker extends BaseActivity
 	
 	public void setSavedSettings()
 	{
-		if(mWeatherLocation != null)
-			prefs.setSetting("zip", mWeatherLocation);
-		if(mBtnWeather != null)
-			prefs.setSetting("weather", mBtnWeather.isChecked());
-		if(WallChanger.getUser() != null && WallChanger.getUser() != "")
-			prefs.setSetting("user", WallChanger.getUser());
-		if(mTxtURL != null)
-			prefs.setSetting("url", mTxtURL.getText().toString());
+		String sPast = "";
 		if(mPastZips.getCount() > 0)
 		{
 			StringBuilder sPastZips = new StringBuilder();
@@ -1170,8 +1210,12 @@ public class ProfileMaker extends BaseActivity
 				if(i < mPastZips.getCount() - 1)
 					sPastZips.append("|");
 			}
-			prefs.setSetting("past_zips", sPastZips.toString());
+			sPast = sPastZips.toString();
 		}
+		prefs.setSettings("zip", mWeatherLocation,
+					"weather", mBtnWeather.isChecked(),
+					"url", mTxtURL.getText().toString(),
+					"past_zips", sPast);
 	}
 	
 	@Override
