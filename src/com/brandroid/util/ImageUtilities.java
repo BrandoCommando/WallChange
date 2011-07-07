@@ -447,4 +447,17 @@ public class ImageUtilities {
 		//win.setAttributes(lp);
 		return bmp;
     }
+	
+	public static Bitmap rotateImage(Bitmap src, int degrees)
+	{
+		if(degrees == 0) return src;
+		Bitmap ret = Bitmap.createBitmap(src.getWidth(), src.getHeight(), Config.ARGB_8888);
+		Canvas c = new Canvas(ret);
+		Matrix m = new Matrix(c.getMatrix());
+		Paint p = new Paint();
+		p.setStyle(Style.FILL);
+		m.setRotate(degrees, src.getWidth() / 2, src.getHeight() / 2);
+		c.drawBitmap(src, m, p);
+		return ret;
+	}
 }

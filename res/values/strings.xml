@@ -62,4 +62,27 @@
     <string name="menu_refresh">Refresh</string>
     <string name="s_adding">Adding</string>
     <string name="s_widgets">Widget</string>
+    <string name="widget_position_prompt">Widget Position</string>
+    <string-array name="widget_position_array">
+        <item>Top Left</item>
+        <item>Top Center</item>
+        <item>Top Right</item>
+        <item>Middle Left</item>
+        <item>Middle Center</item>
+        <item>Middle Right</item>
+        <item>Bottom Left</item>
+        <item>Bottom Center</item>
+        <item>Bottom Right</item>
+    </string-array>
+    <string name="pos_tl">Top Left</string>
+    <string name="pos_tc">T. Center</string>
+    <string name="pos_tr">T. Right</string>
+    <string name="pos_ml">Middle Left</string>
+    <string name="pos_mc">M. Center</string>
+    <string name="pos_mr">M. Right</string>
+    <string name="pos_bl">Bottom Left</string>
+    <string name="pos_bc">B. Center</string>
+    <string name="pos_br">B. Right</string>
+    <string name="s_position">Position</string>
+    <string name="s_recent">Recent</string>
 </resources>

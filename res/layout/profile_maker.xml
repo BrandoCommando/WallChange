@@ -3,6 +3,10 @@
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:orientation="vertical" android:gravity="center|top" android:id="@+id/layoutMain"
 	android:isScrollContainer="true">
+	<ImageView android:id="@+id/imageSample"
+		android:layout_alignParentBottom="true" android:layout_alignParentLeft="true"
+		android:layout_height="wrap_content" android:layout_width="fill_parent"
+		android:src="@drawable/picture" android:visibility="gone"/>
 	<LinearLayout android:layout_alignParentTop="true"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
 		android:id="@+id/adLayout" />
@@ -16,7 +20,7 @@
 				<TextView android:id="@+id/textView1" android:text="@string/s_select_base" android:layout_height="wrap_content" android:layout_width="wrap_content"/>
 				<Button android:text="@string/btn_current" android:id="@+id/btnCurrent"
 					android:layout_below="@+id/textView1"
-					android:layout_width="wrap_content" android:layout_height="wrap_content" />
+					android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="2pt"/>
 				<Button android:text="@string/btn_gallery" android:id="@+id/btnGallery"
 					android:layout_below="@+id/textView1" android:layout_toRightOf="@+id/btnCurrent"
 					android:layout_width="wrap_content" android:layout_height="wrap_content" />
@@ -33,48 +37,36 @@
 			</RelativeLayout>
 			<RelativeLayout android:id="@+id/layoutWeather" android:paddingLeft="1pt"
 				android:layout_below="@+id/layoutBase"
-				android:layout_height="wrap_content" android:layout_width="wrap_content" android:paddingRight="10dip">
+				android:layout_height="wrap_content" android:layout_width="wrap_content">
 				<TextView android:layout_height="wrap_content" android:id="@+id/textView2"
 					android:layout_alignParentTop="true" android:layout_alignParentLeft="true"
 					android:text="@string/lbl_overlay" android:layout_width="wrap_content"/>
 				<CheckBox android:id="@+id/btnWeather"
 					android:layout_below="@+id/textView2" android:layout_alignLeft="@+id/textView2"
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
+					android:layout_marginRight="4pt"
 					android:enabled="true" android:checked="true" android:text="@string/btn_weather" 
 					android:singleLine="true" />
+				<Button android:id="@+id/btnWeatherPosition"
+					android:layout_toRightOf="@+id/btnWeather" android:layout_alignBottom="@+id/btnWeather"
+					android:layout_width="wrap_content"
+					android:text="@string/s_position" android:layout_marginTop="10dip" android:layout_height="wrap_content"/>
+				<Button android:id="@+id/btnWeatherLocation"
+					android:layout_width="wrap_content"
+					android:layout_alignBottom="@+id/btnWeatherPosition" android:layout_toRightOf="@+id/btnWeatherPosition" android:text="@string/s_zipcode" android:layout_height="wrap_content"/>
 			</RelativeLayout>
-			<RelativeLayout android:layout_toRightOf="@+id/layoutWeather" android:layout_alignTop="@+id/layoutWeather"
-					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:id="@+id/layoutLocation">
-				<TextView android:layout_height="wrap_content" android:id="@+id/lblLocation"
-					android:text="@string/s_zipcode" android:layout_width="wrap_content" />
-				<LinearLayout android:id="@+id/linearLayout1" android:layout_height="wrap_content" android:paddingRight="10dip" android:layout_below="@+id/lblLocation" android:layout_alignParentRight="true" android:layout_width="fill_parent">
-					<AutoCompleteTextView android:id="@+id/txtZip" android:singleLine="true"
-						android:visibility="visible" android:enabled="true"
-						android:minWidth="40dip" android:layout_height="wrap_content"
-						android:paddingRight="10dip" android:text="" android:layout_weight="3" android:layout_width="fill_parent"/>
-					<CheckBox android:id="@+id/btnGPS"
-						android:text="@string/btn_gps" android:layout_height="wrap_content"
-						android:checked="false" android:singleLine="true" android:layout_width="fill_parent" android:layout_weight="4"/>
-				</LinearLayout>
-			</RelativeLayout>
-			<RelativeLayout android:id="@+id/layoutCommands" android:layout_below="@+id/layoutLocation"
+			<RelativeLayout android:id="@+id/layoutCommands"
+				android:layout_below="@+id/layoutWeather"
 				android:layout_height="wrap_content" android:layout_width="wrap_content">
 				<TextView android:id="@+id/textView3" android:text="@string/lbl_command" android:layout_height="wrap_content" android:layout_width="wrap_content"></TextView>
 				<Button android:text="@string/btn_select" android:id="@+id/btnSelect"
 					android:layout_below="@+id/textView3"
-					android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+					android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="2pt"></Button>
 				<Button android:text="@string/btn_test" android:id="@+id/btnTest"
 					android:layout_toRightOf="@+id/btnSelect" android:layout_alignTop="@+id/btnSelect"
 					android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
 				<Button android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_toRightOf="@+id/btnTest" android:layout_alignTop="@+id/btnTest" android:layout_alignBottom="@+id/btnTest" android:text="@string/s_rotate" android:id="@+id/btnRotate" android:visibility="gone"></Button>
 			</RelativeLayout>
-			<FrameLayout android:layout_below="@+id/layoutCommands"
-				android:id="@+id/frameLayout1"
-				android:layout_height="wrap_content" android:foregroundGravity="center|top" android:layout_width="wrap_content">
-				<ImageView android:id="@+id/imageSample"
-					android:layout_height="wrap_content" android:src="@drawable/picture" android:layout_width="wrap_content" android:visibility="gone"/>
-			</FrameLayout>
 		</RelativeLayout>
 	</ScrollView>
 	<RelativeLayout android:id="@+id/progress_layout" android:layout_width="fill_parent"

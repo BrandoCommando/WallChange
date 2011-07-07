@@ -51,4 +51,21 @@
     <string name="s_adding">Het toevoegen van</string>
     <string name="s_widgets">Bedekking</string>
     <string name="s_error">Fout met</string>
+    <string name="widget_position_prompt">Widget Position</string>
+    <string-array name="widget_position_array">
+        <item>Linksboven</item>
+        <item>Top Center</item>
+        <item>Rechtsboven</item>
+    </string-array>
+    <string name="s_rotate">Draaien</string>
+    <string name="pos_tc">Top Center</string>
+    <string name="pos_mr">Midden rechts</string>
+    <string name="pos_mc">Midden-Center</string>
+    <string name="pos_ml">Midden links</string>
+    <string name="pos_bc">Bottom Center</string>
+    <string name="pos_tr">Rechtsboven</string>
+    <string name="pos_bl">Linksonder</string>
+    <string name="pos_tl">Linksboven</string>
+    <string name="pos_br">Rechtsonder</string>
+    <string name="s_recent">Recent</string>
 </resources>

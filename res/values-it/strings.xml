@@ -51,4 +51,21 @@
     <string name="s_adding">Aggiunta</string>
     <string name="s_widgets">Copertura</string>
     <string name="s_error">Errore con</string>
+    <string name="widget_position_prompt">Widget posizione</string>
+    <string-array name="widget_position_array">
+        <item>In alto a sinistra</item>
+        <item>In alto al centro</item>
+        <item>In alto a destra</item>
+    </string-array>
+    <string name="s_rotate">Ruotare</string>
+    <string name="pos_tc">In alto al centro</string>
+    <string name="pos_mr">Mezzo destro</string>
+    <string name="pos_mc">Medio Centro</string>
+    <string name="pos_ml">Medio Sinistra</string>
+    <string name="pos_bc">In basso al centro</string>
+    <string name="pos_tr">In alto a destra</string>
+    <string name="pos_bl">In basso a sinistra</string>
+    <string name="pos_tl">In alto a sinistra</string>
+    <string name="pos_br">In basso a destra</string>
+    <string name="s_recent">Recente</string>
 </resources>

@@ -35,6 +35,8 @@ public class WallChanger
 	public static final int REQ_SELECT_GALLERY = 1;
 	public static final int REQ_SELECT_ONLINE = 2;
 	public static final int REQ_SETTINGS = 3;
+	public static final int REQ_POSITION = 4;
+	public static final int REQ_LOCATION = 5;
 	public final static int REQ_UPDATE_GALLERY = 101;
 	public final static int DOWNLOAD_CHUNK_SIZE = 512;
 	public final static Boolean OPTION_SHOW_GALLERY_INFO = true;

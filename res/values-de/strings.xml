@@ -51,4 +51,21 @@
     <string name="s_adding">Hinzufügen</string>
     <string name="s_widgets">Auflage</string>
     <string name="s_error">Fehler bei</string>
+    <string name="widget_position_prompt">Widget Position</string>
+    <string-array name="widget_position_array">
+        <item>Oben links</item>
+        <item>Top-Center</item>
+        <item>Oben Rechts</item>
+    </string-array>
+    <string name="s_rotate">Drehen</string>
+    <string name="pos_tc">Top-Center</string>
+    <string name="pos_mr">Mitte Rechts</string>
+    <string name="pos_mc">Middle-Center</string>
+    <string name="pos_ml">Mitte links</string>
+    <string name="pos_bc">Unten Mitte</string>
+    <string name="pos_tr">Oben Rechts</string>
+    <string name="pos_bl">Unten links</string>
+    <string name="pos_tl">Oben links</string>
+    <string name="pos_br">Unten rechts</string>
+    <string name="s_recent">Kürzlich</string>
 </resources>

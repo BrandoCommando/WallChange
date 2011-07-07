@@ -17,7 +17,9 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -33,6 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.brandroid.util.ImageUtilities;
 import com.brandroid.util.JSON;
 import com.brandroid.util.Logger;
 import com.brandroid.util.MediaUtils;
@@ -45,6 +48,7 @@ import com.brandroid.dynapaper.Database.GalleryDbAdapter;
 import com.brandroid.dynapaper.Database.ProfileDbAdapter;
 import com.brandroid.dynapaper.widget.Weather;
 import com.brandroid.dynapaper.widget.Widget;
+import com.brandroid.dynapaper.widget.Widgets;
 
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -58,10 +62,12 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.location.Criteria;
 import android.location.GpsStatus;
 import android.location.Location;
@@ -78,11 +84,13 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.method.DateTimeKeyListener;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
@@ -91,28 +99,31 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 public class ProfileMaker extends BaseActivity
 { 
 	private EditText mTxtURL;
-	private AutoCompleteTextView mTxtZip;
-	private Button mBtnSelect, mBtnTest, mBtnOnline;
-	private CheckBox mBtnWeather, mBtnGPS;
+	private Button mBtnSelect, mBtnTest, mBtnOnline, mBtnWeatherPosition, mBtnWeatherLocation;
+	private ImageView mImgSample;
+	private CheckBox mBtnWeather;
 	private Intent mIntent;
 	private View mProgressPanel;
 	private ProgressBar mProgressBar;
 	private TextView mProgressLabel;
 	private DownloadToWallpaperTask mDownloadTask;
+	private AddWallpaperWidgetsTask mAddWidgetTask;
 	private GalleryDbAdapter gdb;
-	private LocationListener locationListener;
-	private LocationManager locationManager;
 	private Boolean mWifiEnabled = true;
-	private ArrayAdapter<String> mPastZips;
 	private WallProfile mProfileCurrent;
 	private ProfileDbAdapter pdb;
 	private Bitmap mSample;
+	
+	private String mWeatherLocation = "";
+	private int mWeatherPosition = 4; // middle center
 	
 	//private String mGPSLocation = null;
 	
@@ -153,8 +164,10 @@ public class ProfileMaker extends BaseActivity
 		mBtnSelect = (Button)findViewById(R.id.btnSelect);
 		mBtnTest = (Button)findViewById(R.id.btnTest);
 		mBtnWeather = (CheckBox)findViewById(R.id.btnWeather);
-		mBtnGPS = (CheckBox)findViewById(R.id.btnGPS);
 		mBtnOnline = (Button)findViewById(R.id.btnOnline);
+		mBtnWeatherPosition = (Button)findViewById(R.id.btnWeatherPosition);
+		mBtnWeatherLocation = (Button)findViewById(R.id.btnWeatherLocation);
+		mImgSample = (ImageView)findViewById(R.id.imageSample);
 		
 		mProgressPanel = findViewById(R.id.progress_layout);
 		mProgressBar = (ProgressBar)findViewById(R.id.progress_progress);
@@ -163,14 +176,16 @@ public class ProfileMaker extends BaseActivity
 		mBtnTest.setOnClickListener(this);
 		mBtnSelect.setOnClickListener(this);
 		mBtnWeather.setOnClickListener(this);
-		mBtnGPS.setOnClickListener(this);
 		mBtnOnline.setOnClickListener(this);
+		mBtnWeatherLocation.setOnClickListener(this);
+		mBtnWeatherPosition.setOnClickListener(this);
+		
+		mBtnWeatherLocation.setTextColor(Color.RED);
 		
 		findViewById(R.id.btnCurrent).setOnClickListener(this);
 		findViewById(R.id.btnGallery).setOnClickListener(this);
 		findViewById(R.id.btnSelect).setOnClickListener(this);
 		//findViewById(R.id.btnStocks).setOnClickListener(this);
-		findViewById(R.id.btnGPS).setOnClickListener(this);
 		findViewById(R.id.btnTest).setOnClickListener(this);
 		findViewById(R.id.btnURL).setOnClickListener(this);
 		findViewById(R.id.progress_cancel).setOnClickListener(this);
@@ -197,25 +212,7 @@ public class ProfileMaker extends BaseActivity
 			} });
 		mBtnSelect.setEnabled(false);
 		mBtnTest.setEnabled(false);
-		mTxtZip = (AutoCompleteTextView)findViewById(R.id.txtZip);
 		findViewById(R.id.txtURL).setVisibility(View.GONE);
-		
-		mPastZips = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line);
-		mTxtZip.setTag(false);
-		mTxtZip.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				((EditText)v).setText("");
-				if(v.getTag() != null && v.getTag().getClass().equals(Boolean.class) && ((Boolean)v.getTag()).equals(false))
-				{
-					v.setTag(true);
-					InputMethodManager mgr = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
-					mgr.hideSoftInputFromWindow(v.getWindowToken(), 0);
-					((AutoCompleteTextView)v).showDropDown();
-				}
-			}
-		});
-		mTxtZip.setAdapter(mPastZips);
 		
 		getSavedSettings();
 		
@@ -282,6 +279,8 @@ public class ProfileMaker extends BaseActivity
 	public void onClickCurrent()
 	{
 		Bitmap mCurrent = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
+		MediaUtils.writeFile("last.jpg", mCurrent, true);
+		mTxtURL.setText("last.jpg");
 		//mImgPreview.setImageBitmap(mCacheBitmap);
 		setPreview(mCurrent);
 	}
@@ -299,34 +298,38 @@ public class ProfileMaker extends BaseActivity
 		intentOnline.setType("image/*");
 		startActivityForResult(intentOnline, WallChanger.REQ_SELECT_ONLINE);
 	}
+	public void onClickWeatherPosition()
+	{
+		Intent intentPos = new Intent(getApplicationContext(), SelectPosition.class);
+		intentPos.putExtra("position", getWeatherPosition());
+		startActivityForResult(intentPos, WallChanger.REQ_POSITION);
+	}
+	public void onClickWeatherLocation()
+	{
+		Intent intentLoc = new Intent(getApplicationContext(), SelectLocation.class);
+		intentLoc.putExtra("location", getWeatherLocation());
+		startActivityForResult(intentLoc, WallChanger.REQ_LOCATION);
+	}
 	public void onClickPreview()
 	{
-		new AddWallpaperWidgetsTask(false).execute(getBaseImageURL());
+		if(mAddWidgetTask != null && mAddWidgetTask.getStatus() == Status.RUNNING)
+		{
+			mAddWidgetTask.cancel(true);
+		}
+		mAddWidgetTask = new AddWallpaperWidgetsTask(false);
+		mAddWidgetTask.execute(getBaseImageURL());
 		//new DownloadToWallpaperTask(true).execute(getDynaURL());
 	}
 	public void onClickSelect()
 	{
 		System.gc();
-		new AddWallpaperWidgetsTask(true).execute(getBaseImageURL());
-		//new DownloadToWallpaperTask().execute(getDynaURL());
-	}
-	public void onClickGPS()
-	{
-		try {
-			LocationListener ll = getLocationListener();
-			if(mBtnGPS.isChecked() && ll != null)
-				locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);
-			else if(ll != null)
-				locationManager.removeUpdates(ll);
-			if(ll == null)
-				throw new Exception("Location listener is null");
-		} catch(Exception ex) {
-			mBtnGPS.setEnabled(false);
-			mBtnGPS.setChecked(false);
-			showToast(getResourceString(R.string.s_error, R.string.btn_gps));
-			Logger.LogError("Error toggling GPS", ex);
+		if(mAddWidgetTask != null && mAddWidgetTask.getStatus() == Status.RUNNING)
+		{
+			mAddWidgetTask.cancel(true);
 		}
-		//mTxtZip.setEnabled(mBtnGPS.isChecked());
+		mAddWidgetTask = new AddWallpaperWidgetsTask(true);
+		mAddWidgetTask.execute(getBaseImageURL());
+		//new DownloadToWallpaperTask().execute(getDynaURL());
 	}
 
 	@Override
@@ -348,9 +351,6 @@ public class ProfileMaker extends BaseActivity
 			case R.id.progress_cancel:
 				onCancelDownload();
 				break;
-			case R.id.btnGPS:
-				onClickGPS();
-				break;
 			case R.id.btnTest:
 				onClickPreview();
 				break;
@@ -358,7 +358,14 @@ public class ProfileMaker extends BaseActivity
 				onClickSelect();
 				break;
 			case R.id.btnWeather:
-				mTxtZip.setEnabled(mBtnWeather.isChecked());
+				Boolean bChecked = mBtnWeather.isChecked();
+				mBtnWeatherPosition.setEnabled(bChecked);
+				break;
+			case R.id.btnWeatherPosition:
+				onClickWeatherPosition();
+				break;
+			case R.id.btnWeatherLocation:
+				onClickWeatherLocation();
 				break;
 			case R.id.btnURL:
 				mTxtURL.setVisibility(mTxtURL.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
@@ -390,95 +397,30 @@ public class ProfileMaker extends BaseActivity
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
+		Logger.LogInfo("onConfigurationChanged: " + newConfig.toString());
+		mSample = (Bitmap)getLastNonConfigurationInstance();
+		if(mSample != null)
+			getWindow().setBackgroundDrawable(new BitmapDrawable(mSample));
 	}
 	
 	@Override
 	public Object onRetainNonConfigurationInstance() {
 		//Bitmap bmp = getW
+		Logger.LogInfo("onRetainNonConfigurationInstance");
 		return mSample;
 		//w.get
 	}
 	
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onRestoreInstanceState(savedInstanceState);
+		Logger.LogInfo("onRestoreInstanceState: " + savedInstanceState.toString());
+		mSample = (Bitmap)getLastNonConfigurationInstance();
+		if(mSample != null)
+			getWindow().setBackgroundDrawable(new BitmapDrawable(mSample));
+		//win.setBackgroundDrawable(new BitmapDrawable(mSample));
 	}
 	
-	public LocationListener getLocationListener()
-	{
-		if(locationListener != null) return locationListener;
-		locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
-		final Timer cancelTimer = new Timer(false);
-		final TimerTask cancelTask = new TimerTask() {
-			public void run() {
-				locationManager.removeUpdates(getLocationListener());
-			}
-		};
-		locationListener = new LocationListener()
-		{
-			public void onStatusChanged(String provider, int status, Bundle extras)
-			{
-				Logger.LogWarning("LocationListener Status Change: " + status);
-			}
-			public void onProviderEnabled(String provider) { Logger.LogInfo("Location Provider \"" + provider + "\" enabled."); }
-			public void onProviderDisabled(String provider) {
-				Logger.LogWarning("Location Provider \"" + provider + "\" disabled.");
-			}
-			public void onLocationChanged(Location location) {
-				if(WallChanger.setLastLocation(location))
-				{
-					String lat = ((Double)location.getLatitude()).toString();
-					if(lat.length() > 6)
-						lat = lat.substring(0, Math.max(6, lat.indexOf(".") + 4));
-					String lng = ((Double)location.getLongitude()).toString();
-					if(lng.length() > 6)
-						lng = lng.substring(0, Math.max(6, lng.indexOf(".") + 4));
-					mTxtZip.setText(lat+","+lng);
-				}
-			}
-		};
-		locationManager.addGpsStatusListener(new GpsStatus.Listener() {
-			public void onGpsStatusChanged(int event) {
-				switch(event)
-				{
-					case GpsStatus.GPS_EVENT_STARTED:
-						try {
-							cancelTimer.schedule(cancelTask, 30000);
-						} catch(IllegalStateException ise) { Logger.LogError("Couldn't schedule GPS cancel Timer", ise); }
-						mBtnGPS.setTextColor(Color.DKGRAY);
-						break;
-					case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-						mBtnGPS.setTextColor(Color.CYAN);
-						break;
-					case GpsStatus.GPS_EVENT_FIRST_FIX:
-						mBtnGPS.setTextColor(Color.GREEN);
-						break;
-					case GpsStatus.GPS_EVENT_STOPPED:
-						mBtnGPS.setTextColor(Color.WHITE);
-						mBtnGPS.setChecked(false);
-						break;
-					default: Logger.LogWarning("GpsListener Status Change: " + event);
-				}
-			}
-		});
-		Criteria c = new Criteria();
-		c.setAccuracy(Criteria.ACCURACY_FINE);
-		String provider = locationManager.getBestProvider(c, true);
-		if(provider == null) return null;
-		Logger.LogInfo("Best provider: " + provider);
-		LocationProvider lp = locationManager.getProvider(provider);
-		Logger.LogInfo(lp.getName() + " accuracy: " + lp.getAccuracy()); 
-		Location loc = locationManager.getLastKnownLocation(provider);
-		if(loc == null)
-			if(provider != LocationManager.NETWORK_PROVIDER)
-				loc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			
-		if(loc != null)
-			WallChanger.setLastLocation(loc);
-		
-		return locationListener;
-	}
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -528,46 +470,115 @@ public class ProfileMaker extends BaseActivity
 				int width = 0, height = 0;
 				width = getHomeWidth() / 2;
 				String zip = mTxtURL.getText().toString();
-				mPastZips.insert(zip, 0);
+				//mPastZips.insert(zip, 0);
 				String sThumbUrl = WallChanger.getImageThumbUrl(zip, width, height);
 				Logger.LogWarning("Couldn't find image in Intent. Re-downloading " + sThumbUrl, new Exception("Dummy"));
 				new DownloadToWallpaperTask(true).execute(sThumbUrl);
 			}
 	    	//new DownloadToWallpaperTask().execute(selURL);
+		} else if(requestCode == WallChanger.REQ_POSITION)
+		{
+			if(data.hasExtra("position"))
+			{
+				setWeatherPosition(data.getIntExtra("position", getWeatherPosition()));
+				//mResources.getDrawable(R.drawable.arrow_green)
+				//mBtnWeatherPosition.setBackgroundDrawable();
+				onClickPreview();
+			} else
+				Logger.LogWarning("Unable to get position from SelectPosition Activity result data.");
+		} else if(requestCode == WallChanger.REQ_LOCATION)
+		{
+			if(data.hasExtra("location"))
+			{
+				setWeatherLocation(data.getStringExtra("location"));
+				onClickPreview();
+			} else Logger.LogWarning("Unable to get location from SelectLocation result data.");
 		}
 	}
+	
+	public String getWeatherLocation()
+	{
+		return mWeatherLocation;
+	}
+	
+	public void setWeatherLocation(String location)
+	{
+		Logger.LogInfo("New Location: " + location);
+		mWeatherLocation = location;
+		if(mBtnWeatherLocation != null)
+		{
+			mBtnWeatherLocation.setText(location);
+			mBtnWeatherLocation.setTextColor(Color.BLACK);
+		}
+	}
+	
+	public int getWeatherPosition()
+	{
+		return mWeatherPosition;
+	}
+	
+	public void setWeatherPosition(int index)
+	{
+		Logger.LogInfo("New Position: " + mWeatherPosition);
+		mWeatherPosition = index;
+		if(mBtnWeatherPosition != null)
+		{
+			Bitmap bmp = null;
+			if(mWeatherPosition == 4)
+				bmp = BitmapFactory.decodeResource(mResources, R.drawable.arrow_green_center);
+			else
+				bmp = ImageUtilities.rotateImage(BitmapFactory.decodeResource(mResources, R.drawable.arrow_green), SelectPosition.getDegreesFromIndex(mWeatherPosition));
+			if(bmp != null)
+			{
+				LayerDrawable ld = new LayerDrawable(new Drawable[]{mResources.getDrawable(android.R.drawable.btn_default) , new BitmapDrawable(bmp)});
+				mBtnWeatherPosition.setBackgroundDrawable(ld);
+			}
+		}
+	}
+	
 	
 	public Boolean setPreview(Bitmap bmp)
 	{
 		try {
 			Window win = getWindow();
 			Display d = win.getWindowManager().getDefaultDisplay();
-			//LayoutParams lp = win.getAttributes();
-			int mw = d.getWidth();
-			int mh = d.getHeight();
-			int w = bmp.getWidth();
-			int h = bmp.getHeight();
-			int nw = (h / mh) * w;
-			int nh = (w / mw) * h; // new height
-			int bh = nh - h; // bar height
-			nw /= 2;
-			nh /= 2;
-			bh /= 2;
-			// Max: 600x1024, Image: 1200x1024 --> 1200x1024
-			//Logger.LogInfo("Scaled " + bmp.getWidth() + "x" + bmp.getHeight() + " under " + mw + "x" + mh + " to " + w + "x" + h);
-			//Bitmap scaled = Bitmap.createScaledBitmap(bmp, w, h, true);
-			Logger.LogInfo("Max: " + mw + "x" + mh + ", Image: " + w + "x" + h + ", New: " + nw + "x" + nh);
-			Bitmap newpic = Bitmap.createBitmap(nw, nh, Config.RGB_565);
-			Canvas c = new Canvas(newpic);
-			Paint p = new Paint();
-			p.setStyle(Style.FILL);
-			c.drawColor(Color.BLACK);
-			Rect src = new Rect(0, 0, bmp.getWidth(), bmp.getHeight());
-			Rect dst = new Rect(0, bh, nw, nh);
-			c.drawBitmap(bmp, src, dst, p);
-			Drawable pic = new BitmapDrawable(newpic);
-			//pic.setBounds(pic.getMinimumWidth() / 2, 0, pic.getMinimumWidth(), pic.getMinimumHeight());
-			win.setBackgroundDrawable(pic);
+			if(mImgSample == null || mImgSample.getVisibility() == View.GONE)
+			{
+				//LayoutParams lp = win.getAttributes();
+				int mw = d.getWidth();
+				int mh = d.getHeight();
+				int w = bmp.getWidth();
+				int h = bmp.getHeight();
+				int nw = (h / mh) * w;
+				int nh = (w / mw) * h; // new height
+				int bh = nh - h; // bar height
+				nw /= 2;
+				nh /= 2;
+				bh /= 2;
+				// Max: 600x1024, Image: 1200x1024 --> 1200x1024
+				//Logger.LogInfo("Scaled " + bmp.getWidth() + "x" + bmp.getHeight() + " under " + mw + "x" + mh + " to " + w + "x" + h);
+				//Bitmap scaled = Bitmap.createScaledBitmap(bmp, w, h, true);
+				Logger.LogInfo("Max: " + mw + "x" + mh + ", Image: " + w + "x" + h + ", New: " + nw + "x" + nh);
+				mSample = Bitmap.createBitmap(nw, nh, Config.RGB_565);
+				Canvas c = new Canvas(mSample);
+				Paint p = new Paint();
+				p.setStyle(Style.FILL);
+				c.drawColor(Color.BLACK);
+				Rect src = new Rect(0, 0, bmp.getWidth(), bmp.getHeight());
+				Rect dst = new Rect(0, bh, nw, nh);
+				c.drawBitmap(bmp, src, dst, p);
+				//Drawable pic = new BitmapDrawable(mSample);
+				//pic.setBounds(pic.getMinimumWidth() / 2, 0, pic.getMinimumWidth(), pic.getMinimumHeight());
+				win.setBackgroundDrawable(new BitmapDrawable(mSample));
+			} else {
+				Logger.LogInfo("Minimum width: " + bmp.getWidth());
+				mImgSample.setMinimumWidth(bmp.getWidth());
+				mImgSample.setImageBitmap(bmp);
+				LayoutParams lp = mImgSample.getLayoutParams();
+				lp.width = bmp.getWidth();
+				mImgSample.setLayoutParams(lp);
+				Logger.LogInfo("Image Width: " + mImgSample.getWidth());
+			}
 			return true;
 		} catch(Exception ex) {
 			Logger.LogError("Error setting preview.", ex);
@@ -579,6 +590,10 @@ public class ProfileMaker extends BaseActivity
     	try {
    			setWallpaper(bmp);
     		showToast(getResourceString(R.string.s_updated));
+    		Intent startMain = new Intent(Intent.ACTION_MAIN);
+            startMain.addCategory(Intent.CATEGORY_HOME);
+            startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(startMain);
             return true;
         } catch (Exception ex) {
         	Logger.LogError("Error setting Wallpaper", ex);
@@ -638,6 +653,7 @@ public class ProfileMaker extends BaseActivity
 				File fLast = MediaUtils.getFile(sFile, true);
 				if(!fLast.exists())
 					MediaUtils.writeFile(sFile, ((BitmapDrawable)getWallpaper()).getBitmap(), true);
+				mTxtURL.setText(sFile);
 				return BitmapFactory.decodeFile(fLast.getAbsolutePath());
 				//mImgPreview.setImageURI(Uri.fromFile(fLast));
 			} catch(Exception e) { Logger.LogError("Couldn't set Preview to last", e); return null; }
@@ -661,6 +677,18 @@ public class ProfileMaker extends BaseActivity
 		@Override
 		protected Boolean doInBackground(String... params)
 		{
+			int curCheck = (int)System.currentTimeMillis() / 60000;
+			if(prefs.hasSetting("gallery_check"))
+			{
+				int lastCheck = prefs.getInt("gallery_check", curCheck);
+				if(curCheck < lastCheck + 60)
+				{
+					Logger.LogInfo("Skipping Gallery update (" + curCheck + " m)");
+					return false;
+				}
+			}
+			prefs.setSetting("gallery_check", curCheck);
+			//if(lastCheck / 3)
 			gdb.fetchAllIDs();
 			Integer cStampMax = gdb.fetchLatestStamp();
 			Logger.LogInfo("Latest stamp: " + cStampMax);
@@ -821,13 +849,8 @@ public class ProfileMaker extends BaseActivity
 			{
 				if(values[0] > 0)
 				{
-					mPastZips.insert(values[0].toString(), 0);
-					if(mTxtZip.getTag() != null && mTxtZip.getTag().getClass().equals(Boolean.class) && ((Boolean)mTxtZip.getTag()).equals(false))
-						if(mTxtZip.getText().toString().equals(""))
-						{
-							prefs.setSetting("zip", values[0]);
-							mTxtZip.setText(values[0].toString());
-						}
+					if(getWeatherLocation().equals(""))
+						setWeatherLocation(values[0].toString());
 				} else if (values[0] == 0) {
 					mBtnOnline.setTextColor(Color.GRAY);
 				}
@@ -911,6 +934,7 @@ public class ProfileMaker extends BaseActivity
 		protected Bitmap doInBackground(String... params)
 		{
 			Bitmap base = null;
+			publishProgress(-2);
 			publishProgress(0, 3);
 			String url = params[0];
 			if(url.trim().equals("")) url = MediaUtils.getFullFilename("last.jpg", true);
@@ -931,16 +955,18 @@ public class ProfileMaker extends BaseActivity
 			c.drawBitmap(base, src, dst, p);
 			base = null;
 			
-			Widget[] widgets = getSelectedWidgets();
-			publishProgress(1, 1 + widgets.length);
-			for(int i=0; i < widgets.length; i++)
+			publishProgress(-3);
+			Widgets widgets = getSelectedWidgets();
+			int count = widgets.size();
+			publishProgress(1, 1 + count);
+			for(int i=0; i < count; i++)
 			{
-				if(!widgets[i].applyTo(ret, c))
+				if(!widgets.get(i).applyTo(ret, c))
 					showToast(getResourceString(R.string.s_error, R.string.s_adding, R.string.s_widgets));
-				publishProgress(1 + i, 1 + widgets.length);
+				publishProgress(1 + i, 1 + count);
 			}
 			c.restore();
-			Canvas.freeGlCaches();
+			//Canvas.freeGlCaches();
 			return ret;
 		}
 
@@ -1005,7 +1031,11 @@ public class ProfileMaker extends BaseActivity
 			InputStream s = null;
 			try {
 				if(url.startsWith("/"))
-					return MediaUtils.readFileBitmap(url, true);
+				{
+					ret = MediaUtils.readFileBitmap(url, true);
+					if(ret != null) return ret;
+				}
+				Logger.LogDebug("Trying to download " + url);
 	    		HttpURLConnection uc = (HttpURLConnection)new URL(url).openConnection();
 	    		uc.setConnectTimeout(15000);
 	    		uc.connect();
@@ -1040,22 +1070,47 @@ public class ProfileMaker extends BaseActivity
 		
 	}
 	
-	public String getZip()
-	{
-		String zip = mTxtZip.getText().toString();
-		for(int i = 0; i < mPastZips.getCount(); i++)
-			if(mPastZips.getItem(i).equalsIgnoreCase(zip)) return zip;
-		mPastZips.insert(zip, 0);
-		return zip;
-	}
 	
-	public Widget[] getSelectedWidgets()
+	public Widgets getSelectedWidgets()
 	{
-		ArrayList<Widget> al = new ArrayList<Widget>();
+		Widgets ret = new Widgets();
 		if(mBtnWeather.isChecked())
-			al.add(new Weather(getApplicationContext(), getZip()));
-		Widget[] ret = new Widget[al.size()];
-		ret = al.toArray(ret);
+		{
+			Widget w = new Weather(getApplicationContext(), getWeatherLocation());
+			Point pt = new Point(0,0);
+			switch(getWeatherPosition())
+			{
+			case 0: // top left
+				pt = new Point(-90,-60);
+				break;
+			case 1: // top center
+				pt = new Point(0,-60);
+				break;
+			case 2: // top right
+				pt = new Point(80,-60);
+				break;
+			case 3: // middle left
+				pt = new Point(-90,0);
+				break;
+			case 4: // middle center
+				pt = new Point(0,0);
+				break;
+			case 5: // middle right
+				pt = new Point(80,0);
+				break;
+			case 6: // bottom left
+				pt = new Point(-90,60);
+				break;
+			case 7: // bottom center
+				pt = new Point(0,60);
+				break;
+			case 8: // bottom right
+				pt = new Point(80,60);
+				break;
+			}
+			w.setPosition(pt);
+			ret.add(w);
+		}
 		return ret;
 	}
 	
@@ -1167,8 +1222,7 @@ public class ProfileMaker extends BaseActivity
 	
 	public void getSavedSettings()
 	{
-		if(mTxtZip != null)
-			mTxtZip.setText(prefs.getSetting("zip", mTxtZip.getText().toString()));
+		setWeatherLocation(prefs.getSetting("zip", getWeatherLocation()));
 		if(mBtnWeather != null)
 			mBtnWeather.setChecked(prefs.getBoolean("weather", mBtnWeather.isChecked()));
 		String user = WallChanger.getUser();
@@ -1189,14 +1243,7 @@ public class ProfileMaker extends BaseActivity
 	
 	public void setSavedSettings()
 	{
-		if(mTxtZip != null)
-			prefs.setSetting("zip", getZip());
-		if(mBtnWeather != null)
-			prefs.setSetting("weather", mBtnWeather.isChecked());
-		if(WallChanger.getUser() != null && WallChanger.getUser() != "")
-			prefs.setSetting("user", WallChanger.getUser());
-		if(mTxtURL != null)
-			prefs.setSetting("url", mTxtURL.getText().toString());
+		String sPast = "";
 		if(mPastZips.getCount() > 0)
 		{
 			StringBuilder sPastZips = new StringBuilder();
@@ -1206,8 +1253,12 @@ public class ProfileMaker extends BaseActivity
 				if(i < mPastZips.getCount() - 1)
 					sPastZips.append("|");
 			}
-			prefs.setSetting("past_zips", sPastZips.toString());
+			sPast = sPastZips.toString();
 		}
+		prefs.setSettings("zip", getWeatherLocation(),
+					"weather", mBtnWeather.isChecked(),
+					"url", mTxtURL.getText().toString(),
+					"past_zips", sPast);
 	}
 	
 	@Override

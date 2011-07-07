@@ -50,4 +50,21 @@
     <string name="menu_refresh">Обновить</string>
     <string name="s_adding">Добавление</string>
     <string name="s_widgets">Наложение</string>
+    <string name="widget_position_prompt">Виджет позиции</string>
+    <string-array name="widget_position_array">
+        <item>Слева вверху</item>
+        <item>Топ центр</item>
+        <item>Верхний правый</item>
+    </string-array>
+    <string name="s_rotate">Вращать</string>
+    <string name="pos_tc">Топ центр</string>
+    <string name="pos_mr">Ближний правой</string>
+    <string name="pos_mc">Ближний центр</string>
+    <string name="pos_ml">Ближний левый</string>
+    <string name="pos_bc">Внизу по центру</string>
+    <string name="pos_tr">Верхний правый</string>
+    <string name="pos_bl">Нижняя левая</string>
+    <string name="pos_tl">Слева вверху</string>
+    <string name="pos_br">Нижний правый</string>
+    <string name="s_recent">Недавний</string>
 </resources>

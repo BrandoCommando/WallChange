@@ -29,11 +29,14 @@ import android.view.View;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 public class BaseActivity extends Activity implements OnClickListener, OnMenuItemClickListener 
 {
+	protected static ArrayAdapter<String> mPastZips;
+	
 	private int mHomeWidth = 0;
 	private int mHomeHeight = 0;
 	protected Resources mResources;
@@ -45,6 +48,8 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if(mPastZips == null)
+			mPastZips = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_dropdown_item_1line);
 		
 		if(!Logger.hasDb())
 			Logger.setDb(new LoggerDbAdapter(this));
