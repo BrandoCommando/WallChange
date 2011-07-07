@@ -37,7 +37,7 @@
 			</RelativeLayout>
 			<RelativeLayout android:id="@+id/layoutWeather" android:paddingLeft="1pt"
 				android:layout_below="@+id/layoutBase"
-				android:layout_height="wrap_content" android:layout_width="wrap_content" android:paddingRight="10dip">
+				android:layout_height="wrap_content" android:layout_width="wrap_content">
 				<TextView android:layout_height="wrap_content" android:id="@+id/textView2"
 					android:layout_alignParentTop="true" android:layout_alignParentLeft="true"
 					android:text="@string/lbl_overlay" android:layout_width="wrap_content"/>
@@ -47,8 +47,13 @@
 					android:layout_marginRight="4pt"
 					android:enabled="true" android:checked="true" android:text="@string/btn_weather" 
 					android:singleLine="true" />
-				<Button android:layout_toRightOf="@+id/btnWeather" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignBottom="@+id/btnWeather" android:text="@string/s_position" android:id="@+id/btnWeatherPosition"></Button>
-				<Button android:layout_toRightOf="@+id/btnWeatherPosition" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignBottom="@+id/btnWeatherPosition" android:text="@string/s_zipcode" android:id="@+id/btnWeatherLocation"></Button>
+				<Button android:id="@+id/btnWeatherPosition"
+					android:layout_toRightOf="@+id/btnWeather" android:layout_alignBottom="@+id/btnWeather"
+					android:layout_width="wrap_content"
+					android:text="@string/s_position" android:layout_marginTop="10dip" android:layout_height="wrap_content"/>
+				<Button android:id="@+id/btnWeatherLocation"
+					android:layout_width="wrap_content"
+					android:layout_alignBottom="@+id/btnWeatherPosition" android:layout_toRightOf="@+id/btnWeatherPosition" android:text="@string/s_zipcode" android:layout_height="wrap_content"/>
 			</RelativeLayout>
 			<RelativeLayout android:id="@+id/layoutCommands"
 				android:layout_below="@+id/layoutWeather"

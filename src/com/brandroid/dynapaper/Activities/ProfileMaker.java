@@ -35,6 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.brandroid.util.ImageUtilities;
 import com.brandroid.util.JSON;
 import com.brandroid.util.Logger;
 import com.brandroid.util.MediaUtils;
@@ -47,6 +48,7 @@ import com.brandroid.dynapaper.Database.GalleryDbAdapter;
 import com.brandroid.dynapaper.Database.ProfileDbAdapter;
 import com.brandroid.dynapaper.widget.Weather;
 import com.brandroid.dynapaper.widget.Widget;
+import com.brandroid.dynapaper.widget.Widgets;
 
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -65,6 +67,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.location.Criteria;
 import android.location.GpsStatus;
 import android.location.Location;
@@ -104,7 +107,7 @@ import android.widget.TextView;
 public class ProfileMaker extends BaseActivity
 { 
 	private EditText mTxtURL;
-	private Button mBtnSelect, mBtnTest, mBtnOnline, mBtnWeatherPosition;
+	private Button mBtnSelect, mBtnTest, mBtnOnline, mBtnWeatherPosition, mBtnWeatherLocation;
 	private ImageView mImgSample;
 	private CheckBox mBtnWeather;
 	private Intent mIntent;
@@ -162,6 +165,8 @@ public class ProfileMaker extends BaseActivity
 		mBtnTest = (Button)findViewById(R.id.btnTest);
 		mBtnWeather = (CheckBox)findViewById(R.id.btnWeather);
 		mBtnOnline = (Button)findViewById(R.id.btnOnline);
+		mBtnWeatherPosition = (Button)findViewById(R.id.btnWeatherPosition);
+		mBtnWeatherLocation = (Button)findViewById(R.id.btnWeatherLocation);
 		mImgSample = (ImageView)findViewById(R.id.imageSample);
 		
 		mProgressPanel = findViewById(R.id.progress_layout);
@@ -172,6 +177,10 @@ public class ProfileMaker extends BaseActivity
 		mBtnSelect.setOnClickListener(this);
 		mBtnWeather.setOnClickListener(this);
 		mBtnOnline.setOnClickListener(this);
+		mBtnWeatherLocation.setOnClickListener(this);
+		mBtnWeatherPosition.setOnClickListener(this);
+		
+		mBtnWeatherLocation.setTextColor(Color.RED);
 		
 		findViewById(R.id.btnCurrent).setOnClickListener(this);
 		findViewById(R.id.btnGallery).setOnClickListener(this);
@@ -181,8 +190,6 @@ public class ProfileMaker extends BaseActivity
 		findViewById(R.id.btnURL).setOnClickListener(this);
 		findViewById(R.id.progress_cancel).setOnClickListener(this);
 		findViewById(R.id.btnRotate).setOnClickListener(this);
-		findViewById(R.id.btnWeatherPosition).setOnClickListener(this);
-		findViewById(R.id.btnWeatherLocation).setOnClickListener(this);
 		
 		mProgressPanel.setVisibility(View.GONE);
 		
@@ -294,13 +301,13 @@ public class ProfileMaker extends BaseActivity
 	public void onClickWeatherPosition()
 	{
 		Intent intentPos = new Intent(getApplicationContext(), SelectPosition.class);
-		intentPos.putExtra("position", mWeatherPosition);
+		intentPos.putExtra("position", getWeatherPosition());
 		startActivityForResult(intentPos, WallChanger.REQ_POSITION);
 	}
 	public void onClickWeatherLocation()
 	{
 		Intent intentLoc = new Intent(getApplicationContext(), SelectLocation.class);
-		intentLoc.putExtra("location", mWeatherLocation);
+		intentLoc.putExtra("location", getWeatherLocation());
 		startActivityForResult(intentLoc, WallChanger.REQ_LOCATION);
 	}
 	public void onClickPreview()
@@ -473,8 +480,9 @@ public class ProfileMaker extends BaseActivity
 		{
 			if(data.hasExtra("position"))
 			{
-				mWeatherPosition = data.getIntExtra("position", mWeatherPosition);
-				Logger.LogInfo("New Position: " + mWeatherPosition);
+				setWeatherPosition(data.getIntExtra("position", getWeatherPosition()));
+				//mResources.getDrawable(R.drawable.arrow_green)
+				//mBtnWeatherPosition.setBackgroundDrawable();
 				onClickPreview();
 			} else
 				Logger.LogWarning("Unable to get position from SelectPosition Activity result data.");
@@ -482,12 +490,52 @@ public class ProfileMaker extends BaseActivity
 		{
 			if(data.hasExtra("location"))
 			{
-				mWeatherLocation = data.getStringExtra("location");
-				Logger.LogInfo("New Location: " + mWeatherLocation);
+				setWeatherLocation(data.getStringExtra("location"));
 				onClickPreview();
 			} else Logger.LogWarning("Unable to get location from SelectLocation result data.");
 		}
 	}
+	
+	public String getWeatherLocation()
+	{
+		return mWeatherLocation;
+	}
+	
+	public void setWeatherLocation(String location)
+	{
+		Logger.LogInfo("New Location: " + location);
+		mWeatherLocation = location;
+		if(mBtnWeatherLocation != null)
+		{
+			mBtnWeatherLocation.setText(location);
+			mBtnWeatherLocation.setTextColor(Color.BLACK);
+		}
+	}
+	
+	public int getWeatherPosition()
+	{
+		return mWeatherPosition;
+	}
+	
+	public void setWeatherPosition(int index)
+	{
+		Logger.LogInfo("New Position: " + mWeatherPosition);
+		mWeatherPosition = index;
+		if(mBtnWeatherPosition != null)
+		{
+			Bitmap bmp = null;
+			if(mWeatherPosition == 4)
+				bmp = BitmapFactory.decodeResource(mResources, R.drawable.arrow_green_center);
+			else
+				bmp = ImageUtilities.rotateImage(BitmapFactory.decodeResource(mResources, R.drawable.arrow_green), SelectPosition.getDegreesFromIndex(mWeatherPosition));
+			if(bmp != null)
+			{
+				LayerDrawable ld = new LayerDrawable(new Drawable[]{mResources.getDrawable(android.R.drawable.btn_default) , new BitmapDrawable(bmp)});
+				mBtnWeatherPosition.setBackgroundDrawable(ld);
+			}
+		}
+	}
+	
 	
 	public Boolean setPreview(Bitmap bmp)
 	{
@@ -801,8 +849,8 @@ public class ProfileMaker extends BaseActivity
 			{
 				if(values[0] > 0)
 				{
-					if(mWeatherLocation == "")
-						mWeatherLocation = values[0].toString();
+					if(getWeatherLocation().equals(""))
+						setWeatherLocation(values[0].toString());
 				} else if (values[0] == 0) {
 					mBtnOnline.setTextColor(Color.GRAY);
 				}
@@ -908,13 +956,14 @@ public class ProfileMaker extends BaseActivity
 			base = null;
 			
 			publishProgress(-3);
-			Widget[] widgets = getSelectedWidgets();
-			publishProgress(1, 1 + widgets.length);
-			for(int i=0; i < widgets.length; i++)
+			Widgets widgets = getSelectedWidgets();
+			int count = widgets.size();
+			publishProgress(1, 1 + count);
+			for(int i=0; i < count; i++)
 			{
-				if(!widgets[i].applyTo(ret, c))
+				if(!widgets.get(i).applyTo(ret, c))
 					showToast(getResourceString(R.string.s_error, R.string.s_adding, R.string.s_widgets));
-				publishProgress(1 + i, 1 + widgets.length);
+				publishProgress(1 + i, 1 + count);
 			}
 			c.restore();
 			//Canvas.freeGlCaches();
@@ -1021,19 +1070,15 @@ public class ProfileMaker extends BaseActivity
 		
 	}
 	
-	public String getZip()
-	{
-		return mWeatherLocation;
-	}
 	
-	public Widget[] getSelectedWidgets()
+	public Widgets getSelectedWidgets()
 	{
-		ArrayList<Widget> al = new ArrayList<Widget>();
+		Widgets ret = new Widgets();
 		if(mBtnWeather.isChecked())
 		{
-			Widget w = new Weather(getApplicationContext(), getZip());
+			Widget w = new Weather(getApplicationContext(), getWeatherLocation());
 			Point pt = new Point(0,0);
-			switch(mWeatherPosition)
+			switch(getWeatherPosition())
 			{
 			case 0: // top left
 				pt = new Point(-90,-60);
@@ -1064,10 +1109,8 @@ public class ProfileMaker extends BaseActivity
 				break;
 			}
 			w.setPosition(pt);
-			al.add(w);
+			ret.add(w);
 		}
-		Widget[] ret = new Widget[al.size()];
-		ret = al.toArray(ret);
 		return ret;
 	}
 	
@@ -1179,7 +1222,7 @@ public class ProfileMaker extends BaseActivity
 	
 	public void getSavedSettings()
 	{
-		mWeatherLocation = prefs.getSetting("zip", mWeatherLocation);
+		setWeatherLocation(prefs.getSetting("zip", getWeatherLocation()));
 		if(mBtnWeather != null)
 			mBtnWeather.setChecked(prefs.getBoolean("weather", mBtnWeather.isChecked()));
 		String user = WallChanger.getUser();
@@ -1212,7 +1255,7 @@ public class ProfileMaker extends BaseActivity
 			}
 			sPast = sPastZips.toString();
 		}
-		prefs.setSettings("zip", mWeatherLocation,
+		prefs.setSettings("zip", getWeatherLocation(),
 					"weather", mBtnWeather.isChecked(),
 					"url", mTxtURL.getText().toString(),
 					"past_zips", sPast);

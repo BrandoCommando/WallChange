@@ -62,7 +62,7 @@ public class Weather extends Widget
 		//mConditionMap
 	}
 	
-	public WeatherData getAPIResults()
+	public WeatherData getWeatherResults()
 	{
 		if(mData == null)
 		{
@@ -121,7 +121,7 @@ public class Weather extends Widget
 	}
 	public String[] getConditions()
 	{
-		WeatherData api = getAPIResults();
+		WeatherData api = getWeatherResults();
 		if(api == null) return new String[0];
 		Forecast[] fc = api.getForecast();
 		if(fc == null) return new String[0];
@@ -158,7 +158,7 @@ public class Weather extends Widget
 	{
 		Boolean ret = true;
 		
-		WeatherData api = getAPIResults();
+		WeatherData api = getWeatherResults();
 		if(api == null) return false;
 		String[] conditions = getConditions();
 		if(conditions.length == 0) return false;

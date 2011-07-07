@@ -66,4 +66,5 @@
     <string name="pos_bl">Нижняя левая</string>
     <string name="pos_tl">Слева вверху</string>
     <string name="pos_br">Нижний правый</string>
+    <string name="s_recent">Недавний</string>
 </resources>

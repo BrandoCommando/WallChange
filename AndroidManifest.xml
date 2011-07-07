@@ -20,6 +20,7 @@
     	<meta-data android:name="com.google.android.backup.api_key" android:value="AEdPqrEAAAAI5tqA8JVfWzUd5mlafp2nYmuRqCMEca-rSN9mwg" />
         <activity android:name="com.brandroid.dynapaper.Activities.Settings" android:configChanges="orientation|keyboard|keyboardHidden" />
         <activity android:name="com.brandroid.dynapaper.Activities.Help"/>
+        <activity android:name="com.brandroid.RecentBaseImages"/>
         <activity android:name="com.brandroid.dynapaper.Activities.Feedback" android:configChanges="orientation|keyboard|keyboardHidden" />
         <activity android:name="com.brandroid.dynapaper.Activities.SelectPosition" android:configChanges="orientation|keyboard|keyboardHidden" android:theme="@android:style/Theme.Dialog" />
         <activity android:name="com.brandroid.dynapaper.Activities.SelectLocation" android:configChanges="orientation|keyboard|keyboardHidden" android:theme="@android:style/Theme.Dialog" />

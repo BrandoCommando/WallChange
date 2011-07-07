@@ -84,4 +84,5 @@
     <string name="pos_bc">B. Center</string>
     <string name="pos_br">B. Right</string>
     <string name="s_position">Position</string>
+    <string name="s_recent">Recent</string>
 </resources>

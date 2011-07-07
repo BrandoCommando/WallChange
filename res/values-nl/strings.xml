@@ -67,4 +67,5 @@
     <string name="pos_bl">Linksonder</string>
     <string name="pos_tl">Linksboven</string>
     <string name="pos_br">Rechtsonder</string>
+    <string name="s_recent">Recent</string>
 </resources>

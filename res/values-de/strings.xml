@@ -67,4 +67,5 @@
     <string name="pos_bl">Unten links</string>
     <string name="pos_tl">Oben links</string>
     <string name="pos_br">Unten rechts</string>
+    <string name="s_recent">Kürzlich</string>
 </resources>

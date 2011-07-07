@@ -67,4 +67,5 @@
     <string name="pos_bl">Abajo a la izquierda</string>
     <string name="pos_tl">Arriba a la izquierda</string>
     <string name="pos_br">Abajo a la derecha</string>
+    <string name="s_recent">Reciente</string>
 </resources>

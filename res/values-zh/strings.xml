@@ -66,4 +66,5 @@
     <string name="pos_bl">左下</string>
     <string name="pos_tl">左上</string>
     <string name="pos_br">右下</string>
+    <string name="s_recent">最近</string>
 </resources>
