@@ -63,7 +63,7 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 			Logger.LogError("Couldn't read build info", e);
 		}
 		
-		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());
+		//Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());
 		
 		Logger.LogVerbose("onCreate :: " + this.toString());
 
@@ -205,13 +205,13 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 	@Override
 	protected void onRestart() {
 		super.onRestart();
-		//Logger.LogVerbose("onRestart :: " + this.toString());
+		Logger.LogVerbose("onRestart :: " + this.toString());
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		//Logger.LogVerbose("onResume :: " + this.toString());
+		Logger.LogVerbose("onResume :: " + this.toString());
 	}
 	
 	@Override
@@ -235,25 +235,25 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 	@Override
 	protected void onStart() {
 		super.onStart();
-		//Logger.LogVerbose("onStart :: " + this.toString());
+		Logger.LogVerbose("onStart :: " + this.toString());
 	}
 	
 	@Override
 	protected void onStop() {
 		super.onStop();
-		//Logger.LogVerbose("onStop :: " + this.toString());
+		Logger.LogVerbose("onStop :: " + this.toString());
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
-		//Logger.LogVerbose("onPause :: " + this.toString());
+		Logger.LogVerbose("onPause :: " + this.toString());
 	}
 	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		//Logger.LogVerbose("onDestroy :: " + this.toString());
+		Logger.LogVerbose("onDestroy :: " + this.toString());
 	}
 
 	@Override

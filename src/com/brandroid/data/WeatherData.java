@@ -40,12 +40,12 @@ public class WeatherData
 		} else if(json.has("output")) // from widget_weather.php
 		{
 			json = json.optJSONObject("output");
-			if(json.has("current"))
+			if(json != null && json.has("current"))
 			{
 				mInformation = new Information(json.optJSONObject("current"));
 				mCurrent = new Forecast(json.optJSONObject("current"));
 			}
-			if(json.has("forecast"))
+			if(json != null && json.has("forecast"))
 			{
 				JSONArray fca = json.optJSONArray("forecast");
 				mConditions = new Forecast[fca.length()];
