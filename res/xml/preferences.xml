@@ -11,7 +11,18 @@
 	      		android:persistent="true" android:defaultValue=""  />
 	</PreferenceCategory>
    
-	<CheckBoxPreference android:title="@string/pref_allow" android:defaultValue="true"
-		android:key="allow" android:summary="@string/pref_allow_long" />
+	<CheckBoxPreference android:key="allow"
+		android:defaultValue="true"
+		android:title="@string/pref_allow"
+		android:summary="@string/pref_allow_long" />
+		
+	<ListPreference android:key="resize"
+		android:title="@string/pref_resize"
+		android:dialogTitle="@string/pref_resize"
+		android:summary="@string/pref_resize_stretch"
+		android:persistent="true"
+		android:entries="@array/pref_resize_options"
+		android:entryValues="@array/pref_resize_options"
+		/>
 		
 </PreferenceScreen>

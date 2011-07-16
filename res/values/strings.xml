@@ -85,4 +85,17 @@
     <string name="pos_br">B. Right</string>
     <string name="s_position">Position</string>
     <string name="s_recent">Recent</string>
+    <string name="pref_resize">Base Image Resize Policy</string>
+    <string name="pref_resize_center">Center</string>
+    <string name="pref_resize_fit">Fit</string>
+    <string name="pref_resize_stretch">Stretch</string>
+    <string name="pref_resize_fill">Fill</string>
+    <string name="pref_resize_tile">Tile</string>
+    <string-array name="pref_resize_options">
+        <item>Center</item>
+        <item>Fit</item>
+        <item>Stretch</item>
+        <item>Fill</item>
+        <item>Tile</item>
+    </string-array>
 </resources>

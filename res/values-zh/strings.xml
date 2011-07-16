@@ -67,4 +67,17 @@
     <string name="pos_tl">左上</string>
     <string name="pos_br">右下</string>
     <string name="s_recent">最近</string>
+    <string name="pref_resize">相应的图像调整政策</string>
+    <string name="pref_resize_center">中心</string>
+    <string name="pref_resize_fit">适合</string>
+    <string name="pref_resize_stretch">伸展</string>
+    <string name="pref_resize_fill">填写</string>
+    <string name="pref_resize_tile">瓦</string>
+    <string-array name="pref_resize_options">
+        <item>中心</item>
+        <item>适合</item>
+        <item>伸展</item>
+		<item>填写</item>
+		<item>瓦</item>
+    </string-array>
 </resources>
