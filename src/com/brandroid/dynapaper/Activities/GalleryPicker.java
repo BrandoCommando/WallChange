@@ -106,7 +106,6 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 		mGridView.setOnItemClickListener(this);
 	}
 	
-	@Override
 	public void onItemClick(AdapterView<?> adapter, View view, int position, long id)
 	{
 		Logger.LogInfo("Selected item #" + position);
@@ -187,7 +186,6 @@ public class GalleryPicker extends BaseActivity implements OnItemClickListener, 
 	    }
 
 	    // create a new ImageView for each item referencedimage by the Adapter
-		@Override
 	    public View getView(int position, View convertView, ViewGroup parent) {
 			View view = convertView;
 			if(position < 0 || position >= mGalleryCount) return view;

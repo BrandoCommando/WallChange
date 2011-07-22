@@ -53,7 +53,6 @@ public class SelectLocation extends BaseActivity
 		//mPastZips = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line);
 		mTxtZip.setTag(false);
 		mTxtZip.setOnClickListener(new OnClickListener() {
-			@Override
 			public void onClick(View v) {
 				((EditText)v).setText("");
 				if(v.getTag() != null && v.getTag().getClass().equals(Boolean.class) && ((Boolean)v.getTag()).equals(false))

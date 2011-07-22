@@ -256,7 +256,6 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 		//Logger.LogVerbose("onDestroy :: " + this.toString());
 	}
 
-	@Override
 	public boolean onMenuItemClick(MenuItem item) {
 		Logger.LogDebug("onMenuItemClick :: " + item.toString());
 		return true;
@@ -268,7 +267,6 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 		return super.onOptionsItemSelected(item);
 	}
 
-	@Override
 	public void onClick(View v) {
 		Logger.LogDebug("onClick :: " + v.toString());
 	}

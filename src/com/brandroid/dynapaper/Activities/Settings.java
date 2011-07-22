@@ -27,13 +27,11 @@ public class Settings extends PreferenceActivity implements OnSharedPreferenceCh
 		pUser.setOnPreferenceChangeListener(this);
 	}
 
-	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
 	{
 		Logger.LogDebug("onSharedPreferenceChanged - " + key + " [" + sharedPreferences.toString() + "]");
 	}
 
-	@Override
 	public boolean onPreferenceChange(Preference preference, Object newValue) {
 		if(preference.getKey().equals("user"))
 			pUser.setSummary((String)newValue);
