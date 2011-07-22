@@ -68,4 +68,17 @@
     <string name="pos_tl">左上</string>
     <string name="pos_br">右下</string>
     <string name="s_recent">最近の</string>
+    <string name="pref_resize">ベースイメージのサイズ変更ポリシー</string>
+    <string name="pref_resize_center">センター</string>
+    <string name="pref_resize_fit">フィット</string>
+    <string name="pref_resize_stretch">ストレッチ</string>
+    <string name="pref_resize_fill">入力</string>
+    <string name="pref_resize_tile">タイル</string>
+    <string-array name="pref_resize_options">
+        <item>センター</item>
+        <item>フィット</item>
+        <item>ストレッチ</item>
+		<item>入力</item>
+		<item>タイル</item>
+    </string-array>
 </resources>

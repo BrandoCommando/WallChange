@@ -68,4 +68,17 @@
     <string name="pos_tl">En haut à gauche</string>
     <string name="pos_br">En bas à droite</string>
     <string name="s_recent">Récents</string>
+    <string name="pref_resize">Politique Redimensionner l\'image de base</string>
+    <string name="pref_resize_center">Centre</string>
+    <string name="pref_resize_fit">Fit</string>
+    <string name="pref_resize_stretch">S\'étirer</string>
+    <string name="pref_resize_fill">Remplissez</string>
+    <string name="pref_resize_tile">Tuiles</string>
+    <string-array name="pref_resize_options">
+        <item>Centre</item>
+        <item>Fit</item>
+        <item>S\'étirer</item>
+		<item>Remplissez</item>
+		<item>Tuiles</item>
+    </string-array>
 </resources>

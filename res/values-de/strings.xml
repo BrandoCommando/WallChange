@@ -68,4 +68,17 @@
     <string name="pos_tl">Oben links</string>
     <string name="pos_br">Unten rechts</string>
     <string name="s_recent">Kürzlich</string>
+    <string name="pref_resize">Base Image Resize-Politik</string>
+    <string name="pref_resize_center">Center</string>
+    <string name="pref_resize_fit">Fit</string>
+    <string name="pref_resize_stretch">Strecken</string>
+    <string name="pref_resize_fill">Füllen</string>
+    <string name="pref_resize_tile">Kachel</string>
+    <string-array name="pref_resize_options">
+        <item>Center</item>
+        <item>Fit</item>
+        <item>Strecken</item>
+		<item>Füllen</item>
+		<item>Kachel</item>
+    </string-array>
 </resources>

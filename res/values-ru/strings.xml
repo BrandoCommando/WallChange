@@ -67,4 +67,17 @@
     <string name="pos_tl">Слева вверху</string>
     <string name="pos_br">Нижний правый</string>
     <string name="s_recent">Недавний</string>
+    <string name="pref_resize">База Image Resize политики</string>
+    <string name="pref_resize_center">Центр</string>
+    <string name="pref_resize_fit">Соответствовать</string>
+    <string name="pref_resize_stretch">Растягивать</string>
+    <string name="pref_resize_fill">Заполнять</string>
+    <string name="pref_resize_tile">Плитка</string>
+    <string-array name="pref_resize_options">
+        <item>Центр</item>
+        <item>Соответствовать</item>
+        <item>Растягивать</item>
+		<item>Заполнять</item>
+		<item>Плитка</item>
+    </string-array>
 </resources>

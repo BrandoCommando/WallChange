@@ -15,7 +15,7 @@ import android.preference.PreferenceActivity;
 public class Settings extends PreferenceActivity implements OnSharedPreferenceChangeListener, OnPreferenceChangeListener
 {
 	protected Prefs prefs;
-	protected Preference pUser;
+	protected Preference pUser, pResize;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +25,10 @@ public class Settings extends PreferenceActivity implements OnSharedPreferenceCh
 		pUser = findPreference("user");
 		pUser.setSummary(WallChanger.getUser());
 		pUser.setOnPreferenceChangeListener(this);
+		pResize = findPreference("resize");
+		pResize.setSummary(WallChanger.getResizeMode());
+		pResize.setDefaultValue(WallChanger.getResizeMode());
+		pResize.setOnPreferenceChangeListener(this);
 	}
 
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
@@ -34,7 +38,13 @@ public class Settings extends PreferenceActivity implements OnSharedPreferenceCh
 
 	public boolean onPreferenceChange(Preference preference, Object newValue) {
 		if(preference.getKey().equals("user"))
+		{
 			pUser.setSummary((String)newValue);
+			WallChanger.setUser((String)newValue);
+		} else if(preference.getKey().equals("resize")) {
+			pResize.setSummary((String)newValue);
+			WallChanger.setResizeMode((String)newValue);
+		}
 		Logger.LogDebug("onPreferenceChange - " + preference.getKey() + " = " + newValue.toString());
 		return true;
 	}

@@ -68,4 +68,17 @@
     <string name="pos_tl">Arriba a la izquierda</string>
     <string name="pos_br">Abajo a la derecha</string>
     <string name="s_recent">Reciente</string>
+    <string name="pref_resize">Cambiar el tamaño de la imagen base de la política</string>
+    <string name="pref_resize_center">Centro</string>
+    <string name="pref_resize_fit">Ajuste</string>
+    <string name="pref_resize_stretch">Tramo</string>
+    <string name="pref_resize_fill">Llenar</string>
+    <string name="pref_resize_tile">Azulejo</string>
+    <string-array name="pref_resize_options">
+        <item>Centro</item>
+        <item>Ajuste</item>
+        <item>Tramo</item>
+		<item>Llenar</item>
+		<item>Azulejo</item>
+    </string-array>
 </resources>
