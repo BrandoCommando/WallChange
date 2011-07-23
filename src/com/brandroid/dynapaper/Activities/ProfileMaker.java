@@ -582,11 +582,12 @@ public class ProfileMaker extends BaseActivity
 					Logger.LogWarning("Invalid Dimensions: Max: " + mw + "x" + mh + ", Image: " + w + "x" + h + ", New: " + nw + "x" + nh + ", Bar: " + nw + "x" + bh);
 			} else {
 				Logger.LogInfo("Minimum width: " + bmp.getWidth());
-				mImgSample.setMinimumWidth(bmp.getWidth());
+				//mImgSample.setMinimumWidth(bmp.getWidth());
 				mImgSample.setImageBitmap(bmp);
-				LayoutParams lp = mImgSample.getLayoutParams();
-				lp.width = bmp.getWidth();
-				mImgSample.setLayoutParams(lp);
+				//LayoutParams lp = mImgSample.getLayoutParams();
+				//lp.width = bmp.getWidth();
+				//mImgSample.setLayoutParams(lp);
+				mImgSample.setVisibility(View.VISIBLE);
 				Logger.LogInfo("Image Width: " + mImgSample.getWidth());
 			}
 			return true;
