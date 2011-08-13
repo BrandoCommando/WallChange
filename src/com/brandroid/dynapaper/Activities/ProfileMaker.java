@@ -253,26 +253,6 @@ public class ProfileMaker extends BaseActivity
 		return url;
 	}
 	
-	public Boolean checkWifi()
-	{
-		mWifiEnabled = false;
-		try {
-			WifiManager wm = (WifiManager)getSystemService(WIFI_SERVICE);
-			if(wm != null)
-			{
-				//Logger.LogInfo("WIFI Manager: " + wm.toString());
-				WifiInfo wi = wm.getConnectionInfo();
-				if(wi != null)
-				{
-					Logger.LogInfo("WIFI Info: " + wi.toString());
-					if(wi.getSupplicantState().equals(SupplicantState.COMPLETED))
-						mWifiEnabled = true;
-				}
-			}
-		} catch(Exception ex) { Logger.LogError("Error checking Wifi", ex); }
-		return mWifiEnabled;
-	}
-	
 	public void onClickCurrent()
 	{
 		Bitmap mCurrent = ((BitmapDrawable)getWallpaper()).getBitmap(); // getSizedBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), getHomeWidth(), getHomeHeight());
@@ -335,11 +315,9 @@ public class ProfileMaker extends BaseActivity
 		switch(v.getId())
 		{
 			case R.id.btnCurrent:
-				checkWifi();
 				onClickCurrent();
 				break;
 			case R.id.btnGallery:
-				checkWifi();
 				onClickLocalGallery();
 				break;
 			case R.id.btnOnline:
