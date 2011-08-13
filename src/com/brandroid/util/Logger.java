@@ -13,7 +13,7 @@ public class Logger
 	private static String[] sLastMessage = new String[] {"", "", "", "", ""};
 	private static Integer[] iLastCount = new Integer[] {0,0,0,0,0};
 	public static Boolean LoggingEnabled = true;
-	public static final Integer MIN_DB_LEVEL = Log.DEBUG;
+	public static final Integer MIN_DB_LEVEL = Log.VERBOSE;
 	private static final String LOG_KEY = WallChanger.LOG_KEY;
 	private static LoggerDbAdapter dbLog;
 
@@ -93,10 +93,22 @@ public class Logger
 		LogToDB(Log.INFO, msg, "");
 		Log.i(LOG_KEY, msg);
 	}
+	public static void LogInfo(String msg, String stack)
+	{
+		if(CheckLastLog(msg, Log.INFO)) return;
+		LogToDB(Log.DEBUG, msg, stack);
+		Log.d(LOG_KEY, msg);
+	}
 	public static void LogDebug(String msg)
 	{
 		if(CheckLastLog(msg, Log.DEBUG)) return;
 		LogToDB(Log.DEBUG, msg, "");
+		Log.d(LOG_KEY, msg);
+	}
+	public static void LogDebug(String msg, String stack)
+	{
+		if(CheckLastLog(msg, Log.DEBUG)) return;
+		LogToDB(Log.DEBUG, msg, stack);
 		Log.d(LOG_KEY, msg);
 	}
 	public static void LogVerbose(String msg)

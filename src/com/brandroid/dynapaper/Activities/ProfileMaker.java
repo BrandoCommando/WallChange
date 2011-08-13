@@ -190,6 +190,11 @@ public class ProfileMaker extends BaseActivity
 		findViewById(R.id.btnURL).setOnClickListener(this);
 		findViewById(R.id.progress_cancel).setOnClickListener(this);
 		findViewById(R.id.btnRotate).setOnClickListener(this);
+		findViewById(R.id.btn_feedback).setOnClickListener(this);
+		findViewById(R.id.btn_help).setOnClickListener(this);
+		findViewById(R.id.btn_settings).setOnClickListener(this);
+		
+		//LayoutParams lp = findViewById(R.id.layoutOther).getLayoutParams();
 		
 		mProgressPanel.setVisibility(View.GONE);
 		
@@ -346,6 +351,18 @@ public class ProfileMaker extends BaseActivity
 				Logger.LogInfo("Toggling URL Text box");
 				mTxtURL.setVisibility(mTxtURL.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
 				break;
+			case R.id.btn_feedback:
+				Logger.LogInfo("Feedback button pressed");
+				startActivity(new Intent(getApplicationContext(), Feedback.class));
+				break;
+			case R.id.btn_help:
+				Logger.LogInfo("Help button pressed");
+				startActivity(new Intent(getApplicationContext(), Help.class));
+				break;
+			case R.id.btn_settings:
+				Logger.LogInfo("Settings button pressed");
+				startActivityForResult(new Intent(getApplicationContext(), Settings.class), WallChanger.REQ_SETTINGS);
+				break;
 			case R.id.btnRotate:
 				
 				break;
@@ -357,13 +374,15 @@ public class ProfileMaker extends BaseActivity
 		switch(item.getItemId())
 		{
 		case R.id.menu_settings:
-			Intent intentSettings = new Intent(getApplicationContext(), Settings.class);
-			startActivityForResult(intentSettings, WallChanger.REQ_SETTINGS);
+			Logger.LogInfo("Settings menu selected");
+			startActivityForResult(new Intent(getApplicationContext(), Settings.class), WallChanger.REQ_SETTINGS);
 			break;
 		case R.id.menu_help:
+			Logger.LogInfo("Help menu selected");
 			startActivity(new Intent(getApplicationContext(), Help.class));
 			break;
 		case R.id.menu_feedback:
+			Logger.LogInfo("Feedback menu selected");
 			startActivity(new Intent(getApplicationContext(), Feedback.class));
 			break;
 		}

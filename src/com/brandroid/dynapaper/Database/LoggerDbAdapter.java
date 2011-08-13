@@ -72,8 +72,12 @@ public class LoggerDbAdapter
     	if(mDb != null && mDb.isOpen()) return this;
     	if(mDbHelper == null)
     		mDbHelper = new DatabaseHelper(mCtx);
+    	try {
     	if(mDb == null)
     		mDb = mDbHelper.getWritableDatabase();
+    	} catch(IllegalStateException ise) {
+    		Logger.LogError("Couldn't open logger", ise);
+    	}
     	return this;
     }
     
@@ -83,6 +87,7 @@ public class LoggerDbAdapter
     
     public long createItem(String message, int level, String stack) {
     	if(mDb == null || !mDb.isOpen()) open();
+    	if(mDb == null) return -1;
     	ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_MESSAGE, message);
         initialValues.put(KEY_LEVEL, level);
