@@ -6,8 +6,9 @@
 	<ImageView android:id="@+id/imageSample"
 		android:layout_alignParentBottom="true" android:layout_alignParentLeft="true"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
-		android:src="@drawable/picture" android:visibility="gone"/>
-	<LinearLayout android:layout_alignParentTop="true"
+		android:visibility="invisible"
+		android:src="@drawable/picture"/>
+	<LinearLayout android:layout_alignParentTop="true" android:layout_alignParentLeft="true"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
 		android:id="@+id/adLayout" />
 	<ScrollView android:layout_width="fill_parent"

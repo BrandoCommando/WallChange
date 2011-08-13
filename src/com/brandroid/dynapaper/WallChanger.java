@@ -10,7 +10,7 @@ import android.location.LocationManager;
 public class WallChanger
 {
 	public static final String LOG_KEY = "WallChanger";
-	public static final String[] MY_AD_UNIT_ID = new String[] {"a14de00854229f0", "a14d9c70f03d5b2"};
+	public static final String[] MY_AD_UNIT_ID = new String[] {"a14d9c70f03d5b2", "a14de00854229f0"};
 	public static final String MY_MOBCLIX_AD_ID = "851E0632-B1F1-417C-AF71-3850ECF46E00";
 	public static final String MY_ROOT_URL = "http://791.b.hostable.me";
 	public static final String MY_ROOT_URL_GS = "http://commondatastorage.googleapis.com/data.brandonbowles.com";
@@ -40,11 +40,11 @@ public class WallChanger
 	public final static int REQ_UPDATE_GALLERY = 101;
 	public final static int DOWNLOAD_CHUNK_SIZE = 512;
 	public final static Boolean OPTION_SHOW_GALLERY_INFO = true;
-	private static String mUser = "";
+	private static String mUser = "", mResizeMode = "";
 	private static int mUploadQuality = 90;
 	private static int mUploadQualityNoWifi = 60;
 	private static final Boolean bPaidMode = false;
-	private static final Boolean bTesting = true;
+	private static final Boolean bTesting = false;
 	//private static String mDeviceId;
 	private static Location mLastLocation;
 	public static Prefs Prefs;
@@ -62,6 +62,18 @@ public class WallChanger
 		if(user.equals("")) return;
 		Logger.LogInfo("New User: " + user + " (from " + mUser + ")");
 		mUser = user;
+	}
+	
+	public static String getResizeMode()
+	{
+		if(mResizeMode == "")
+			mResizeMode = Prefs.getSetting("resize", "Stretch");
+		return mResizeMode;
+	}
+	
+	public static void setResizeMode(String value)
+	{
+		mResizeMode = value;
 	}
 	
 	public final static Boolean isPaidMode() { return bPaidMode; }

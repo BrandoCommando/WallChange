@@ -68,4 +68,17 @@
     <string name="pos_tl">In alto a sinistra</string>
     <string name="pos_br">In basso a destra</string>
     <string name="s_recent">Recente</string>
+    <string name="pref_resize">Base Immagine Politica Ridimensiona</string>
+    <string name="pref_resize_center">Centro</string>
+    <string name="pref_resize_fit">In forma</string>
+    <string name="pref_resize_stretch">Tratto</string>
+    <string name="pref_resize_fill">Riempire</string>
+    <string name="pref_resize_tile">Tegola</string>
+    <string-array name="pref_resize_options">
+        <item>Centro</item>
+        <item>In forma</item>
+        <item>Tratto</item>
+		<item>Riempire</item>
+		<item>Tegola</item>
+    </string-array>
 </resources>

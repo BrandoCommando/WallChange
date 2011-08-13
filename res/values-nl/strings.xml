@@ -68,4 +68,17 @@
     <string name="pos_tl">Linksboven</string>
     <string name="pos_br">Rechtsonder</string>
     <string name="s_recent">Recent</string>
+    <string name="pref_resize">Base Image Resize-beleid</string>
+    <string name="pref_resize_center">Centrum</string>
+    <string name="pref_resize_fit">Geschikt</string>
+    <string name="pref_resize_stretch">Uitrekken</string>
+    <string name="pref_resize_fill">Vullen</string>
+    <string name="pref_resize_tile">Tegel</string>
+    <string-array name="pref_resize_options">
+        <item>Centrum</item>
+        <item>Geschikt</item>
+        <item>Uitrekken</item>
+		<item>Vullen</item>
+		<item>Tegel</item>
+    </string-array>
 </resources>

@@ -201,11 +201,8 @@ public class ProfileMaker extends BaseActivity
 			new GrabCurrentWallpaperTask().execute();
 		
 		mTxtURL.addTextChangedListener(new TextWatcher(){
-			@Override
 			public void afterTextChanged(Editable s) {}
-			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
 				mBtnSelect.setEnabled(true);
 				mBtnTest.setEnabled(true);
@@ -368,6 +365,7 @@ public class ProfileMaker extends BaseActivity
 				onClickWeatherLocation();
 				break;
 			case R.id.btnURL:
+				Logger.LogInfo("Toggling URL Text box");
 				mTxtURL.setVisibility(mTxtURL.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
 				break;
 			case R.id.btnRotate:
@@ -503,6 +501,7 @@ public class ProfileMaker extends BaseActivity
 	
 	public void setWeatherLocation(String location)
 	{
+		if(location.equals("")) return;
 		Logger.LogInfo("New Location: " + location);
 		mWeatherLocation = location;
 		if(mBtnWeatherLocation != null)
@@ -549,34 +548,46 @@ public class ProfileMaker extends BaseActivity
 				int mh = d.getHeight();
 				int w = bmp.getWidth();
 				int h = bmp.getHeight();
-				int nw = (h / mh) * w;
-				int nh = (w / mw) * h; // new height
-				int bh = nh - h; // bar height
+				int nw = w, nh = h;
+				int bh = 0;
+				if(nw > mw || nh > mh)
+				{
+					nw = (int)Math.floor(((float)h / (float)mh) * (float)w);
+					nh = (int)Math.floor(((float)w / (float)mw) * (float)h);
+					bh = (int)Math.floor(Math.abs(mh - nh) * ((float)h / (float)mh));
+				} else {
+					bh = nh;
+					nh *= 2;
+				}
 				nw /= 2;
 				nh /= 2;
 				bh /= 2;
-				// Max: 600x1024, Image: 1200x1024 --> 1200x1024
 				//Logger.LogInfo("Scaled " + bmp.getWidth() + "x" + bmp.getHeight() + " under " + mw + "x" + mh + " to " + w + "x" + h);
 				//Bitmap scaled = Bitmap.createScaledBitmap(bmp, w, h, true);
-				Logger.LogInfo("Max: " + mw + "x" + mh + ", Image: " + w + "x" + h + ", New: " + nw + "x" + nh);
-				mSample = Bitmap.createBitmap(nw, nh, Config.RGB_565);
-				Canvas c = new Canvas(mSample);
-				Paint p = new Paint();
-				p.setStyle(Style.FILL);
-				c.drawColor(Color.BLACK);
-				Rect src = new Rect(0, 0, bmp.getWidth(), bmp.getHeight());
-				Rect dst = new Rect(0, bh, nw, nh);
-				c.drawBitmap(bmp, src, dst, p);
-				//Drawable pic = new BitmapDrawable(mSample);
-				//pic.setBounds(pic.getMinimumWidth() / 2, 0, pic.getMinimumWidth(), pic.getMinimumHeight());
-				win.setBackgroundDrawable(new BitmapDrawable(mSample));
+				Logger.LogInfo("Max: " + mw + "x" + mh + ", Image: " + w + "x" + h + ", New: " + nw + "x" + nh + ", Bar: " + nw + "x" + bh);
+				if(nh > 0 && nw > 0)
+				{
+					mSample = Bitmap.createBitmap(nw, nh, Config.RGB_565);
+					Canvas c = new Canvas(mSample);
+					Paint p = new Paint();
+					p.setStyle(Style.FILL);
+					c.drawColor(Color.BLACK);
+					Rect src = new Rect(0, 0, w, h);
+					Rect dst = new Rect(0, bh, nw, nh);
+					c.drawBitmap(bmp, src, dst, p);
+					//Drawable pic = new BitmapDrawable(mSample);
+					//pic.setBounds(pic.getMinimumWidth() / 2, 0, pic.getMinimumWidth(), pic.getMinimumHeight());
+					win.setBackgroundDrawable(new BitmapDrawable(mSample));
+				} else
+					Logger.LogWarning("Invalid Dimensions: Max: " + mw + "x" + mh + ", Image: " + w + "x" + h + ", New: " + nw + "x" + nh + ", Bar: " + nw + "x" + bh);
 			} else {
 				Logger.LogInfo("Minimum width: " + bmp.getWidth());
-				mImgSample.setMinimumWidth(bmp.getWidth());
+				//mImgSample.setMinimumWidth(bmp.getWidth());
 				mImgSample.setImageBitmap(bmp);
-				LayoutParams lp = mImgSample.getLayoutParams();
-				lp.width = bmp.getWidth();
-				mImgSample.setLayoutParams(lp);
+				//LayoutParams lp = mImgSample.getLayoutParams();
+				//lp.width = bmp.getWidth();
+				//mImgSample.setLayoutParams(lp);
+				mImgSample.setVisibility(View.VISIBLE);
 				Logger.LogInfo("Image Width: " + mImgSample.getWidth());
 			}
 			return true;
@@ -653,7 +664,6 @@ public class ProfileMaker extends BaseActivity
 				File fLast = MediaUtils.getFile(sFile, true);
 				if(!fLast.exists())
 					MediaUtils.writeFile(sFile, ((BitmapDrawable)getWallpaper()).getBitmap(), true);
-				mTxtURL.setText(sFile);
 				return BitmapFactory.decodeFile(fLast.getAbsolutePath());
 				//mImgPreview.setImageURI(Uri.fromFile(fLast));
 			} catch(Exception e) { Logger.LogError("Couldn't set Preview to last", e); return null; }
@@ -667,7 +677,11 @@ public class ProfileMaker extends BaseActivity
 		
 		@Override
 		protected void onPostExecute(Bitmap result) {
-			setPreview(result);
+			if(result != null)
+			{
+				mTxtURL.setText("last.jpg");
+				setPreview(result);
+			}
 		}
     	
     }

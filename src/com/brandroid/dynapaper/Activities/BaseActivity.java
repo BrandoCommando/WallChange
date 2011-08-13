@@ -8,10 +8,17 @@ import com.brandroid.dynapaper.Prefs;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.dynapaper.Database.LoggerDbAdapter;
+import com.google.ads.Ad;
+import com.google.ads.AdListener;
+import com.google.ads.AdRequest;
+import com.google.ads.AdRequest.ErrorCode;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -33,15 +40,17 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-public class BaseActivity extends Activity implements OnClickListener, OnMenuItemClickListener 
+public class BaseActivity extends Activity implements OnClickListener, OnMenuItemClickListener, AdListener
 {
 	protected static ArrayAdapter<String> mPastZips;
 	
 	private int mHomeWidth = 0;
 	private int mHomeHeight = 0;
-	protected Resources mResources;
-	protected Prefs prefs;
+	protected static Resources mResources;
+	protected static Prefs prefs;
+	protected static Bundle mManifestMetadata;
 	
+	private int mAdTries = 3;
 	protected Boolean mAdBannerLoaded = false;
 	protected Boolean mAdFullLoaded = false;
 		
@@ -56,6 +65,7 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 		
 		try {
 			PackageManager pm = getPackageManager();
+			mManifestMetadata = pm.getApplicationInfo(this.getPackageName(), PackageManager.GET_META_DATA).metaData;
 			PackageInfo pi = pm.getPackageInfo("com.brandroid.dynapaper", PackageManager.GET_META_DATA);
 			WallChanger.VERSION_CODE = pi.versionCode;
 			Logger.LogInfo("Version Code: " + pi.versionCode);
@@ -63,7 +73,7 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 			Logger.LogError("Couldn't read build info", e);
 		}
 		
-		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());
+		//Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());
 		
 		Logger.LogVerbose("onCreate :: " + this.toString());
 
@@ -75,9 +85,9 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
         }
         prefs = WallChanger.Prefs;
         
-        //if(!WallChanger.isPaidMode()) addAds();
-        if(findViewById(R.id.adLayout)!=null)
-        	findViewById(R.id.adLayout).setVisibility(View.GONE);
+        if(!WallChanger.isPaidMode()) addAds();
+        //if(findViewById(R.id.adLayout)!=null)
+        //	findViewById(R.id.adLayout).setVisibility(View.GONE);
         	
 	}
 	
@@ -109,22 +119,26 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 		}
 	}*/
 	
-	/*
 	public void addAds()
     {	
     	try {
-	    	// Create the adView
-    		Time t = new Time();
-    		int iAdToUse = t.hour % (WallChanger.MY_AD_UNIT_ID.length + 1);
-    		String sAdID = WallChanger.MY_AD_UNIT_ID[iAdToUse];
-    		Logger.LogInfo("Using Ad ID #" + iAdToUse + " for Admob - " + sAdID);
+	    	String sAdID = null; 
+    		if(mManifestMetadata != null)
+    			sAdID = mManifestMetadata.getString("ADMOB_PUBLISHER_ID");
+			
+    		if(sAdID == null)
+    		{
+    			int iAdToUse = new Time().hour % (WallChanger.MY_AD_UNIT_ID.length + 1);
+    			sAdID = WallChanger.MY_AD_UNIT_ID[iAdToUse];
+    			Logger.LogInfo("Using Ad ID #" + iAdToUse + " for Admob - " + sAdID);
+    		} else Logger.LogInfo("Using metadata publisher ID for Admob - " + sAdID);
     		
     		DisplayMetrics dm = getResources().getDisplayMetrics();
-    		int density = (int)dm.density;
+    		//int density = (int)dm.density;
     		int iShortDimension = Math.min(dm.widthPixels, dm.heightPixels);
     		int iLongDimension = Math.max(dm.widthPixels, dm.heightPixels);
     		AdSize adsize = AdSize.BANNER;
-    		if(iShortDimension > 480)
+    		if(iShortDimension >= 800)
     		{
     			Logger.LogDebug("Using Tablet Ad Size because screen is " + iShortDimension + "x" + iLongDimension);
     			adsize = AdSize.IAB_MRECT;
@@ -132,29 +146,41 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
     		
     		AdView adView = new AdView(this, adsize, sAdID);
     		
-    		// Lookup your LinearLayout assuming its been given
-	        // the attribute android:id="@+id/mainLayout"
 	        LinearLayout layout = (LinearLayout)findViewById(R.id.adLayout);
-	        if(layout == null) {
+	        if(layout == null || layout.getVisibility() != View.VISIBLE) {
 	        	Logger.LogWarning("Unable to add Ads.");
 	        	return;
-	        }
-	        // Add the adView to it
-	        layout.addView(adView);
-	        // Initiate a generic request to load it with an ad
+	        } else
+	        	layout.addView(adView);
+	        
 	        AdRequest ad = new AdRequest();
 	        
 	        if(WallChanger.isTesting())
 	        {
 		        ad.addTestDevice(AdRequest.TEST_EMULATOR);
+		        ad.addTestDevice("3169B8AFE26E8A5294DF63F930EC28FF");
 	        	ad.addTestDevice("383A6E6B957E2A18C8830E6C431B2AAF");
+	        	ad.addTestDevice("CD988C81E0DF2F9E7C64FFFCEF67154A");
 	        } else ad.setTesting(false);
-        	
+	        
 	        ad.setLocation(WallChanger.getLastLocation());
+	        
+	        Logger.LogInfo("AdMob version " + AdRequest.VERSION + " under " + AdRequest.LOGTAG + " -> " + ad.toString());
+	        
+	        adView.setAdListener(this);
 	        adView.loadAd(ad);
     	} catch(Exception ex) { Logger.LogWarning("Error adding ads.", ex); }    
     }
-	*/
+	public void onDismissScreen(Ad ad) { Logger.LogDebug("Admob present screen for " + this.toString() + ". " + ad.toString()); }
+	public void onFailedToReceiveAd(Ad ad, ErrorCode code) {
+		Logger.LogDebug("Admob failed to receive ad for " + this.toString() + ". Code " + code + ". " + ad.toString());
+		if(mAdTries-- > 0)
+			addAds();
+	}
+	public void onLeaveApplication(Ad ad) { Logger.LogDebug("Admob left application for " + this.toString() + ". " + ad.toString()); }
+	public void onPresentScreen(Ad ad) { Logger.LogDebug("Admob present screen for " + this.toString() + ". " + ad.toString()); }
+	public void onReceiveAd(Ad ad) { Logger.LogDebug("Admob received ad for " + this.toString() + ". " + ad.toString()); }
+	
     protected String getResourceString(int... resourceIDs)
     {
     	StringBuilder ret = new StringBuilder();
@@ -205,13 +231,13 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 	@Override
 	protected void onRestart() {
 		super.onRestart();
-		//Logger.LogVerbose("onRestart :: " + this.toString());
+		Logger.LogVerbose("onRestart :: " + this.toString());
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		//Logger.LogVerbose("onResume :: " + this.toString());
+		Logger.LogVerbose("onResume :: " + this.toString());
 	}
 	
 	@Override
@@ -235,28 +261,27 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 	@Override
 	protected void onStart() {
 		super.onStart();
-		//Logger.LogVerbose("onStart :: " + this.toString());
+		Logger.LogVerbose("onStart :: " + this.toString());
 	}
 	
 	@Override
 	protected void onStop() {
 		super.onStop();
-		//Logger.LogVerbose("onStop :: " + this.toString());
+		Logger.LogVerbose("onStop :: " + this.toString());
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
-		//Logger.LogVerbose("onPause :: " + this.toString());
+		Logger.LogVerbose("onPause :: " + this.toString());
 	}
 	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		//Logger.LogVerbose("onDestroy :: " + this.toString());
+		Logger.LogVerbose("onDestroy :: " + this.toString());
 	}
 
-	@Override
 	public boolean onMenuItemClick(MenuItem item) {
 		Logger.LogDebug("onMenuItemClick :: " + item.toString());
 		return true;
@@ -268,35 +293,8 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 		return super.onOptionsItemSelected(item);
 	}
 
-	@Override
 	public void onClick(View v) {
 		Logger.LogDebug("onClick :: " + v.toString());
 	}
 
-	/*
-	@Override
-	public void onDismissScreen(Ad ad) {
-		Logger.LogDebug("Admob present screen for " + this.toString() + ". " + ad.toString());
-	}
-
-	@Override
-	public void onFailedToReceiveAd(Ad ad, ErrorCode code) {
-		Logger.LogDebug("Admob failed to receive ad for " + this.toString() + ". Code " + code + ". " + ad.toString());
-	}
-
-	@Override
-	public void onLeaveApplication(Ad ad) {
-		Logger.LogDebug("Admob left application for " + this.toString() + ". " + ad.toString());
-	}
-
-	@Override
-	public void onPresentScreen(Ad ad) {
-		Logger.LogDebug("Admob present screen for " + this.toString() + ". " + ad.toString());
-	}
-
-	@Override
-	public void onReceiveAd(Ad ad) {
-		Logger.LogDebug("Admob received ad for " + this.toString() + ". " + ad.toString());
-	}
-	*/
 }

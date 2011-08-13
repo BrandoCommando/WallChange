@@ -44,7 +44,6 @@ public class Feedback extends BaseActivity
 		final EditText txtName = (EditText)findViewById(R.id.txtFeedbackName);
 		final RatingBar rateFeedback = (RatingBar)findViewById(R.id.rateFeedback);
 		findViewById(R.id.btnSend).setOnClickListener(new OnClickListener() {
-			@Override
 			public void onClick(View v) {
 				new SendFeedbackTask().execute("rating", ((Float)rateFeedback.getRating()).toString(), "feedback", txtFeedback.getText().toString(), "name", txtName.getText().toString());
 				showToast(R.string.s_thanks);
