@@ -6,11 +6,11 @@
 	<ImageView android:id="@+id/imageSample"
 		android:layout_alignParentBottom="true" android:layout_alignParentLeft="true"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
-		android:visibility="invisible"
+		android:visibility="invisible" android:layout_above="@+id/adLayout"
 		android:src="@drawable/picture"/>
-	<LinearLayout android:layout_alignParentTop="true" android:layout_alignParentLeft="true"
+	<LinearLayout android:gravity="center"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
-		android:id="@+id/adLayout" />
+		android:id="@+id/adLayout" android:layout_alignParentTop="true" />
 	<ScrollView android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:layout_below="@+id/adLayout"
 		android:id="@+id/scrollView1">

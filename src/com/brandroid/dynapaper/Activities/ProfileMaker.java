@@ -286,6 +286,7 @@ public class ProfileMaker extends BaseActivity
 		Intent intentGallery = new Intent();
 		intentGallery.setType("image/*");
 		intentGallery.setAction(Intent.ACTION_GET_CONTENT);
+		//intentGallery.setAction(Intent.ACTION_);
 		startActivityForResult(Intent.createChooser(intentGallery, getResourceString(R.string.s_select_base)), WallChanger.REQ_SELECT_GALLERY);
 	}
 	public void onClickOnlineGallery()
@@ -335,11 +336,11 @@ public class ProfileMaker extends BaseActivity
 		switch(v.getId())
 		{
 			case R.id.btnCurrent:
-				checkWifi();
+				//checkWifi();
 				onClickCurrent();
 				break;
 			case R.id.btnGallery:
-				checkWifi();
+				//checkWifi();
 				onClickLocalGallery();
 				break;
 			case R.id.btnOnline:
