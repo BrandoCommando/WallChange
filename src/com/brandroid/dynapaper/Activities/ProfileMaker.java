@@ -190,6 +190,11 @@ public class ProfileMaker extends BaseActivity
 		findViewById(R.id.btnURL).setOnClickListener(this);
 		findViewById(R.id.progress_cancel).setOnClickListener(this);
 		findViewById(R.id.btnRotate).setOnClickListener(this);
+		findViewById(R.id.btn_feedback).setOnClickListener(this);
+		findViewById(R.id.btn_help).setOnClickListener(this);
+		findViewById(R.id.btn_settings).setOnClickListener(this);
+		
+		//LayoutParams lp = findViewById(R.id.layoutOther).getLayoutParams();
 		
 		mProgressPanel.setVisibility(View.GONE);
 		
@@ -251,26 +256,6 @@ public class ProfileMaker extends BaseActivity
 			url = WallChanger.getImageFullUrl(url);
 		Logger.LogInfo("Final Base Image URL: " + url);
 		return url;
-	}
-	
-	public Boolean checkWifi()
-	{
-		mWifiEnabled = false;
-		try {
-			WifiManager wm = (WifiManager)getSystemService(WIFI_SERVICE);
-			if(wm != null)
-			{
-				//Logger.LogInfo("WIFI Manager: " + wm.toString());
-				WifiInfo wi = wm.getConnectionInfo();
-				if(wi != null)
-				{
-					Logger.LogInfo("WIFI Info: " + wi.toString());
-					if(wi.getSupplicantState().equals(SupplicantState.COMPLETED))
-						mWifiEnabled = true;
-				}
-			}
-		} catch(Exception ex) { Logger.LogError("Error checking Wifi", ex); }
-		return mWifiEnabled;
 	}
 	
 	public void onClickCurrent()
@@ -336,11 +321,9 @@ public class ProfileMaker extends BaseActivity
 		switch(v.getId())
 		{
 			case R.id.btnCurrent:
-				//checkWifi();
 				onClickCurrent();
 				break;
 			case R.id.btnGallery:
-				//checkWifi();
 				onClickLocalGallery();
 				break;
 			case R.id.btnOnline:
@@ -369,6 +352,18 @@ public class ProfileMaker extends BaseActivity
 				Logger.LogInfo("Toggling URL Text box");
 				mTxtURL.setVisibility(mTxtURL.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
 				break;
+			case R.id.btn_feedback:
+				Logger.LogInfo("Feedback button pressed");
+				startActivity(new Intent(getApplicationContext(), Feedback.class));
+				break;
+			case R.id.btn_help:
+				Logger.LogInfo("Help button pressed");
+				startActivity(new Intent(getApplicationContext(), Help.class));
+				break;
+			case R.id.btn_settings:
+				Logger.LogInfo("Settings button pressed");
+				startActivityForResult(new Intent(getApplicationContext(), Settings.class), WallChanger.REQ_SETTINGS);
+				break;
 			case R.id.btnRotate:
 				
 				break;
@@ -380,13 +375,15 @@ public class ProfileMaker extends BaseActivity
 		switch(item.getItemId())
 		{
 		case R.id.menu_settings:
-			Intent intentSettings = new Intent(getApplicationContext(), Settings.class);
-			startActivityForResult(intentSettings, WallChanger.REQ_SETTINGS);
+			Logger.LogInfo("Settings menu selected");
+			startActivityForResult(new Intent(getApplicationContext(), Settings.class), WallChanger.REQ_SETTINGS);
 			break;
 		case R.id.menu_help:
+			Logger.LogInfo("Help menu selected");
 			startActivity(new Intent(getApplicationContext(), Help.class));
 			break;
 		case R.id.menu_feedback:
+			Logger.LogInfo("Feedback menu selected");
 			startActivity(new Intent(getApplicationContext(), Feedback.class));
 			break;
 		}

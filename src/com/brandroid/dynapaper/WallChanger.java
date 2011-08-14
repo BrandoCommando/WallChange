@@ -10,7 +10,7 @@ import android.location.LocationManager;
 public class WallChanger
 {
 	public static final String LOG_KEY = "WallChanger";
-	public static final String[] MY_AD_UNIT_ID = new String[] {"a14d9c70f03d5b2", "a14de00854229f0"};
+	public static final String[] MY_AD_UNIT_ID = new String[] {"a14d9c70f03d5b2"}; //, "a14de00854229f0"};
 	public static final String MY_MOBCLIX_AD_ID = "851E0632-B1F1-417C-AF71-3850ECF46E00";
 	public static final String MY_ROOT_URL = "http://791.b.hostable.me";
 	public static final String MY_ROOT_URL_GS = "http://commondatastorage.googleapis.com/data.brandonbowles.com";
