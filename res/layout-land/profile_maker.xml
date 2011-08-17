@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	android:orientation="vertical" android:gravity="center|top" android:id="@+id/layoutMain"
-	android:isScrollContainer="true">
+	android:id="@+id/layoutMain">
 	<ImageView android:id="@+id/imageSample"
 		android:layout_alignParentBottom="true" android:layout_alignParentLeft="true"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
@@ -74,21 +73,22 @@
 	</RelativeLayout>
 	<RelativeLayout android:id="@+id/layoutOther"
 		android:layout_width="wrap_content" android:layout_height="wrap_content"
-		android:layout_above="@+id/progress_layout"
-		android:layout_alignWithParentIfMissing="true"
-		android:layout_marginTop="50dip">
+		android:layout_alignParentRight="true"
+		android:layout_alignParentTop="true"
+		android:gravity="right|top"
+		android:layout_alignWithParentIfMissing="true">
 		<TextView android:id="@+id/textViewOther" android:text="Other"
 			android:layout_alignParentTop="true" android:layout_width="wrap_content"
 			android:layout_height="wrap_content" />
 		<Button android:id="@+id/btn_help" android:layout_width="wrap_content"
 			android:layout_height="wrap_content" android:layout_below="@+id/textViewOther"
-			android:layout_marginLeft="2pt" android:text="@string/menu_help" />
+			android:text="@string/menu_help" />
 		<Button android:id="@+id/btn_feedback" android:text="@string/s_feedback"
-			android:layout_toRightOf="@+id/btn_help" android:layout_alignTop="@+id/btn_help"
+			android:layout_below="@+id/btn_help" android:layout_alignRight="@+id/btn_help"
 			android:layout_width="wrap_content" android:layout_height="wrap_content" />
 		<Button android:id="@+id/btn_settings" android:text="@string/menu_settings"
-			android:layout_toRightOf="@+id/btn_feedback"
-			android:layout_alignTop="@+id/btn_help" android:layout_width="wrap_content"
+			android:layout_below="@+id/btn_feedback"
+			android:layout_alignRight="@+id/btn_help" android:layout_width="wrap_content"
 			android:layout_height="wrap_content" />
 	</RelativeLayout>
 	<RelativeLayout android:id="@+id/progress_layout" android:layout_width="fill_parent"
