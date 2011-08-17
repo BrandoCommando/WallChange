@@ -76,8 +76,10 @@ public class ProfileDbAdapter
     	if(mDb != null && mDb.isOpen()) return this;
     	if(mDbHelper == null)
     		mDbHelper = new DatabaseHelper(mCtx);
-    	if(mDb == null)
+    	if(mDb == null && mDbHelper != null)
     		mDb = mDbHelper.getWritableDatabase();
+    	else if(mDbHelper == null)
+    		throw new SQLException("mDbHelper is null");
     	return this;
     }
     

@@ -117,7 +117,6 @@ public class ProfileMaker extends BaseActivity
 	private DownloadToWallpaperTask mDownloadTask;
 	private AddWallpaperWidgetsTask mAddWidgetTask;
 	private GalleryDbAdapter gdb;
-	private Boolean mWifiEnabled = true;
 	private WallProfile mProfileCurrent;
 	private ProfileDbAdapter pdb;
 	private Bitmap mSample;
@@ -544,6 +543,12 @@ public class ProfileMaker extends BaseActivity
 				//LayoutParams lp = win.getAttributes();
 				int mw = d.getWidth();
 				int mh = d.getHeight();
+				if(mh > mw)
+				{
+					int tmp = mw;
+					mw = mh;
+					mh = tmp;
+				}
 				int w = bmp.getWidth();
 				int h = bmp.getHeight();
 				int nw = w, nh = h;
@@ -693,9 +698,9 @@ public class ProfileMaker extends BaseActivity
 			if(prefs.hasSetting("gallery_check"))
 			{
 				int lastCheck = prefs.getInt("gallery_check", curCheck);
-				if(curCheck < lastCheck + 60)
+				if(lastCheck > 0 && curCheck > 0 && curCheck < lastCheck + 60)
 				{
-					Logger.LogInfo("Skipping Gallery update (" + curCheck + " m)");
+					Logger.LogInfo("Skipping Gallery update (" + lastCheck + " :: " + curCheck + " m)");
 					return false;
 				}
 			}
@@ -956,13 +961,24 @@ public class ProfileMaker extends BaseActivity
 			if(base == null) return null;
 			int w = getHomeWidth();
 			int h = getHomeHeight();
+			int bw = base.getWidth();
+			int bh = base.getHeight();
+			if(w < h)
+			{
+				int tmp = w;
+				w = h;
+				h = tmp;
+				tmp = bw;
+				bw = bh;
+				bh = tmp;
+			}
 			//base = Bitmap.createScaledBitmap(base, w, h, true);
 			Bitmap ret = Bitmap.createBitmap(w, h, Config.ARGB_8888);
 			Canvas c = new Canvas(ret);
 			c.save();
 			Paint p = new Paint();
 			p.setStyle(Style.FILL);
-			Rect src = new Rect(0, 0, base.getWidth(), base.getHeight());
+			Rect src = new Rect(0, 0, bw, bh);
 			RectF dst = new RectF(new Rect(0, 0, w, h));
 			c.drawBitmap(base, src, dst, p);
 			base = null;

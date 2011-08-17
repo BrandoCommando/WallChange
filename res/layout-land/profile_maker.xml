@@ -7,9 +7,6 @@
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
 		android:visibility="invisible" android:layout_above="@+id/adLayout"
 		android:src="@drawable/picture"/>
-	<LinearLayout android:gravity="center"
-		android:layout_height="wrap_content" android:layout_width="fill_parent"
-		android:id="@+id/adLayout" android:layout_alignParentTop="true" />
 	<RelativeLayout android:layout_height="wrap_content"
 		android:id="@+id/layoutBase" android:isScrollContainer="true"
 		android:layout_width="wrap_content">
@@ -55,7 +52,7 @@
 			android:layout_height="wrap_content" />
 	</RelativeLayout>
 	<RelativeLayout android:id="@+id/layoutCommands"
-		android:layout_below="@+id/layoutWeather" android:layout_height="wrap_content"
+		android:layout_below="@+id/adLayout" android:layout_height="wrap_content"
 		android:layout_width="wrap_content">
 		<TextView android:id="@+id/textView3" android:text="@string/lbl_command"
 			android:layout_height="wrap_content" android:layout_width="wrap_content"></TextView>
@@ -80,16 +77,14 @@
 		<TextView android:id="@+id/textViewOther" android:text="Other"
 			android:layout_alignParentTop="true" android:layout_width="wrap_content"
 			android:layout_height="wrap_content" />
-		<Button android:id="@+id/btn_help" android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:layout_below="@+id/textViewOther"
-			android:text="@string/menu_help" />
+		<Button android:id="@+id/btn_help" android:layout_height="wrap_content" android:layout_below="@+id/textViewOther"
+			android:text="@string/menu_help" android:layout_width="wrap_content" android:minWidth="80dp"/>
 		<Button android:id="@+id/btn_feedback" android:text="@string/s_feedback"
-			android:layout_below="@+id/btn_help" android:layout_alignRight="@+id/btn_help"
+			android:layout_below="@+id/btn_help"
 			android:layout_width="wrap_content" android:layout_height="wrap_content" />
 		<Button android:id="@+id/btn_settings" android:text="@string/menu_settings"
-			android:layout_below="@+id/btn_feedback"
-			android:layout_alignRight="@+id/btn_help" android:layout_width="wrap_content"
-			android:layout_height="wrap_content" />
+			android:layout_below="@+id/btn_feedback" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:minWidth="80dp"/>
 	</RelativeLayout>
 	<RelativeLayout android:id="@+id/progress_layout" android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:layout_alignParentBottom="true"
@@ -107,4 +102,6 @@
 			style="?android:attr/progressBarStyleHorizontal"
 			android:layout_toLeftOf="@+id/progress_cancel" android:layout_width="fill_parent"/>
 	</RelativeLayout>
+	<LinearLayout android:gravity="left"
+		android:layout_height="wrap_content" android:id="@+id/adLayout" android:layout_below="@+id/layoutWeather" android:layout_alignParentLeft="true" android:layout_width="wrap_content"/>
 </RelativeLayout>

@@ -138,11 +138,11 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
     		int iShortDimension = Math.min(dm.widthPixels, dm.heightPixels);
     		int iLongDimension = Math.max(dm.widthPixels, dm.heightPixels);
     		AdSize adsize = AdSize.BANNER;
-    		if(iShortDimension >= 800)
+    		if(iShortDimension >= 750)
     		{
     			Logger.LogDebug("Using Tablet Ad Size because screen is " + iShortDimension + "x" + iLongDimension);
     			adsize = AdSize.IAB_MRECT;
-    		}
+    		} else Logger.LogDebug("Using Banner Ad Size because screen is " + iShortDimension + "x" + iLongDimension);
     		
     		AdView adView = new AdView(this, adsize, sAdID);
     		

@@ -52,8 +52,8 @@ public class Weather extends Widget
 	private WeatherData mData = null;
 	
 	// 'mostly cloudy' => 'cloudy4', 'heavy showers' => 'shower3', 'showers' => 'shower2', 'partial' => 'cloudy2', 'some' => 'shower2', 'cloud' => 'cloudy1', 'rain' => 'shower1', 'mist' => 'mist', 'snow' => 'snow2', 'fair' => 'sunny', 'sun' => 'sunny');
-	public static final String[] MAP_STRINGS = new String[] {"mostly cloudy", "heavy showers", "showers", "partial", "some", "cloud", "rain", "mist", "snow", "fair", "sun", "clear", "fog", "cast"};
-	public static final int[] MAP_DRAWABLE = new int[] {R.drawable.ww_cloudy4, R.drawable.ww_shower3, R.drawable.ww_shower2, R.drawable.ww_cloudy2, R.drawable.ww_shower2, R.drawable.ww_cloudy1, R.drawable.ww_shower1, R.drawable.ww_mist, R.drawable.ww_snow2, R.drawable.ww_sunny, R.drawable.ww_sunny, R.drawable.ww_sunny, R.drawable.ww_fog, R.drawable.ww_fog};
+	public static final String[] MAP_STRINGS = new String[] {"mostly cloudy", "heavy showers", "showers", "partial", "some", "cloud", "rain", "mist", "snow", "fair", "sun", "clear", "fog", "cast", "haze"};
+	public static final int[] MAP_DRAWABLE = new int[] {R.drawable.ww_cloudy4, R.drawable.ww_shower3, R.drawable.ww_shower2, R.drawable.ww_cloudy2, R.drawable.ww_shower2, R.drawable.ww_cloudy1, R.drawable.ww_shower1, R.drawable.ww_mist, R.drawable.ww_snow2, R.drawable.ww_sunny, R.drawable.ww_sunny, R.drawable.ww_sunny, R.drawable.ww_fog, R.drawable.ww_fog, R.drawable.ww_fog};
 	
 	public Weather(Context context, String location)
 	{
@@ -78,7 +78,7 @@ public class Weather extends Widget
 				uc.connect();
 				if(uc.getResponseCode() == HttpURLConnection.HTTP_OK)
 				{
-					Logger.LogDebug("Received " + uc.getContentLength() + " bytes.");
+					//Logger.LogDebug("Received " + uc.getContentLength() + " bytes.");
 					String encoding = uc.getContentEncoding();
 					if(encoding != null && encoding.equalsIgnoreCase("gzip"))
 						in = new GZIPInputStream(uc.getInputStream());
@@ -89,7 +89,7 @@ public class Weather extends Widget
 					parser = XmlPullParserFactory.newInstance().newPullParser();
 					parser.setInput(in, "UTF-8");
 					mData = new WeatherData(parser);
-					Logger.LogDebug("Weather Data from Google: " + mData.toString());
+					Logger.LogDebug("Weather Data from Google (" + url + ")", mData.toString());
 				} else throw new FileNotFoundException(url + " returned " + uc.getResponseCode());
 			} catch (XmlPullParserException e) {
 				Logger.LogError("Error parsing Google", e);
