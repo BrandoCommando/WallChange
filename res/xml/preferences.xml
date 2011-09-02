@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-        android:title="Settings">
+        android:title="WallChanger Settings">
  
 	<PreferenceCategory android:title="User Settings">
 	      <EditTextPreference android:key="user"
@@ -10,19 +10,27 @@
 	      		android:inputType="textPassword" android:title="@string/pref_pass"
 	      		android:persistent="true" android:defaultValue=""  />
 	</PreferenceCategory>
+
+	<PreferenceCategory android:title="Output Settings">
+	
+		<ListPreference android:key="resize"
+			android:title="@string/pref_resize"
+			android:dialogTitle="@string/pref_resize"
+			android:summary="@string/pref_resize_stretch"
+			android:persistent="true"
+			android:entries="@array/pref_resize_options"
+			android:entryValues="@array/pref_resize_options"
+			/>
+	
+	</PreferenceCategory>
+	
+	<PreferenceCategory android:title="Other Settings">
    
-	<CheckBoxPreference android:key="allow"
-		android:defaultValue="true"
-		android:title="@string/pref_allow"
-		android:summary="@string/pref_allow_long" />
+		<CheckBoxPreference android:key="allow"
+			android:defaultValue="true"
+			android:title="@string/pref_allow"
+			android:summary="@string/pref_allow_long" />
 		
-	<ListPreference android:key="resize"
-		android:title="@string/pref_resize"
-		android:dialogTitle="@string/pref_resize"
-		android:summary="@string/pref_resize_stretch"
-		android:persistent="true"
-		android:entries="@array/pref_resize_options"
-		android:entryValues="@array/pref_resize_options"
-		/>
+	</PreferenceCategory>
 		
 </PreferenceScreen>

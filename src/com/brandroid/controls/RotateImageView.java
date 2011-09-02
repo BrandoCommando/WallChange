@@ -10,7 +10,7 @@ import android.widget.ImageView;
 
 public class RotateImageView extends ImageView
 {
-	private int mRotation = 0;
+	private float mRotation = 0;
 
 	public RotateImageView(Context context) {
 		super(context);
@@ -30,7 +30,7 @@ public class RotateImageView extends ImageView
 		this.mRotation = mRotation;
 	}
 
-	public int getRotation() {
+	public float getRotation() {
 		return mRotation;
 	}
 }
