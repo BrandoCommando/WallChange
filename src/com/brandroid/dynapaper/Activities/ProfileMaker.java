@@ -399,14 +399,6 @@ public class ProfileMaker extends BaseActivity
 	}
 	
 	@Override
-	public Object onRetainNonConfigurationInstance() {
-		//Bitmap bmp = getW
-		Logger.LogInfo("onRetainNonConfigurationInstance");
-		return mSample;
-		//w.get
-	}
-	
-	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 		Logger.LogInfo("onRestoreInstanceState: " + savedInstanceState.toString());

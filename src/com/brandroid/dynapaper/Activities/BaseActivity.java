@@ -26,21 +26,29 @@ import android.content.res.Resources;
 import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.telephony.TelephonyManager;
+import android.text.Layout;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Toast;
 
-public class BaseActivity extends Activity implements OnClickListener, OnMenuItemClickListener, AdListener
+public class BaseActivity extends FragmentActivity implements OnClickListener, OnMenuItemClickListener, AdListener
 {
 	protected static ArrayAdapter<String> mPastZips;
 	
@@ -53,6 +61,8 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 	private int mAdTries = 3;
 	protected Boolean mAdBannerLoaded = false;
 	protected Boolean mAdFullLoaded = false;
+	
+	protected FrameLayout adLayout;
 		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +130,11 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 	}*/
 	
 	public void addAds()
+	{
+		BaseActivity.addAds(this, (ViewGroup)findViewById(R.id.adLayout));
+	}
+	
+	public static void addAds(Activity activity, ViewGroup adLayout)
     {	
     	try {
 	    	String sAdID = null; 
@@ -133,7 +148,7 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
     			Logger.LogInfo("Using Ad ID #" + iAdToUse + " for Admob - " + sAdID);
     		} else Logger.LogInfo("Using metadata publisher ID for Admob - " + sAdID);
     		
-    		DisplayMetrics dm = getResources().getDisplayMetrics();
+    		DisplayMetrics dm = activity.getResources().getDisplayMetrics();
     		//int density = (int)dm.density;
     		int iShortDimension = Math.min(dm.widthPixels, dm.heightPixels);
     		int iLongDimension = Math.max(dm.widthPixels, dm.heightPixels);
@@ -144,14 +159,15 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
     			adsize = AdSize.IAB_MRECT;
     		} else Logger.LogDebug("Using Banner Ad Size because screen is " + iShortDimension + "x" + iLongDimension);
     		
-    		AdView adView = new AdView(this, adsize, sAdID);
+    		AdView adView = new AdView(activity, adsize, sAdID);
     		
-	        LinearLayout layout = (LinearLayout)findViewById(R.id.adLayout);
-	        if(layout == null || layout.getVisibility() != View.VISIBLE) {
+    		if(adLayout == null)
+    			adLayout = (FrameLayout)activity.findViewById(R.id.adLayout);
+	        if(adLayout == null || adLayout.getVisibility() != View.VISIBLE) {
 	        	Logger.LogWarning("Unable to add Ads.");
 	        	return;
 	        } else
-	        	layout.addView(adView);
+	        	adLayout.addView(adView);
 	        
 	        AdRequest ad = new AdRequest();
 	        
@@ -167,7 +183,7 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 	        
 	        Logger.LogInfo("AdMob version " + AdRequest.VERSION + " under " + AdRequest.LOGTAG + " -> " + ad.toString());
 	        
-	        adView.setAdListener(this);
+	        //adView.setAdListener(activity);
 	        adView.loadAd(ad);
     	} catch(Exception ex) { Logger.LogWarning("Error adding ads.", ex); }    
     }
@@ -250,12 +266,6 @@ public class BaseActivity extends Activity implements OnClickListener, OnMenuIte
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 		Logger.LogVerbose("onRestoreInstanceState :: " + this.toString());
-	}
-	
-	@Override
-	public Object onRetainNonConfigurationInstance() {
-		Logger.LogVerbose("onRetainNonConfigurationInstance :: " + this.toString());
-		return super.onRetainNonConfigurationInstance();
 	}
 	
 	@Override

@@ -19,6 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.brandroid.dynapaper.BaseFragment;
 import com.brandroid.dynapaper.GalleryItem;
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
@@ -29,27 +30,32 @@ import com.brandroid.util.Logger;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.RatingBar;
 
-public class Feedback extends BaseActivity
+public class Feedback extends Fragment
 {
+	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.feedback);
-		final EditText txtFeedback = (EditText)findViewById(R.id.txtFeedback);
-		final EditText txtName = (EditText)findViewById(R.id.txtFeedbackName);
-		final RatingBar rateFeedback = (RatingBar)findViewById(R.id.rateFeedback);
-		findViewById(R.id.btnSend).setOnClickListener(new OnClickListener() {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.feedback, null);
+		final EditText txtFeedback = (EditText)view.findViewById(R.id.txtFeedback);
+		final EditText txtName = (EditText)view.findViewById(R.id.txtFeedbackName);
+		final RatingBar rateFeedback = (RatingBar)view.findViewById(R.id.rateFeedback);
+		view.findViewById(R.id.btnSend).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				new SendFeedbackTask().execute("rating", ((Float)rateFeedback.getRating()).toString(), "feedback", txtFeedback.getText().toString(), "name", txtName.getText().toString());
-				showToast(R.string.s_thanks);
-				finish();
+				//showToast(R.string.s_thanks);
+				
 			}
 		});
+		return view;
 	}
 	
 	private class SendFeedbackTask extends AsyncTask<String, Integer, Boolean> {
