@@ -231,12 +231,12 @@ public class BaseActivity extends FragmentActivity implements OnClickListener, O
 	}
 
     /* A helper for a set of "show a toast" methods */
-	protected void showToast(final String message)  {
+	public void showToast(final String message)  {
 		Log.i(WallChanger.LOG_KEY, "Made Toast: " + message);
         showToast(message, Toast.LENGTH_SHORT);
     }
-	protected void showToast(final int iStringResource) { showToast(getResourceString(iStringResource)); }
-	protected void showToast(final String message, final int toastLength)  {
+	public void showToast(final int iStringResource) { showToast(getResourceString(iStringResource)); }
+	public void showToast(final String message, final int toastLength)  {
         runOnUiThread(new Runnable() {
             public void run() {
                 Toast.makeText(getBaseContext(), message, toastLength).show();

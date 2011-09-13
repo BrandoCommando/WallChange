@@ -1,8 +1,12 @@
 package com.brandroid.dynapaper.Activities;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import com.brandroid.dynapaper.R;
 import com.brandroid.dynapaper.WallChanger;
 import com.brandroid.util.Logger;
+import com.brandroid.util.MediaUtils;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,6 +25,13 @@ public class ProfileMakerMain extends BaseActivity
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.wallchanger);
+		MediaUtils.init(getApplicationContext());
+		try {
+		if(!MediaUtils.writeFile("pewp", new byte[] { }, true))
+			Logger.LogWarning("Unable to write to pewp");
+		else
+			Logger.LogInfo("Wrote to pewp!");
+		} catch(IOException fnfe) { Logger.LogError("Unable to write to pewp!", fnfe); }
 		mUseMultiplePanes = (null != findViewById(R.id.detail_container));
 		if (null == savedInstanceState) {
 			FragmentManager fm = getSupportFragmentManager();
@@ -34,9 +45,12 @@ public class ProfileMakerMain extends BaseActivity
 	public void ShowDetailFragment(Fragment frag, String tag)
 	{
 		FragmentManager fm = getSupportFragmentManager();
+		fm.enableDebugLogging(true);
 		FragmentTransaction ft = fm.beginTransaction();
 		if(mUseMultiplePanes)
+		{
 			ft.replace(R.id.detail_container, frag, tag);
+		}
 		else {
 			ft.replace(R.id.list, frag, tag);
 		    ft.addToBackStack(null);

@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -17,16 +18,21 @@ import android.graphics.Bitmap.CompressFormat;
 import android.os.Environment;
 
 public class MediaUtils {
-	public static String MEDIA_DIRECTORY = "brandroid";
-	public static boolean mExternalStorageAvailable = false;
-	public static boolean mExternalStorageWriteable = false;
+	public static String MEDIA_DIRECTORY = "data/com.brandroid.dynapaper";
+	public static boolean mExternalStorageAvailable = true;
+	public static boolean mExternalStorageWriteable = true;
 	public static String mExternalState = Environment.getExternalStorageState();
 	private static boolean mChecked = false;
-	private static File mCacheDir = Environment.getDownloadCacheDirectory();
+	private static File mCacheDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), MEDIA_DIRECTORY);
 	
 	public static void init(Context c)
 	{
-		mCacheDir = c.getCacheDir();
+		if(!mCacheDir.exists())
+			if(!mCacheDir.mkdirs())
+			{
+				mCacheDir = new File(c.getExternalCacheDir().getAbsolutePath(), MEDIA_DIRECTORY);
+				mCacheDir.mkdirs();
+			}
 	}
 	public static void Check()
 	{
@@ -57,7 +63,13 @@ public class MediaUtils {
 			ret = mCacheDir;
 		else
 			ret = new File(Environment.getExternalStorageDirectory(), MEDIA_DIRECTORY);
-		Logger.LogInfo("Base directory: " + ret.toString());
+		if(!ret.exists())
+		{
+			if(ret.mkdir())
+				Logger.LogDebug("Base directory created: " + ret.toString());
+			else
+				Logger.LogError("Couldn't create base directory: " + ret.toString());
+		}
 		return ret;
 	}
 	public static File getCacheDirectory()
@@ -84,22 +96,24 @@ public class MediaUtils {
 		return new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename);
 	}
 
-    public static Boolean writeFile(String filename, byte[] data, Boolean useCache)
+    public static Boolean writeFile(String filename, byte[] data, Boolean useCache) throws IOException
     {
     	if(data == null) return false;
     	Boolean success = false;
     	OutputStream s = null;
-    	try {
-    		File f = new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename);
+    	File f = new File(useCache ? getCacheDirectory() : getBaseDirectory(), filename);
+		try {
     		//Logger.LogInfo("Writing to " + f.toString());
         	//if(!f.createNewFile()) return false;
     		if(f.exists())
     			f.delete();
+    		else
+    			f.createNewFile();
     		s = new BufferedOutputStream(new FileOutputStream(f));
     		s.write(data);
     		success = true;
     	} catch(IOException ex) {
-    		Logger.LogError("Exception saving file.", ex);
+    		Logger.LogError("Exception saving file - " + f.getAbsolutePath(), ex);
     		mExternalStorageWriteable = false;
     	}
     	finally {

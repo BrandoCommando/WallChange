@@ -5,7 +5,9 @@
 	<ListView android:layout_height="wrap_content"
 		android:layout_width="match_parent" android:layout_alignParentTop="true"
 		android:layout_above="@+id/adLayout"
-		android:layout_alignParentLeft="true" android:id="@android:id/list"></ListView>
+		android:layout_alignParentLeft="true" android:id="@android:id/list">
+	    <!-- Preview: listitem=@android:layout/simple_expandable_list_item_2 -->
+	</ListView>
 	<FrameLayout android:id="@+id/adLayout" android:layout_height="wrap_content" android:layout_alignParentBottom="true" android:layout_width="match_parent" />
 
 </RelativeLayout>

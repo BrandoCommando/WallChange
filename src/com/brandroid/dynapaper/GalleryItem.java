@@ -24,6 +24,7 @@ public class GalleryItem
 	//private Bitmap mThumbnail;
 	private String mTags;
 	private int mDays = 0;
+	private static final boolean USE_CACHE = false;
 	
 	public GalleryItem(JSONObject obj)
 	{
@@ -119,12 +120,12 @@ public class GalleryItem
 	public int getDownloadCount() { return mDownloadCount; }
 	public void setThumbnail(Bitmap bmp) {
 		//mThumbnail = bmp;
-		MediaUtils.writeFile(getThumbnailFilename(), bmp, true);
+		MediaUtils.writeFile(getThumbnailFilename(), bmp, USE_CACHE);
 	}
 	public Bitmap getThumbnail() {
 		//if(mThumbnail == null)
 			//mThumbnail = MediaUtils.readFileBitmap(getID() + ".jpg", true);
-		return MediaUtils.readFileBitmap(getThumbnailFilename(), true);
+		return MediaUtils.readFileBitmap(getThumbnailFilename(), USE_CACHE);
 	}
 	public String getThumbnailFilename() {
 		return getThumbnailFilename(false);
@@ -138,11 +139,11 @@ public class GalleryItem
 		*/
 		String ret = getID() + ".jpg";
 		if(fullName)
-			ret = MediaUtils.getFullFilename(ret, true);
+			ret = MediaUtils.getFullFilename(ret, USE_CACHE);
 		return ret;
 	}	
 	public Boolean hasThumbnail() {
-		return MediaUtils.fileExists(getThumbnailFilename(), true);
+		return MediaUtils.fileExists(getThumbnailFilename(), USE_CACHE);
 	}
 
 	public void setWidth(int mWidth) {
