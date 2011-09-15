@@ -14,6 +14,9 @@ import com.brandroid.widgets.SeparatedListAdapter;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -47,6 +50,7 @@ public class ProfileMakerList extends ListFragment implements OnItemClickListene
 	ListView mList;
     private String[] groups = { };
     private String[][] children = { };
+    private ProfileMakerMain mMain;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -54,6 +58,7 @@ public class ProfileMakerList extends ListFragment implements OnItemClickListene
 		View v = inflater.inflate(R.layout.maker_list, null);
 		FrameLayout adLayout = (FrameLayout)v.findViewById(R.id.adLayout);
 		BaseActivity.addAds(getActivity(), adLayout);
+		mMain = (ProfileMakerMain)getActivity();
 		return v;
 	}
 	
@@ -90,6 +95,10 @@ public class ProfileMakerList extends ListFragment implements OnItemClickListene
 		return false;
 	}
 
+	public Drawable getWallpaper()
+	{
+		return getActivity().getBaseContext().getWallpaper();
+	}
 
 	public void onItemClick(AdapterView<?> adapter, View v, int childPosition, long id)
 	{
@@ -105,24 +114,26 @@ public class ProfileMakerList extends ListFragment implements OnItemClickListene
 		{
 			if(childPosition == 0) // Current
 			{
-				
+				mMain.ShowPreview(((BitmapDrawable)getWallpaper()).getBitmap());
 			} else if(childPosition == 1) // Gallery
 			{
-				
+				mMain.showToast("Coming soon");
 			} else if(childPosition == 2) // Online
 			{
-				((ProfileMakerMain)getActivity()).ShowDetailFragment(new GalleryFragment(), "online");
+				mMain.ShowDetailFragment(new GalleryFragment(), "online");
 			}
 		} else if (groupPosition == 1) // Widgets
 		{
+			mMain.showToast("Coming soon");
 		} else if (groupPosition == 2) // Execute
 		{
 			if(childPosition == 0) // Test
 			{
 				
+				//mMain.showToast("Coming soon");
 			} else if (childPosition == 1) // Apply
 			{
-			
+				mMain.showToast("Coming soon");
 			}
 			
 		} else if (groupPosition == 3) // Settings
