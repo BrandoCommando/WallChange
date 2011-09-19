@@ -42,6 +42,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.util.LogWriter;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -110,8 +111,15 @@ public class ProfileMakerMain extends BaseActivity
 		if(!mFragHash.containsValue(frag))
 			ft.replace(id, frag, tag);
 		else
-			ft.show(frag);
-	    ft.addToBackStack(null);
+		{
+			try {
+				ft.show(frag);
+			} catch(IllegalStateException ise) {
+				Logger.LogWarning("Unable to show fragment.", ise);
+				ft.replace(id, frag, tag);
+			}
+		}
+	    //ft.addToBackStack(null);
 		mFragHash.put(tag, frag);
 		ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
 		ft.commit();

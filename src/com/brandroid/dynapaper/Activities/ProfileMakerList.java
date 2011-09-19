@@ -71,7 +71,7 @@ public class ProfileMakerList extends ListFragment implements OnItemClickListene
 			getResourceString(R.string.menu_settings)
  		};
 		children = new String[][] {
-	            { "Current", "Gallery", "Online" },
+	            { "Current", "Gallery", "Online", "Local" },
 	            { "Weather" },
 	            { "Test", "Apply" },
 	            { "Settings", "Old UI", "Feedback" }
@@ -117,10 +117,18 @@ public class ProfileMakerList extends ListFragment implements OnItemClickListene
 				mMain.ShowPreview(((BitmapDrawable)getWallpaper()).getBitmap());
 			} else if(childPosition == 1) // Gallery
 			{
-				mMain.showToast("Coming soon");
+				//mMain.showToast("Coming soon");
+				Intent intentGallery = new Intent();
+				intentGallery.setType("image/*");
+				intentGallery.setAction(Intent.ACTION_GET_CONTENT);
+				//intentGallery.setAction(Intent.ACTION_);
+				startActivityForResult(Intent.createChooser(intentGallery, getResourceString(R.string.s_select_base)), WallChanger.REQ_SELECT_GALLERY);
 			} else if(childPosition == 2) // Online
 			{
-				mMain.ShowDetailFragment(new GalleryFragment(), "online");
+				ShowDetailFragment(new GalleryFragment(), "online");
+			} else if(childPosition == 3) // Local
+			{
+				ShowDetailFragment(new FindLocalPicturesFragment(), "source");
 			}
 		} else if (groupPosition == 1) // Widgets
 		{
@@ -140,17 +148,21 @@ public class ProfileMakerList extends ListFragment implements OnItemClickListene
 		{
 			if(childPosition == 0) // Settings
 			{
-				((ProfileMakerMain)getActivity()).ShowDetailFragment(new Settings(), "settings");
+				ShowDetailFragment(new Settings(), "settings");
 			} else if(childPosition == 1) // Old UI
 			{
 				startActivity(new Intent(getActivity().getApplicationContext(), ProfileMaker.class));
 			} else if(childPosition == 2) // Feedback
 			{
-				((ProfileMakerMain)getActivity()).ShowDetailFragment(new Feedback(), "feedback");
+				ShowDetailFragment(new Feedback(), "feedback");
 			}
 		}
 	}
-	
+
+	private void ShowDetailFragment(Fragment frag, String tag)
+	{
+		((ProfileMakerMain)getActivity()).ShowDetailFragment(frag, tag);
+	}
 
     private String getResourceString(int... resourceIDs)
     {

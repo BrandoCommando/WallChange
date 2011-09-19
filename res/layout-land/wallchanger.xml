@@ -19,7 +19,7 @@
 		
 		<RelativeLayout android:id="@+id/progress_layout" android:layout_width="300dp"
 			android:layout_height="wrap_content" android:layout_alignParentRight="true"
-			android:background="@color/translucent_dark">
+			android:background="@color/translucent_dark" android:visibility="gone">
 			<Button android:text="@string/btn_cancel"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:layout_alignParentRight="true"
